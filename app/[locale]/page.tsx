@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
+
+export const metadata: Metadata = {
+  title: "Your Next Job, Delivered to WhatsApp",
+};
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 function CheckIcon() {
   return (
@@ -42,12 +47,12 @@ function LandingContent() {
             >
               {t("heroCtaPrimary")}
             </Link>
-            <Link
+            <a
               href="#how-it-works"
               className="px-6 py-3 text-sm font-bold font-heading text-text-primary bg-bg-card border-2 border-border-color hover:bg-bg-page transition-colors"
             >
               {t("heroCtaSecondary")}
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -66,9 +71,9 @@ function LandingContent() {
               className="p-4 rounded-sm"
               style={{ backgroundColor: "#DCF8C6", border: "1px solid #b2dfb2" }}
             >
-              <p className="text-xs font-bold font-mono text-text-primary mb-1">⚡ Jobleo Match Alert</p>
-              <p className="text-sm font-bold font-heading text-text-primary">Senior Frontend Developer</p>
-              <p className="text-xs font-heading text-text-secondary">Acme Corp • Toronto, Canada</p>
+              <p className="text-xs font-bold font-mono text-text-primary mb-1">⚡ {t("mockupHeader")}</p>
+              <p className="text-sm font-bold font-heading text-text-primary">{t("mockupTitle")}</p>
+              <p className="text-xs font-heading text-text-secondary">{t("mockupCompany")}</p>
               <div className="mt-2 flex items-center gap-2">
                 <span
                   className="px-2 py-0.5 text-xs font-bold font-mono text-white"
@@ -76,17 +81,17 @@ function LandingContent() {
                 >
                   87%
                 </span>
-                <span className="text-xs font-heading text-text-secondary">Match Score</span>
+                <span className="text-xs font-heading text-text-secondary">{t("mockupScore")}</span>
               </div>
               <p
                 className="mt-2 text-xs font-bold font-heading"
                 style={{ color: "#1E88E5" }}
               >
-                Apply Now →
+                {t("mockupApply")}
               </p>
             </div>
             <p className="text-center text-xs font-mono text-text-muted">
-              Sample WhatsApp alert
+              {t("mockupCaption")}
             </p>
           </div>
         </div>
@@ -275,6 +280,7 @@ function LandingContent() {
         >
           {t("ctaButton")}
         </Link>
+
       </section>
 
       <PublicFooter />

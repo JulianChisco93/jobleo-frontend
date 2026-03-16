@@ -6,18 +6,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getCV } from "@/lib/api";
+import { Link } from "@/i18n/navigation";
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -26,6 +27,10 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function LoginPage() {
   const t = useTranslations("auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+  const urlMsg = searchParams.get("msg");
+
   const [tab, setTab] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +54,6 @@ export default function LoginPage() {
       });
       if (err) throw err;
 
-      // Check if user has CV → route accordingly
       try {
         const cv = await getCV();
         router.push(cv ? "/dashboard" : "/onboarding");
@@ -84,17 +88,32 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${siteUrl}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   }
 
+  const displayError =
+    error ||
+    (urlError === "auth"
+      ? urlMsg
+        ? decodeURIComponent(urlMsg)
+        : "Authentication failed. Please try again."
+      : null);
+
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-bg-page"
-    >
+    <div className="flex flex-col items-center justify-center min-h-screen bg-bg-page">
+      {/* Back to home */}
+      <div className="w-full max-w-md mb-4 px-1">
+        <Link
+          href="/"
+          className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
+        >
+          ← {t("backToHome")}
+        </Link>
+      </div>
+
       <div
         className="flex flex-col gap-8 p-12 bg-bg-card w-full max-w-md"
         style={{ border: "2px solid #000000" }}
@@ -105,18 +124,15 @@ export default function LoginPage() {
             JOBLEO
           </h1>
           <p className="text-2xl font-bold font-heading text-text-primary mt-3">
-            {t("welcomeBack")}
+            {tab === "login" ? t("welcomeBack") : t("createAccountTitle")}
           </p>
           <p className="text-sm font-heading text-text-secondary mt-1">
-            {t("signInSubtitle")}
+            {tab === "login" ? t("signInSubtitle") : t("createAccountSubtitle")}
           </p>
         </div>
 
         {/* Tabs */}
-        <div
-          className="flex"
-          style={{ borderBottom: "2px solid #000000" }}
-        >
+        <div className="flex" style={{ borderBottom: "2px solid #000000" }}>
           <button
             onClick={() => setTab("login")}
             className="flex-1 py-2.5 text-sm font-bold font-heading transition-colors"
@@ -142,33 +158,31 @@ export default function LoginPage() {
         </div>
 
         {/* Error */}
-        {error && (
+        {displayError && (
           <div
             className="px-4 py-3 text-sm font-heading"
             style={{ backgroundColor: "#ffebee", color: "#E53935", border: "1px solid #ffcdd2" }}
           >
-            {error}
+            {displayError}
           </div>
         )}
 
         {/* Login Form */}
         {tab === "login" && (
-          <form
-            onSubmit={loginForm.handleSubmit(handleLogin)}
-            className="flex flex-col gap-5"
-          >
+          <form onSubmit={loginForm.handleSubmit(handleLogin)} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
                 {t("emailLabel")}
               </label>
               <input
                 type="email"
+                autoComplete="email"
                 placeholder={t("emailPlaceholder")}
                 {...loginForm.register("email")}
                 className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
               />
               {loginForm.formState.errors.email && (
-                <span className="text-xs text-accent-red font-heading">
+                <span className="text-xs font-heading" style={{ color: "#E53935" }}>
                   {loginForm.formState.errors.email.message}
                 </span>
               )}
@@ -178,16 +192,15 @@ export default function LoginPage() {
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
                 {t("passwordLabel")}
               </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder={t("passwordPlaceholder")}
-                  {...loginForm.register("password")}
-                  className="w-full h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
-                />
-              </div>
+              <input
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                {...loginForm.register("password")}
+                className="w-full h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
+              />
               {loginForm.formState.errors.password && (
-                <span className="text-xs text-accent-red font-heading">
+                <span className="text-xs font-heading" style={{ color: "#E53935" }}>
                   {loginForm.formState.errors.password.message}
                 </span>
               )}
@@ -205,20 +218,23 @@ export default function LoginPage() {
 
         {/* Register Form */}
         {tab === "register" && (
-          <form
-            onSubmit={registerForm.handleSubmit(handleRegister)}
-            className="flex flex-col gap-5"
-          >
+          <form onSubmit={registerForm.handleSubmit(handleRegister)} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
                 {t("nameLabel")}
               </label>
               <input
                 type="text"
+                autoComplete="name"
                 placeholder={t("namePlaceholder")}
                 {...registerForm.register("name")}
                 className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
               />
+              {registerForm.formState.errors.name && (
+                <span className="text-xs font-heading" style={{ color: "#E53935" }}>
+                  {registerForm.formState.errors.name.message}
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -227,10 +243,16 @@ export default function LoginPage() {
               </label>
               <input
                 type="email"
+                autoComplete="email"
                 placeholder={t("emailPlaceholder")}
                 {...registerForm.register("email")}
                 className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
               />
+              {registerForm.formState.errors.email && (
+                <span className="text-xs font-heading" style={{ color: "#E53935" }}>
+                  {registerForm.formState.errors.email.message}
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -239,10 +261,16 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
-                placeholder={t("passwordPlaceholder")}
+                autoComplete="new-password"
+                placeholder="••••••••"
                 {...registerForm.register("password")}
                 className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
               />
+              {registerForm.formState.errors.password && (
+                <span className="text-xs font-heading" style={{ color: "#E53935" }}>
+                  {registerForm.formState.errors.password.message}
+                </span>
+              )}
             </div>
 
             <button

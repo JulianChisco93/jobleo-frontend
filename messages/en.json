@@ -57,7 +57,13 @@
     "testimonial3Author": "— Ahmed K., Data Scientist",
     "ctaTitle": "Ready to Automate Your Job Search?",
     "ctaSubtitle": "Join thousands of professionals getting jobs delivered to their WhatsApp.",
-    "ctaButton": "Get Started Free →"
+    "ctaButton": "Get Started Free →",
+    "mockupHeader": "Jobleo Match Alert",
+    "mockupTitle": "Senior Frontend Developer",
+    "mockupCompany": "Acme Corp • Toronto, Canada",
+    "mockupScore": "Match Score",
+    "mockupApply": "Apply Now →",
+    "mockupCaption": "Sample WhatsApp alert"
   },
   "pricing": {
     "tag": "PRICING",
@@ -85,7 +91,10 @@
   },
   "auth": {
     "welcomeBack": "Welcome Back",
+    "createAccountTitle": "Create Account",
     "signInSubtitle": "Sign in to your account to continue",
+    "createAccountSubtitle": "Join thousands finding jobs on WhatsApp.",
+    "backToHome": "Back to home",
     "loginTab": "Login",
     "registerTab": "Register",
     "emailLabel": "Email",

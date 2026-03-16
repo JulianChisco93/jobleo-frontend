@@ -8,7 +8,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Jobleo — Your Next Job, Delivered to WhatsApp",
+  title: {
+    template: "%s | Jobleo",
+    default: "Jobleo — Your Next Job, Delivered to WhatsApp",
+  },
   description:
     "Upload your CV, configure your job search, and receive curated job matches directly on WhatsApp — powered by AI.",
 };

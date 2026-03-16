@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
+
+export const metadata: Metadata = {
+  title: "Pricing Plans",
+};
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 function CheckIcon({ color = "#4CAF50" }: { color?: string }) {
   return (
@@ -73,7 +78,8 @@ function PricingContent() {
           </div>
 
           <button
-            className="mt-auto w-full py-3 text-sm font-bold font-heading text-text-primary border-2 border-border-color hover:bg-bg-page transition-colors"
+            disabled
+            className="mt-auto w-full py-3 text-sm font-bold font-heading text-text-muted border-2 border-border-light cursor-not-allowed opacity-60"
           >
             {t("starterCta")}
           </button>
@@ -82,7 +88,7 @@ function PricingContent() {
         {/* Pro */}
         <div
           className="flex flex-col gap-6 p-10 flex-1"
-          style={{ backgroundColor: "#1E88E5", border: "2px solid #000000" }}
+          style={{ backgroundColor: "#E53935", border: "2px solid #000000" }}
         >
           <div className="flex flex-col gap-2">
             <span

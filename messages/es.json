@@ -57,7 +57,13 @@
     "testimonial3Author": "— Ahmed K., Científico de Datos",
     "ctaTitle": "¿Listo para Automatizar tu Búsqueda de Empleo?",
     "ctaSubtitle": "Únete a miles de profesionales que reciben empleos en su WhatsApp.",
-    "ctaButton": "Comenzar Gratis →"
+    "ctaButton": "Comenzar Gratis →",
+    "mockupHeader": "Alerta de Empleos Jobleo",
+    "mockupTitle": "Desarrollador Frontend Senior",
+    "mockupCompany": "Acme Corp • Toronto, Canadá",
+    "mockupScore": "Compatibilidad",
+    "mockupApply": "Postularme →",
+    "mockupCaption": "Ejemplo de alerta WhatsApp"
   },
   "pricing": {
     "tag": "PRECIOS",
@@ -85,6 +91,9 @@
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
+    "createAccountTitle": "Crear Cuenta",
+    "createAccountSubtitle": "Únete a miles que reciben empleos en WhatsApp.",
+    "backToHome": "Volver al inicio",
     "signInSubtitle": "Inicia sesión para continuar",
     "loginTab": "Iniciar Sesión",
     "registerTab": "Registrarse",
