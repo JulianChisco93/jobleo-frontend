@@ -56,15 +56,21 @@ export interface Job {
 export interface CreateSearchProfilePayload {
   name: string;
   profession: string;
-  job_titles: string[];
-  locations: string[];
-  include_terms: string[];
-  exclude_terms: string[];
+  job_titles: string[];        // max 5, puede ser []
+  locations: string[];         // mínimo 1 elemento
+  include_terms: string[];     // puede ser []
+  exclude_terms: string[];     // puede ser []
+  title_exclude_terms: string[]; // puede ser []
   frequency_minutes: number;
   business_hours_only: boolean;
-  business_hours_start?: string;
-  business_hours_end?: string;
+  business_hours_start: number; // int 0-23
+  business_hours_end: number;   // int 0-23
   business_days_only: boolean;
+}
+
+export interface CreateCVPayload {
+  extracted_text: string; // mínimo 200 chars, máximo 50,000
+  filename?: string;
 }
 
 export type Locale = "en" | "es";

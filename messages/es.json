@@ -87,7 +87,8 @@
     "proFeature3": "Alertas en WhatsApp",
     "proFeature4": "Historial completo de empleos",
     "proFeature5": "Puntuación con IA",
-    "proCta": "Comenzar"
+    "proCta": "Comenzar",
+    "starterComingSoonTooltip": "Prueba gratuita próximamente — ¡estate atento!"
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
@@ -104,12 +105,32 @@
     "nameLabel": "Nombre completo",
     "namePlaceholder": "Tu nombre",
     "signIn": "Iniciar Sesión",
+    "signingIn": "Iniciando sesión...",
     "createAccount": "Crear Cuenta",
+    "creatingAccount": "Creando cuenta...",
     "orContinueWith": "o",
     "continueWithGoogle": "Continuar con Google",
     "termsNotice": "Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad.",
     "alreadyHaveAccount": "¿Ya tienes cuenta? Inicia sesión",
-    "dontHaveAccount": "¿No tienes cuenta? Regístrate"
+    "dontHaveAccount": "¿No tienes cuenta? Regístrate",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "checkEmailSuccess": "Revisa tu correo para confirmar tu cuenta.",
+    "loginFailed": "Error al iniciar sesión. Inténtalo de nuevo.",
+    "registrationFailed": "Error al registrarse. Inténtalo de nuevo.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "forgotPasswordInstructions": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+    "forgotPasswordEmailRequired": "Por favor ingresa tu correo electrónico.",
+    "forgotPasswordSuccess": "Correo de restablecimiento enviado. Por favor revisa tu bandeja de entrada.",
+    "forgotPasswordFailed": "Error al enviar el correo. Inténtalo de nuevo.",
+    "sendResetEmail": "Enviar Correo de Restablecimiento",
+    "sending": "Enviando...",
+    "backToLogin": "Volver al inicio de sesión"
+  },
+  "meta": {
+    "defaultTitle": "Jobleo — Tu Próximo Trabajo, Entregado en WhatsApp",
+    "defaultDescription": "Sube tu CV, configura tu búsqueda de empleo y recibe coincidencias directamente en WhatsApp — impulsado por IA.",
+    "pricingTitle": "Planes y Precios"
   },
   "onboarding": {
     "step1of3": "PASO 1 DE 3",
@@ -145,6 +166,8 @@
     "phonePlaceholder": "(555) 123-4567",
     "previewTitle": "VISTA PREVIA: LO QUE RECIBIRÁS",
     "finishSetup": "Finalizar Configuración ✓",
+    "invalidFileType": "Solo se aceptan archivos PDF. Por favor selecciona un archivo .pdf.",
+    "uploadError": "Error al subir el archivo. Por favor intenta de nuevo.",
     "whatsappPreview": {
       "header": "Alerta de Jobleo",
       "title": "Desarrollador Frontend",
@@ -152,7 +175,12 @@
       "score": "92% Coincidencia",
       "applyNow": "Postularse Ahora →",
       "viewMore": "Ver 4 más →"
-    }
+    },
+    "cvTooShort": "El CV es muy corto — pega al menos 200 caracteres",
+    "cvTooLong": "El CV es demasiado largo — máximo 50,000 caracteres",
+    "charsMinimum": "caracteres mínimo",
+    "charsOver": "caracteres sobre el límite",
+    "charsRemaining": "caracteres restantes"
   },
   "dashboard": {
     "title": "Panel Principal",
@@ -202,7 +230,9 @@
     "freq1440": "Diariamente",
     "addTitle": "Agregar puesto...",
     "addLocation": "Agregar ubicación...",
-    "addKeyword": "Agregar palabra clave..."
+    "addKeyword": "Agregar palabra clave...",
+    "saveProfileError": "No se pudo guardar el perfil. Por favor intenta de nuevo.",
+    "locationsRequired": "Se necesita al menos una ubicación"
   },
   "jobs": {
     "pageTitle": "Historial de Empleos",
@@ -247,7 +277,9 @@
     "saveChanges": "Guardar Cambios",
     "saved": "¡Guardado!",
     "english": "English",
-    "spanish": "Español"
+    "spanish": "Español",
+    "phoneFormatError": "El número debe estar en formato E.164 (ej. +15551234567).",
+    "phoneSaveError": "No se pudo guardar el número. Por favor intenta de nuevo."
   },
   "sidebar": {
     "myProfiles": "Mis Perfiles",

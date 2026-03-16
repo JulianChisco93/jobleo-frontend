@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
@@ -24,6 +25,7 @@ export type ProfileFormData = z.infer<typeof schema> & {
   locations: string[];
   include_terms: string[];
   exclude_terms: string[];
+  title_exclude_terms?: string[];
 };
 
 interface ProfileFormProps {
@@ -63,7 +65,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       name: defaultValues?.name || "",
       profession: defaultValues?.profession || "",
       job_titles: defaultValues?.job_titles || [],
-      locations: defaultValues?.locations || [],
+      locations: defaultValues?.locations || [] as string[],
       include_terms: defaultValues?.include_terms || [],
       exclude_terms: defaultValues?.exclude_terms || [],
       frequency_minutes: defaultValues?.frequency_minutes || 60,
@@ -82,6 +84,16 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
   const locations = watch("locations" as any) as string[] || [];
   const includeTerms = watch("include_terms" as any) as string[] || [];
   const excludeTerms = watch("exclude_terms" as any) as string[] || [];
+  const [locationsError, setLocationsError] = useState(false);
+
+  async function wrappedSubmit(data: ProfileFormData) {
+    if (locations.length === 0) {
+      setLocationsError(true);
+      return;
+    }
+    setLocationsError(false);
+    await onSubmit(data);
+  }
 
   async function handleDelete() {
     if (!onDelete) return;
@@ -91,7 +103,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 p-8">
+    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8">
 
       {/* Name + Profession row */}
       <div className="grid grid-cols-2 gap-6">
@@ -129,10 +141,13 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       <TagInput
         label={t("locationsLabel")}
         value={locations}
-        onChange={(v) => setValue("locations" as any, v)}
+        onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
         placeholder={t("addLocation")}
         helperText={t("locationsTip")}
       />
+      {locationsError && (
+        <span className="text-xs text-accent-red font-heading -mt-4">{t("locationsRequired")}</span>
+      )}
 
       {/* Include / Exclude */}
       <div className="grid grid-cols-2 gap-6">

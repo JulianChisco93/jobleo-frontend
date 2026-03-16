@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ export default function NewProfilePage() {
   const locale = useLocale();
   const prefix = locale === "en" ? "" : `/${locale}`;
   const queryClient = useQueryClient();
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["profiles"],
@@ -29,9 +31,19 @@ export default function NewProfilePage() {
       alert(t("maxProfilesReached"));
       return;
     }
-    const { is_active, ...rest } = data;
-    await mutateAsync(rest);
-    router.push(`${prefix}/dashboard/profiles`);
+    setSaveError(null);
+    try {
+      const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+      await mutateAsync({
+        ...rest,
+        title_exclude_terms: [],
+        business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
+        business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
+      });
+      router.push(`${prefix}/dashboard/profiles`);
+    } catch {
+      setSaveError(t("saveProfileError"));
+    }
   }
 
   return (
@@ -40,6 +52,11 @@ export default function NewProfilePage() {
       <main>
         <div className="px-8 pt-6 pb-0">
           <h2 className="text-xl font-bold font-heading text-text-primary">{t("newProfileTitle")}</h2>
+          {saveError && (
+            <div className="mt-4 px-4 py-3 text-sm font-heading text-white bg-accent-red border-2 border-border-color">
+              {saveError}
+            </div>
+          )}
         </div>
         <ProfileForm onSubmit={handleSubmit} isNew />
       </main>

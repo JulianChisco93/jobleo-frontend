@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
 
-export const metadata: Metadata = {
-  title: "Pricing Plans",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return { title: t("pricingTitle") };
+}
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Link } from "@/i18n/navigation";
@@ -79,6 +85,7 @@ function PricingContent() {
 
           <button
             disabled
+            title={t("starterComingSoonTooltip")}
             className="mt-auto w-full py-3 text-sm font-bold font-heading text-text-muted border-2 border-border-light cursor-not-allowed opacity-60"
           >
             {t("starterCta")}

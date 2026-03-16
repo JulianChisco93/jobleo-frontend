@@ -87,7 +87,8 @@
     "proFeature3": "WhatsApp alerts",
     "proFeature4": "Full job history",
     "proFeature5": "AI match scoring",
-    "proCta": "Get Started"
+    "proCta": "Get Started",
+    "starterComingSoonTooltip": "Free trial coming soon — stay tuned!"
   },
   "auth": {
     "welcomeBack": "Welcome Back",
@@ -104,12 +105,32 @@
     "nameLabel": "Full Name",
     "namePlaceholder": "Your name",
     "signIn": "Sign In",
+    "signingIn": "Signing In...",
     "createAccount": "Create Account",
+    "creatingAccount": "Creating Account...",
     "orContinueWith": "or",
     "continueWithGoogle": "Continue With Google",
     "termsNotice": "By continuing, you agree to our Terms of Service and Privacy Policy.",
     "alreadyHaveAccount": "Already have an account? Sign in",
-    "dontHaveAccount": "Don't have an account? Sign up"
+    "dontHaveAccount": "Don't have an account? Sign up",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "checkEmailSuccess": "Check your email to confirm your account.",
+    "loginFailed": "Login failed. Please try again.",
+    "registrationFailed": "Registration failed. Please try again.",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordInstructions": "Enter your email address and we'll send you a link to reset your password.",
+    "forgotPasswordEmailRequired": "Please enter your email address.",
+    "forgotPasswordSuccess": "Password reset email sent. Please check your inbox.",
+    "forgotPasswordFailed": "Failed to send reset email. Please try again.",
+    "sendResetEmail": "Send Reset Email",
+    "sending": "Sending...",
+    "backToLogin": "Back to login"
+  },
+  "meta": {
+    "defaultTitle": "Jobleo — Your Next Job, Delivered to WhatsApp",
+    "defaultDescription": "Upload your CV, configure your job search, and receive curated job matches directly on WhatsApp — powered by AI.",
+    "pricingTitle": "Pricing Plans"
   },
   "onboarding": {
     "step1of3": "STEP 1 OF 3",
@@ -145,6 +166,8 @@
     "phonePlaceholder": "(555) 123-4567",
     "previewTitle": "PREVIEW: WHAT YOU'LL RECEIVE",
     "finishSetup": "Finish Setup ✓",
+    "invalidFileType": "Only PDF files are accepted. Please select a .pdf file.",
+    "uploadError": "Upload failed. Please try again.",
     "whatsappPreview": {
       "header": "Jobleo Match Alert",
       "title": "Frontend Developer",
@@ -152,7 +175,12 @@
       "score": "92% Match",
       "applyNow": "Apply Now →",
       "viewMore": "View 4 more →"
-    }
+    },
+    "cvTooShort": "Your CV is too short — paste at least 200 characters",
+    "cvTooLong": "Your CV is too long — maximum 50,000 characters",
+    "charsMinimum": "chars minimum",
+    "charsOver": "chars over limit",
+    "charsRemaining": "chars remaining"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -202,7 +230,9 @@
     "freq1440": "Daily",
     "addTitle": "Add title...",
     "addLocation": "Add location...",
-    "addKeyword": "Add keyword..."
+    "addKeyword": "Add keyword...",
+    "saveProfileError": "Failed to save profile. Please try again.",
+    "locationsRequired": "At least one location is required"
   },
   "jobs": {
     "pageTitle": "Job History",
@@ -247,7 +277,9 @@
     "saveChanges": "Save Changes",
     "saved": "Saved!",
     "english": "English",
-    "spanish": "Español"
+    "spanish": "Español",
+    "phoneFormatError": "Phone number must be in E.164 format (e.g. +15551234567).",
+    "phoneSaveError": "Failed to save phone number. Please try again."
   },
   "sidebar": {
     "myProfiles": "My Profiles",

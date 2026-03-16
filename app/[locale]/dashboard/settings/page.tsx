@@ -44,6 +44,8 @@ export default function SettingsPage() {
   const [businessHours, setBusinessHours] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
   const [newPhone, setNewPhone] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [phoneSaveError, setPhoneSaveError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -86,8 +88,19 @@ export default function SettingsPage() {
   }
 
   async function handleSavePhone() {
-    await update({ whatsapp_number: newPhone });
-    setEditingPhone(false);
+    const e164Regex = /^\+[1-9]\d{6,14}$/;
+    if (!e164Regex.test(newPhone)) {
+      setPhoneError(t("phoneFormatError"));
+      return;
+    }
+    setPhoneError(null);
+    setPhoneSaveError(null);
+    try {
+      await update({ whatsapp_number: newPhone });
+      setEditingPhone(false);
+    } catch {
+      setPhoneSaveError(t("phoneSaveError"));
+    }
   }
 
   async function handleDeleteAccount() {
@@ -153,28 +166,36 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-4 p-6 bg-bg-card" style={{ border: "2px solid #000000" }}>
             <h3 className="text-base font-bold font-heading text-text-primary">{t("whatsappSection")}</h3>
             {editingPhone ? (
-              <div className="flex items-center gap-3">
-                <input
-                  type="tel"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  placeholder="+1 (555) 123-4567"
-                  className="flex-1 h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleSavePhone}
-                  className="px-4 py-2.5 text-sm font-bold font-heading text-white bg-accent-blue border-2 border-border-color"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingPhone(false)}
-                  className="px-4 py-2.5 text-sm font-bold font-heading text-text-secondary border-2 border-border-light"
-                >
-                  Cancel
-                </button>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="tel"
+                    value={newPhone}
+                    onChange={(e) => { setNewPhone(e.target.value); setPhoneError(null); }}
+                    placeholder="+15551234567"
+                    className="flex-1 h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSavePhone}
+                    className="px-4 py-2.5 text-sm font-bold font-heading text-white bg-accent-blue border-2 border-border-color"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setEditingPhone(false); setPhoneError(null); setPhoneSaveError(null); }}
+                    className="px-4 py-2.5 text-sm font-bold font-heading text-text-secondary border-2 border-border-light"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {phoneError && (
+                  <p className="text-xs text-accent-red font-heading">{phoneError}</p>
+                )}
+                {phoneSaveError && (
+                  <p className="text-xs text-accent-red font-heading">{phoneSaveError}</p>
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-between">

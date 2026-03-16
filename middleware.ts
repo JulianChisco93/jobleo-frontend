@@ -73,9 +73,13 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const locale = pathname.match(/^\/(en|es)/)?.[1] || "en";
-  const loginUrl = new URL(`/${locale}/login`, request.url);
-  const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+  // Detect locale from URL prefix; EN has no prefix (localePrefix: "as-needed")
+  const localeMatch = pathname.match(/^\/(en|es)(\/|$)/)?.[1];
+  const locale = localeMatch || "en";
+  // For EN (default locale), omit the prefix — /login; for ES use /es/login
+  const loginPath = locale === "en" ? "/login" : `/${locale}/login`;
+  const loginUrl = new URL(loginPath, request.url);
+  const dashboardUrl = new URL(locale === "en" ? "/dashboard" : `/${locale}/dashboard`, request.url);
 
   // Not authenticated → redirect to login
   if (!user && (isDashboardPath(pathname) || isOnboardingPath(pathname))) {

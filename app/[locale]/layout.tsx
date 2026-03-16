@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -7,14 +7,22 @@ import { AuthCodeHandler } from "@/components/auth/AuthCodeHandler";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s | Jobleo",
-    default: "Jobleo — Your Next Job, Delivered to WhatsApp",
-  },
-  description:
-    "Upload your CV, configure your job search, and receive curated job matches directly on WhatsApp — powered by AI.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+
+  return {
+    title: {
+      template: "%s | Jobleo",
+      default: t("defaultTitle"),
+    },
+    description: t("defaultDescription"),
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

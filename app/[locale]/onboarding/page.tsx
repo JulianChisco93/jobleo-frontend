@@ -48,11 +48,28 @@ function Step1({
       if (cvTab === "upload" && file) {
         await uploadCVFile(file);
       } else if (cvTab === "paste" && text.trim()) {
-        await uploadCVText(text.trim(), "resume.txt");
+        const trimmed = text.trim();
+        if (trimmed.length < 200) {
+          setError(t("cvTooShort"));
+          setLoading(false);
+          return;
+        }
+        if (trimmed.length > 50000) {
+          setError(t("cvTooLong"));
+          setLoading(false);
+          return;
+        }
+        await uploadCVText(trimmed, "resume.txt");
       }
       onNext({ cvUploaded: !!(file || text.trim()) });
     } catch (err: any) {
-      setError(err.message || "Upload failed");
+      const raw = err.message || "";
+      try {
+        const parsed = JSON.parse(raw);
+        setError(parsed.detail || t("uploadError"));
+      } catch {
+        setError(raw || t("uploadError"));
+      }
     } finally {
       setLoading(false);
     }
@@ -78,7 +95,7 @@ function Step1({
         {(["upload", "paste"] as const).map((tabKey) => (
           <button
             key={tabKey}
-            onClick={() => setCvTab(tabKey)}
+            onClick={() => { setCvTab(tabKey); setError(null); }}
             className="px-5 py-2.5 text-sm font-bold font-heading transition-colors"
             style={{
               borderBottom: cvTab === tabKey ? "2px solid #000000" : "none",
@@ -119,9 +136,19 @@ function Step1({
           <input
             ref={fileRef}
             type="file"
-            accept="application/pdf"
+            accept=".pdf,application/pdf"
             className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const selected = e.target.files?.[0] || null;
+              if (selected && selected.type !== "application/pdf") {
+                setError(t("invalidFileType"));
+                setFile(null);
+                e.target.value = "";
+                return;
+              }
+              setError(null);
+              setFile(selected);
+            }}
           />
         </div>
       ) : (
@@ -137,6 +164,14 @@ function Step1({
               rows={8}
               className="w-full p-4 text-sm font-heading text-text-primary placeholder:text-text-muted bg-bg-card outline-none resize-none"
             />
+          </div>
+          <div className="flex justify-between text-xs font-mono text-text-muted">
+            <span style={{ color: text.trim().length > 0 && text.trim().length < 200 ? "#E53935" : undefined }}>
+              {text.trim().length} / 200 {t("charsMinimum")}
+            </span>
+            <span style={{ color: text.trim().length > 50000 ? "#E53935" : undefined }}>
+              {text.trim().length > 50000 ? `${text.trim().length - 50000} ${t("charsOver")}` : `${50000 - text.trim().length} ${t("charsRemaining")}`}
+            </span>
           </div>
         </div>
       )}

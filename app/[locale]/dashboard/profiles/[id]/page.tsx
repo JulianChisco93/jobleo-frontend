@@ -47,8 +47,14 @@ export default function EditProfilePage({
   });
 
   async function handleSubmit(data: ProfileFormData) {
-    const { is_active, ...rest } = data;
-    await update({ ...rest, is_active: is_active ?? true });
+    const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+    await update({
+      ...rest,
+      is_active: is_active ?? true,
+      title_exclude_terms: (rest as any).title_exclude_terms ?? [],
+      business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
+      business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
+    });
     router.push(`${prefix}/dashboard/profiles`);
   }
 

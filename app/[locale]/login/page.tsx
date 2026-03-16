@@ -24,6 +24,39 @@ const registerSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+// Eye icon for password visibility toggle
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
+
+// Spinner icon for loading state
+function Spinner() {
+  return (
+    <svg
+      className="animate-spin"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+    >
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+    </svg>
+  );
+}
+
 function LoginForm() {
   const t = useTranslations("auth");
   const router = useRouter();
@@ -33,7 +66,13 @@ function LoginForm() {
 
   const [tab, setTab] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -43,9 +82,18 @@ function LoginForm() {
     resolver: zodResolver(registerSchema),
   });
 
+  // UX-01: Clear error/success when switching tabs
+  function handleTabChange(newTab: "login" | "register") {
+    setTab(newTab);
+    setError(null);
+    setSuccess(null);
+    setShowForgotPassword(false);
+  }
+
   async function handleLogin(data: LoginFormData) {
     setLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       const supabase = createClient();
       const { error: err } = await supabase.auth.signInWithPassword({
@@ -60,8 +108,14 @@ function LoginForm() {
       } catch {
         router.push("/onboarding");
       }
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : t("loginFailed");
+      setError(message || t("loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -70,17 +124,37 @@ function LoginForm() {
   async function handleRegister(data: RegisterFormData) {
     setLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       const supabase = createClient();
-      const { error: err } = await supabase.auth.signUp({
+      const { data: signUpData, error: err } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: { data: { display_name: data.name } },
       });
-      if (err) throw err;
+      // CRIT-01: Always check for error first and surface it
+      if (err) {
+        throw err;
+      }
+      // UX-02: If email confirmation is required, show success message instead of redirecting
+      if (signUpData?.user && !signUpData.session) {
+        setSuccess(t("checkEmailSuccess"));
+        return;
+      }
       router.push("/onboarding");
-    } catch (err: any) {
-      setError(err.message || "Registration failed");
+    } catch (err: unknown) {
+      // CRIT-01: Robust catch — handle any error shape
+      let message: string;
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        message = String((err as { message: unknown }).message);
+      } else if (typeof err === "string") {
+        message = err;
+      } else {
+        message = t("registrationFailed");
+      }
+      setError(message || t("registrationFailed"));
     } finally {
       setLoading(false);
     }
@@ -92,6 +166,32 @@ function LoginForm() {
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
+  }
+
+  // UX-06: Forgot password handler
+  async function handleForgotPassword() {
+    if (!forgotEmail) {
+      setError(t("forgotPasswordEmailRequired"));
+      return;
+    }
+    setForgotLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      });
+      if (err) throw err;
+      setSuccess(t("forgotPasswordSuccess"));
+      setShowForgotPassword(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : t("forgotPasswordFailed");
+      setError(message || t("forgotPasswordFailed"));
+    } finally {
+      setForgotLoading(false);
+    }
   }
 
   const displayError =
@@ -131,10 +231,10 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — UX-01: use handleTabChange to clear errors */}
         <div className="flex" style={{ borderBottom: "2px solid #000000" }}>
           <button
-            onClick={() => setTab("login")}
+            onClick={() => handleTabChange("login")}
             className="flex-1 py-2.5 text-sm font-bold font-heading transition-colors"
             style={{
               borderBottom: tab === "login" ? "2px solid #000000" : "none",
@@ -145,7 +245,7 @@ function LoginForm() {
             {t("loginTab")}
           </button>
           <button
-            onClick={() => setTab("register")}
+            onClick={() => handleTabChange("register")}
             className="flex-1 py-2.5 text-sm font-bold font-heading transition-colors"
             style={{
               borderBottom: tab === "register" ? "2px solid #000000" : "none",
@@ -157,7 +257,7 @@ function LoginForm() {
           </button>
         </div>
 
-        {/* Error */}
+        {/* Error banner */}
         {displayError && (
           <div
             className="px-4 py-3 text-sm font-heading"
@@ -167,8 +267,18 @@ function LoginForm() {
           </div>
         )}
 
+        {/* UX-02: Success banner */}
+        {success && (
+          <div
+            className="px-4 py-3 text-sm font-heading"
+            style={{ backgroundColor: "#e8f5e9", color: "#2E7D32", border: "1px solid #c8e6c9" }}
+          >
+            {success}
+          </div>
+        )}
+
         {/* Login Form */}
-        {tab === "login" && (
+        {tab === "login" && !showForgotPassword && (
           <form onSubmit={loginForm.handleSubmit(handleLogin)} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
@@ -188,17 +298,29 @@ function LoginForm() {
               )}
             </div>
 
+            {/* MISS-01: Password visibility toggle */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
                 {t("passwordLabel")}
               </label>
-              <input
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                {...loginForm.register("password")}
-                className="w-full h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  {...loginForm.register("password")}
+                  className="w-full h-11 px-4 pr-11 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                  tabIndex={-1}
+                  aria-label={showLoginPassword ? t("hidePassword") : t("showPassword")}
+                >
+                  <EyeIcon open={showLoginPassword} />
+                </button>
+              </div>
               {loginForm.formState.errors.password && (
                 <span className="text-xs font-heading" style={{ color: "#E53935" }}>
                   {loginForm.formState.errors.password.message}
@@ -206,14 +328,83 @@ function LoginForm() {
               )}
             </div>
 
+            {/* MISS-03: Loading state on submit button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
             >
-              {loading ? "..." : t("signIn")}
+              {loading ? (
+                <>
+                  <Spinner />
+                  {t("signingIn")}
+                </>
+              ) : (
+                t("signIn")
+              )}
+            </button>
+
+            {/* UX-06: Forgot password link */}
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setSuccess(null);
+                setShowForgotPassword(true);
+              }}
+              className="text-xs font-heading text-text-muted hover:text-text-primary transition-colors text-center"
+            >
+              {t("forgotPassword")}
             </button>
           </form>
+        )}
+
+        {/* UX-06: Forgot password panel */}
+        {tab === "login" && showForgotPassword && (
+          <div className="flex flex-col gap-5">
+            <p className="text-sm font-heading text-text-secondary">
+              {t("forgotPasswordInstructions")}
+            </p>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
+                {t("emailLabel")}
+              </label>
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder={t("emailPlaceholder")}
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
+              />
+            </div>
+            <button
+              type="button"
+              disabled={forgotLoading}
+              onClick={handleForgotPassword}
+              className="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+            >
+              {forgotLoading ? (
+                <>
+                  <Spinner />
+                  {t("sending")}
+                </>
+              ) : (
+                t("sendResetEmail")
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPassword(false);
+                setError(null);
+                setSuccess(null);
+              }}
+              className="text-xs font-heading text-text-muted hover:text-text-primary transition-colors text-center"
+            >
+              ← {t("backToLogin")}
+            </button>
+          </div>
         )}
 
         {/* Register Form */}
@@ -255,17 +446,29 @@ function LoginForm() {
               )}
             </div>
 
+            {/* MISS-01: Password visibility toggle */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
                 {t("passwordLabel")}
               </label>
-              <input
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                {...registerForm.register("password")}
-                className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
-              />
+              <div className="relative">
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  {...registerForm.register("password")}
+                  className="h-11 w-full px-4 pr-11 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none focus:border-accent-blue"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                  tabIndex={-1}
+                  aria-label={showRegisterPassword ? t("hidePassword") : t("showPassword")}
+                >
+                  <EyeIcon open={showRegisterPassword} />
+                </button>
+              </div>
               {registerForm.formState.errors.password && (
                 <span className="text-xs font-heading" style={{ color: "#E53935" }}>
                   {registerForm.formState.errors.password.message}
@@ -273,12 +476,20 @@ function LoginForm() {
               )}
             </div>
 
+            {/* MISS-03: Loading state on submit button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
             >
-              {loading ? "..." : t("createAccount")}
+              {loading ? (
+                <>
+                  <Spinner />
+                  {t("creatingAccount")}
+                </>
+              ) : (
+                t("createAccount")
+              )}
             </button>
           </form>
         )}
