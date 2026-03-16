@@ -19,11 +19,12 @@ export function AuthCodeHandler() {
     if (!code) return;
 
     const supabase = createClient();
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+    supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
       if (!error) {
         router.replace("/dashboard");
       } else {
-        router.replace("/login?error=auth");
+        console.error("[AuthCodeHandler] exchangeCodeForSession error:", error.message, error);
+        router.replace(`/login?error=auth&msg=${encodeURIComponent(error.message)}`);
       }
     });
   }, [searchParams, router]);
