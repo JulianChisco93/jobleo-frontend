@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
+import { PublicNavbar } from "@/components/layout/PublicNavbar";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { Link } from "@/i18n/navigation";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Your Next Job, Delivered to WhatsApp",
 };
-import { PublicNavbar } from "@/components/layout/PublicNavbar";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { Link } from "@/i18n/navigation";
 
 function CheckIcon() {
   return (
@@ -56,44 +57,18 @@ function LandingContent() {
           </div>
         </div>
 
-        {/* Hero mockup */}
+        {/* Hero image */}
         <div
-          className="flex-1 hidden md:flex items-center justify-center"
-          style={{
-            border: "2px solid #000000",
-            minHeight: 320,
-            backgroundColor: "#FAFAFA",
-          }}
+          className="flex-1 hidden md:flex items-center justify-center relative overflow-hidden"
+          style={{ border: "2px solid #000000", minHeight: 320 }}
         >
-          <div className="flex flex-col gap-3 p-6 w-full max-w-sm">
-            {/* WhatsApp-style preview card */}
-            <div
-              className="p-4 rounded-sm"
-              style={{ backgroundColor: "#DCF8C6", border: "1px solid #b2dfb2" }}
-            >
-              <p className="text-xs font-bold font-mono text-text-primary mb-1">⚡ {t("mockupHeader")}</p>
-              <p className="text-sm font-bold font-heading text-text-primary">{t("mockupTitle")}</p>
-              <p className="text-xs font-heading text-text-secondary">{t("mockupCompany")}</p>
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className="px-2 py-0.5 text-xs font-bold font-mono text-white"
-                  style={{ backgroundColor: "#4CAF50" }}
-                >
-                  87%
-                </span>
-                <span className="text-xs font-heading text-text-secondary">{t("mockupScore")}</span>
-              </div>
-              <p
-                className="mt-2 text-xs font-bold font-heading"
-                style={{ color: "#1E88E5" }}
-              >
-                {t("mockupApply")}
-              </p>
-            </div>
-            <p className="text-center text-xs font-mono text-text-muted">
-              {t("mockupCaption")}
-            </p>
-          </div>
+          <Image
+            src="/hero-image.png"
+            alt="Job Match on WhatsApp"
+            fill
+            style={{ objectFit: "cover", objectPosition: "center top" }}
+            priority
+          />
         </div>
       </section>
 

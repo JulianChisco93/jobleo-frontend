@@ -55,7 +55,7 @@ export function PublicNavbar() {
         </Link>
         <Link
           href={`${prefix}/login`}
-          className="px-6 py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity"
+          className="hidden md:inline-flex px-6 py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity"
         >
           {t("getStarted")}
         </Link>

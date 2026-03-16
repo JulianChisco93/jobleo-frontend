@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 interface LangToggleProps {
@@ -14,17 +14,7 @@ export function LangToggle({ variant = "light" }: LangToggleProps) {
   const pathname = usePathname();
 
   function switchLocale(next: string) {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("jobleo-locale", next);
-    }
-    // Replace current locale prefix with new one
-    const segments = pathname.split("/");
-    const isLocaleSegment = routing.locales.includes(segments[1] as "en" | "es");
-    const withoutLocale = isLocaleSegment ? segments.slice(2).join("/") : segments.slice(1).join("/");
-    const newPath = next === routing.defaultLocale
-      ? `/${withoutLocale}`
-      : `/${next}/${withoutLocale}`;
-    router.push(newPath || "/");
+    router.replace(pathname, { locale: next });
   }
 
   const isDark = variant === "dark";
