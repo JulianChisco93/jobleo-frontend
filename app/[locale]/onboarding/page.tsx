@@ -240,8 +240,11 @@ function Step2({
         locations,
         include_terms: includeTerms,
         exclude_terms: excludeTerms,
+        title_exclude_terms: [],
         frequency_minutes: 60,
         business_hours_only: false,
+        business_hours_start: 9,
+        business_hours_end: 18,
         business_days_only: false,
       });
       onNext({ profileId: profile.id });
