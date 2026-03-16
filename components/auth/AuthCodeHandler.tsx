@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
 
 /**
  * Handles the ?code= parameter that Supabase sometimes drops on the
@@ -11,23 +10,16 @@ import { createClient } from "@/lib/supabase/client";
  * redirects to /dashboard.
  */
 export function AuthCodeHandler() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const code = searchParams.get("code");
     if (!code) return;
 
-    const supabase = createClient();
-    supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
-      if (!error) {
-        router.replace("/dashboard");
-      } else {
-        console.error("[AuthCodeHandler] exchangeCodeForSession error:", error.message, error);
-        router.replace(`/login?error=auth&msg=${encodeURIComponent(error.message)}`);
-      }
-    });
-  }, [searchParams, router]);
+    // Redirect to the server-side callback handler so it can read the
+    // PKCE verifier from cookies (client-side exchange is unreliable with @supabase/ssr).
+    window.location.href = `/auth/callback?code=${encodeURIComponent(code)}`;
+  }, [searchParams]);
 
   return null;
 }
