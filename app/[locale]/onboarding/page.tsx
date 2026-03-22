@@ -7,20 +7,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { TagInput } from "@/components/ui/TagInput";
+import { LangToggle } from "@/components/ui/LangToggle";
 import { uploadCVFile, uploadCVText, createSearchProfile, updateMe } from "@/lib/api";
 
 // ─── Step progress bar ──────────────────────────────────────
 function StepBar({ step }: { step: 1 | 2 | 3 }) {
-  const colors = ["#E53935", "#1E88E5", "#FFC107"];
   return (
-    <div className="flex gap-1.5 mb-2">
+    <div className="flex gap-1.5">
       {[1, 2, 3].map((s) => (
         <div
           key={s}
-          className="h-1 flex-1 rounded-sm"
-          style={{
-            backgroundColor: s <= step ? colors[s - 1] : "#E0E0E0",
-          }}
+          className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+            s <= step ? "bg-secondary" : "bg-surface-container-high"
+          }`}
         />
       ))}
     </div>
@@ -28,11 +27,7 @@ function StepBar({ step }: { step: 1 | 2 | 3 }) {
 }
 
 // ─── Step 1: CV Upload ───────────────────────────────────────
-function Step1({
-  onNext,
-}: {
-  onNext: (data: { cvUploaded: boolean }) => void;
-}) {
+function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) {
   const t = useTranslations("onboarding");
   const [cvTab, setCvTab] = useState<"upload" | "paste">("upload");
   const [file, setFile] = useState<File | null>(null);
@@ -76,32 +71,30 @@ function Step1({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <div>
-        <span className="text-xs font-bold tracking-widest font-mono text-accent-red">
+        <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">
           {t("step1of3")}
-        </span>
+        </p>
         <StepBar step={1} />
-        <h2 className="text-2xl font-bold font-heading text-text-primary mt-3">
+        <h2 className="text-2xl font-display font-bold text-on-surface mt-4">
           {t("step1Title")}
         </h2>
-        <p className="text-sm font-heading text-text-secondary mt-1">
-          {t("step1Subtitle")}
-        </p>
+        <p className="text-sm text-on-surface-variant mt-1">{t("step1Subtitle")}</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex" style={{ borderBottom: "2px solid #000000" }}>
+      {/* Tab toggle */}
+      <div className="flex bg-surface-container-high rounded-xl p-1 gap-1">
         {(["upload", "paste"] as const).map((tabKey) => (
           <button
             key={tabKey}
+            type="button"
             onClick={() => { setCvTab(tabKey); setError(null); }}
-            className="px-5 py-2.5 text-sm font-bold font-heading transition-colors"
-            style={{
-              borderBottom: cvTab === tabKey ? "2px solid #000000" : "none",
-              color: cvTab === tabKey ? "#000000" : "#777777",
-              marginBottom: cvTab === tabKey ? "-2px" : "0",
-            }}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+              cvTab === tabKey
+                ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
           >
             {tabKey === "upload" ? t("uploadPdf") : t("pasteText")}
           </button>
@@ -110,8 +103,8 @@ function Step1({
 
       {cvTab === "upload" ? (
         <div
-          className="flex flex-col items-center justify-center gap-3 p-12 cursor-pointer hover:bg-bg-page transition-colors"
-          style={{ border: "2px dashed #000000", minHeight: 160 }}
+          className="flex flex-col items-center justify-center gap-3 p-10 rounded-xl border-2 border-dashed border-outline-variant cursor-pointer hover:border-primary hover:bg-primary-fixed/30 transition-all"
+          style={{ minHeight: 160 }}
           onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -120,17 +113,15 @@ function Step1({
             if (dropped?.type === "application/pdf") setFile(dropped);
           }}
         >
-          <svg width="32" height="32" fill="none" stroke="#777777" strokeWidth="1.5" viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
+          <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center">
+            <span className="material-symbols-outlined text-2xl text-primary">upload_file</span>
+          </div>
           {file ? (
-            <span className="text-sm font-bold font-heading text-accent-green">{file.name}</span>
+            <span className="text-sm font-bold text-secondary">{file.name}</span>
           ) : (
             <>
-              <span className="text-sm font-heading text-text-secondary">{t("dragDropHint")}</span>
-              <span className="text-xs font-heading text-text-muted">{t("orBrowseFiles")}</span>
+              <span className="text-sm font-semibold text-on-surface">{t("dragDropHint")}</span>
+              <span className="text-xs text-on-surface-variant">{t("orBrowseFiles")}</span>
             </>
           )}
           <input
@@ -153,52 +144,58 @@ function Step1({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <div
-            className="relative"
-            style={{ border: "2px solid #000000" }}
-          >
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={t("pasteTextPlaceholder")}
-              rows={8}
-              className="w-full p-4 text-sm font-heading text-text-primary placeholder:text-text-muted bg-bg-card outline-none resize-none"
-            />
-          </div>
-          <div className="flex justify-between text-xs font-mono text-text-muted">
-            <span style={{ color: text.trim().length > 0 && text.trim().length < 200 ? "#E53935" : undefined }}>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("pasteTextPlaceholder")}
+            rows={8}
+            className="w-full p-4 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm text-on-surface placeholder:text-on-surface-variant resize-none outline-none transition-all"
+          />
+          <div className="flex justify-between text-xs text-on-surface-variant">
+            <span className={text.trim().length > 0 && text.trim().length < 200 ? "text-error" : ""}>
               {text.trim().length} / 200 {t("charsMinimum")}
             </span>
-            <span style={{ color: text.trim().length > 50000 ? "#E53935" : undefined }}>
-              {text.trim().length > 50000 ? `${text.trim().length - 50000} ${t("charsOver")}` : `${50000 - text.trim().length} ${t("charsRemaining")}`}
+            <span className={text.trim().length > 50000 ? "text-error" : ""}>
+              {text.trim().length > 50000
+                ? `${text.trim().length - 50000} ${t("charsOver")}`
+                : `${50000 - text.trim().length} ${t("charsRemaining")}`}
             </span>
           </div>
         </div>
       )}
 
       {error && (
-        <p className="text-sm text-accent-red font-heading">{error}</p>
+        <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          {error}
+        </div>
       )}
 
-      {/* Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div className="flex flex-col gap-1">
           <button
+            type="button"
             onClick={() => onNext({ cvUploaded: false })}
-            className="text-sm font-bold font-heading text-text-secondary border-2 border-border-light px-5 py-2.5 hover:border-border-color transition-colors"
+            className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
           >
             {t("skipForNow")}
           </button>
-          <p className="text-xs font-heading text-text-muted max-w-48">
-            {t("skipWarning")}
-          </p>
+          <p className="text-xs text-on-surface-variant max-w-48">{t("skipWarning")}</p>
         </div>
         <button
+          type="button"
           onClick={handleContinue}
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
         >
-          {loading ? "..." : t("continue")}
+          {loading ? (
+            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              {t("continue")}
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -211,13 +208,7 @@ const searchSchema = z.object({
 });
 type SearchFormData = z.infer<typeof searchSchema>;
 
-function Step2({
-  onNext,
-  onBack,
-}: {
-  onNext: (data: any) => void;
-  onBack: () => void;
-}) {
+function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) {
   const t = useTranslations("onboarding");
   const { register, handleSubmit, formState: { errors } } = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
@@ -258,30 +249,28 @@ function Step2({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <div>
-        <span className="text-xs font-bold tracking-widest font-mono text-accent-blue">
+        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">
           {t("step2of3")}
-        </span>
+        </p>
         <StepBar step={2} />
-        <h2 className="text-2xl font-bold font-heading text-text-primary mt-3">
+        <h2 className="text-2xl font-display font-bold text-on-surface mt-4">
           {t("step2Title")}
         </h2>
-        <p className="text-sm font-heading text-text-secondary mt-1">
-          {t("step2Subtitle")}
-        </p>
+        <p className="text-sm text-on-surface-variant mt-1">{t("step2Subtitle")}</p>
       </div>
 
       {/* Profession */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
+        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
           {t("professionLabel")}
         </label>
         <input
           {...register("profession")}
           placeholder={t("professionPlaceholder")}
-          className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none"
+          className="px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm transition-all outline-none"
         />
         {errors.profession && (
-          <span className="text-xs text-accent-red font-heading">Required</span>
+          <span className="text-xs text-error">Required</span>
         )}
       </div>
 
@@ -319,22 +308,34 @@ function Step2({
         />
       </div>
 
-      {error && <p className="text-sm text-accent-red font-heading">{error}</p>}
+      {error && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-between">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2.5 text-sm font-bold font-heading text-text-secondary border-2 border-border-light hover:border-border-color transition-colors"
+          className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
         >
           {t("back")}
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-blue border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
         >
-          {loading ? "..." : t("continue")}
+          {loading ? (
+            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              {t("continue")}
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </>
+          )}
         </button>
       </div>
     </form>
@@ -342,13 +343,7 @@ function Step2({
 }
 
 // ─── Step 3: WhatsApp ─────────────────────────────────────────
-function Step3({
-  onBack,
-  onFinish,
-}: {
-  onBack: () => void;
-  onFinish: () => void;
-}) {
+function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void }) {
   const t = useTranslations("onboarding");
   const tPreview = useTranslations("onboarding.whatsappPreview");
   const [phone, setPhone] = useState("");
@@ -373,30 +368,28 @@ function Step3({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <div>
-        <span className="text-xs font-bold tracking-widest font-mono text-accent-yellow">
+        <p className="text-xs font-bold text-tertiary uppercase tracking-widest mb-2">
           {t("step3of3")}
-        </span>
+        </p>
         <StepBar step={3} />
-        <h2 className="text-2xl font-bold font-heading text-text-primary mt-3">
+        <h2 className="text-2xl font-display font-bold text-on-surface mt-4">
           {t("step3Title")}
         </h2>
-        <p className="text-sm font-heading text-text-secondary mt-1">
-          {t("step3Subtitle")}
-        </p>
+        <p className="text-sm text-on-surface-variant mt-1">{t("step3Subtitle")}</p>
       </div>
 
       {/* Phone input */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
+        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
           {t("whatsappLabel")}
         </label>
-        <div className="flex gap-0">
+        <div className="flex gap-2">
           <select
             value={countryCode}
             onChange={(e) => setCountryCode(e.target.value)}
-            className="h-11 px-3 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none border-r-0"
+            className="px-3 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none"
           >
             <option value="+1">+1</option>
             <option value="+44">+44</option>
@@ -413,65 +406,63 @@ function Step3({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder={t("phonePlaceholder")}
-            className="flex-1 h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary placeholder:text-text-muted outline-none"
+            className="flex-1 px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none transition-all"
           />
         </div>
       </div>
 
       {/* WhatsApp Preview */}
-      <div className="flex flex-col gap-3">
-        <span className="text-xs font-bold tracking-widest font-mono text-text-secondary uppercase">
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
           {t("previewTitle")}
         </span>
-        <div
-          className="p-5"
-          style={{ backgroundColor: "#E8F5E9", border: "1px solid #c8e6c9" }}
-        >
-          <p className="text-xs font-bold font-mono text-text-secondary mb-3">
+        <div className="p-5 rounded-xl" style={{ backgroundColor: "#E8F5E9", border: "1px solid #c8e6c9" }}>
+          <p className="text-xs font-bold text-green-800 mb-3">
             ⚡ {tPreview("header")}
           </p>
-          <p className="text-sm font-bold font-heading text-text-primary">
-            {tPreview("title")}
-          </p>
-          <p className="text-xs font-heading text-text-secondary mt-0.5">
-            {tPreview("company")}
-          </p>
+          <p className="text-sm font-bold text-green-900">{tPreview("title")}</p>
+          <p className="text-xs text-green-700 mt-0.5">{tPreview("company")}</p>
           <div className="mt-3 flex items-center gap-2">
-            <span
-              className="px-2 py-0.5 text-xs font-bold font-mono text-white"
-              style={{ backgroundColor: "#4CAF50" }}
-            >
+            <span className="px-2 py-0.5 text-xs font-bold text-white rounded-full" style={{ backgroundColor: "#4CAF50" }}>
               {tPreview("score")}
             </span>
           </div>
-          <p
-            className="mt-3 text-xs font-bold font-heading"
-            style={{ color: "#1E88E5" }}
-          >
+          <p className="mt-3 text-xs font-bold" style={{ color: "#1E88E5" }}>
             {tPreview("applyNow")}
           </p>
-          <p className="text-xs font-heading text-text-secondary mt-1">
-            {tPreview("viewMore")}
-          </p>
+          <p className="text-xs text-green-700 mt-1">{tPreview("viewMore")}</p>
         </div>
       </div>
 
-      {error && <p className="text-sm text-accent-red font-heading">{error}</p>}
+      {error && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-between">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2.5 text-sm font-bold font-heading text-text-secondary border-2 border-border-light hover:border-border-color transition-colors"
+          className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
         >
           {t("back")}
         </button>
         <button
+          type="button"
           onClick={handleFinish}
           disabled={loading}
-          className="px-6 py-2.5 text-sm font-bold font-heading text-text-primary bg-accent-yellow border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
         >
-          {loading ? "..." : t("finishSetup")}
+          {loading ? (
+            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              {t("finishSetup")}
+              <span className="material-symbols-outlined text-[18px]">check</span>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -484,20 +475,24 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-bg-page py-12">
-      <div
-        className="w-full max-w-xl bg-bg-card p-12"
-        style={{ border: "2px solid #000000" }}
-      >
-        {step === 1 && (
-          <Step1 onNext={() => setStep(2)} />
-        )}
-        {step === 2 && (
-          <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} />
-        )}
-        {step === 3 && (
-          <Step3 onBack={() => setStep(2)} onFinish={() => router.push("/dashboard")} />
-        )}
+    <div className="min-h-screen bg-surface flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <span className="font-display font-black text-xl text-primary tracking-tight">
+            jobleo
+          </span>
+          <LangToggle />
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)]">
+          {step === 1 && <Step1 onNext={() => setStep(2)} />}
+          {step === 2 && <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+          {step === 3 && <Step3 onBack={() => setStep(2)} onFinish={() => router.push("/dashboard")} />}
+        </div>
       </div>
     </div>
   );

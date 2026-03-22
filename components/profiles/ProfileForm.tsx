@@ -1,13 +1,13 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { TagInput } from "@/components/ui/TagInput";
 import { Toggle } from "@/components/ui/Toggle";
-import type { SearchProfile, CreateSearchProfilePayload } from "@/lib/types";
+import type { SearchProfile } from "@/lib/types";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -49,6 +49,9 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => {
   return `${h}:00`;
 });
 
+const inputCls = "px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none transition-all w-full";
+const labelCls = "text-xs font-bold text-on-surface-variant uppercase tracking-wider";
+
 export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: ProfileFormProps) {
   const t = useTranslations("profiles");
 
@@ -57,7 +60,6 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
     handleSubmit,
     watch,
     setValue,
-    control,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(schema) as any,
@@ -103,28 +105,18 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
   }
 
   return (
-    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8">
+    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8 max-w-3xl">
 
       {/* Name + Profession row */}
       <div className="grid grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
-            {t("profileNameLabel")}
-          </label>
-          <input
-            {...register("name")}
-            className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
-          />
-          {errors.name && <span className="text-xs text-accent-red">{t("profileNameLabel")} required</span>}
+          <label className={labelCls}>{t("profileNameLabel")}</label>
+          <input {...register("name")} className={inputCls} />
+          {errors.name && <span className="text-xs text-error">{t("profileNameLabel")} required</span>}
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
-            {t("professionLabel")}
-          </label>
-          <input
-            {...register("profession")}
-            className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
-          />
+          <label className={labelCls}>{t("professionLabel")}</label>
+          <input {...register("profession")} className={inputCls} />
         </div>
       </div>
 
@@ -138,16 +130,18 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       />
 
       {/* Locations */}
-      <TagInput
-        label={t("locationsLabel")}
-        value={locations}
-        onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
-        placeholder={t("addLocation")}
-        helperText={t("locationsTip")}
-      />
-      {locationsError && (
-        <span className="text-xs text-accent-red font-heading -mt-4">{t("locationsRequired")}</span>
-      )}
+      <div>
+        <TagInput
+          label={t("locationsLabel")}
+          value={locations}
+          onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
+          placeholder={t("addLocation")}
+          helperText={t("locationsTip")}
+        />
+        {locationsError && (
+          <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
+        )}
+      </div>
 
       {/* Include / Exclude */}
       <div className="grid grid-cols-2 gap-6">
@@ -168,12 +162,10 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       {/* Frequency + Active */}
       <div className="flex items-center gap-6">
         <div className="flex flex-col gap-2 flex-1">
-          <label className="text-xs font-bold tracking-wider font-mono text-text-secondary uppercase">
-            {t("frequencyLabel")}
-          </label>
+          <label className={labelCls}>{t("frequencyLabel")}</label>
           <select
             {...register("frequency_minutes", { valueAsNumber: true })}
-            className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
+            className={inputCls}
           >
             {FREQUENCY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -192,12 +184,9 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       </div>
 
       {/* Business Hours */}
-      <div
-        className="flex flex-col gap-4 p-6"
-        style={{ border: "2px solid #E0E0E0" }}
-      >
+      <div className="flex flex-col gap-4 p-5 bg-surface-container-low rounded-xl">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-bold font-heading text-text-primary">
+          <span className="text-sm font-semibold text-on-surface">
             {t("businessHoursLabel")}
           </span>
           <Toggle
@@ -207,7 +196,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
         </div>
 
         {businessHoursOnly && (
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 pt-2 border-t border-outline-variant/20">
             <Toggle
               checked={watch("business_days_only")}
               onChange={(v) => setValue("business_days_only", v)}
@@ -215,26 +204,16 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
             />
             <div className="flex gap-4 flex-1">
               <div className="flex flex-col gap-2 flex-1">
-                <label className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider">
-                  {t("startHourLabel")}
-                </label>
-                <select
-                  {...register("business_hours_start")}
-                  className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
-                >
+                <label className={labelCls}>{t("startHourLabel")}</label>
+                <select {...register("business_hours_start")} className={inputCls}>
                   {HOUR_OPTIONS.map((h) => (
                     <option key={h} value={h}>{h}</option>
                   ))}
                 </select>
               </div>
               <div className="flex flex-col gap-2 flex-1">
-                <label className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider">
-                  {t("endHourLabel")}
-                </label>
-                <select
-                  {...register("business_hours_end")}
-                  className="h-11 px-4 border-2 border-border-color bg-bg-card text-sm font-heading text-text-primary outline-none"
-                >
+                <label className={labelCls}>{t("endHourLabel")}</label>
+                <select {...register("business_hours_end")} className={inputCls}>
                   {HOUR_OPTIONS.map((h) => (
                     <option key={h} value={h}>{h}</option>
                   ))}
@@ -246,13 +225,12 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       </div>
 
       {/* Footer actions */}
-      <div className="flex items-center justify-between pt-4" style={{ borderTop: "2px solid #E0E0E0" }}>
+      <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
         {!isNew && onDelete && (
           <button
             type="button"
             onClick={handleDelete}
-            className="px-5 py-2.5 text-sm font-bold font-heading border-2 transition-colors"
-            style={{ borderColor: "#E53935", color: "#E53935" }}
+            className="px-5 py-2.5 text-sm font-bold text-error border border-error rounded-xl hover:bg-error-container transition-colors"
           >
             {t("deleteProfile")}
           </button>
@@ -260,9 +238,13 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
         <button
           type="submit"
           disabled={isSubmitting}
-          className="ml-auto px-6 py-2.5 text-sm font-bold font-heading text-white bg-accent-blue border-2 border-border-color hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="ml-auto flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
         >
-          {isSubmitting ? t("saving") : t("saveChanges")}
+          {isSubmitting ? (
+            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            t("saveChanges")
+          )}
         </button>
       </div>
     </form>

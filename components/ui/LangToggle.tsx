@@ -4,11 +4,7 @@ import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
-interface LangToggleProps {
-  variant?: "light" | "dark";
-}
-
-export function LangToggle({ variant = "light" }: LangToggleProps) {
+export function LangToggle() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -17,24 +13,19 @@ export function LangToggle({ variant = "light" }: LangToggleProps) {
     router.replace(pathname, { locale: next });
   }
 
-  const isDark = variant === "dark";
-  const base = isDark
-    ? "px-3 py-1 text-xs font-bold font-mono border transition-colors"
-    : "px-3 py-1 text-xs font-bold font-mono border transition-colors";
-
   return (
-    <div className="flex" style={{ border: "2px solid", borderColor: isDark ? "#ffffff" : "#000000" }}>
+    <div className="flex items-center bg-surface-container-high p-1 rounded-full gap-0.5">
       {routing.locales.map((loc) => {
         const isActive = locale === loc;
-        const style = isActive
-          ? { background: isDark ? "#ffffff" : "#000000", color: isDark ? "#000000" : "#ffffff" }
-          : { background: "transparent", color: isDark ? "#ffffff" : "#000000" };
         return (
           <button
             key={loc}
             onClick={() => switchLocale(loc)}
-            className="px-3 py-1 text-xs font-bold uppercase transition-colors"
-            style={style}
+            className={`px-3 py-1.5 text-xs font-bold uppercase rounded-full transition-all ${
+              isActive
+                ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
           >
             {loc.toUpperCase()}
           </button>

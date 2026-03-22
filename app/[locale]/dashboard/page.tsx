@@ -10,34 +10,45 @@ import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 
+const PROFILE_ICONS = ["terminal", "work", "code"];
+const PROFILE_ACCENTS = [
+  "border-secondary",
+  "border-primary-container",
+  "border-tertiary-container",
+];
+
+function formatLastSearched(dateStr: string) {
+  if (!dateStr) return "—";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
 function StatCard({
   title,
   value,
-  color,
+  accent,
 }: {
   title: string;
   value: string | number;
-  color?: string;
+  accent?: string;
 }) {
   return (
-    <div
-      className="flex flex-col gap-2 p-6 bg-bg-card flex-1"
-      style={{ border: "2px solid #000000" }}
-    >
-      <span className="text-xs font-bold tracking-widest font-mono text-text-muted uppercase">
-        {title}
-      </span>
+    <div className="bg-surface-container-low px-6 py-5 rounded-xl flex flex-col items-center min-w-[130px] flex-1">
       <span
-        className="text-4xl font-bold font-mono"
-        style={{ color: color || "#000000" }}
+        className={`text-3xl font-black font-display ${accent ?? "text-primary"}`}
       >
         {value}
+      </span>
+      <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+        {title}
       </span>
     </div>
   );
 }
-
-const PROFILE_COLORS = ["#E53935", "#1E88E5", "#FFC107"];
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -51,8 +62,8 @@ export default function DashboardPage() {
       if (user) {
         setUserName(
           user.user_metadata?.display_name ||
-          user.email?.split("@")[0] ||
-          "User"
+            user.email?.split("@")[0] ||
+            "User"
         );
       }
     });
@@ -73,87 +84,69 @@ export default function DashboardPage() {
     (acc, p) => (p.updated_at > acc ? p.updated_at : acc),
     ""
   );
-
-  function formatLastSearched(dateStr: string) {
-    if (!dateStr) return "—";
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins} min`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  }
-
   const atMax = profiles.length >= 3;
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
       <DashboardTopBar title={t("title")} userName={userName} />
 
-      <main className="flex flex-col gap-8 p-8">
-        {/* Welcome Banner */}
-        <div
-          className="flex items-center justify-between px-8 py-6"
-          style={{ backgroundColor: "#E53935" }}
-        >
-          <div>
-            <h2 className="text-xl font-bold font-heading text-white">
-              {t("welcome", { name: userName })}
-            </h2>
-            <p className="text-sm font-heading text-white opacity-85 mt-1">
-              {t("welcomeSubtitle")}
-            </p>
+      <main className="max-w-6xl mx-auto w-full px-6 py-10">
+        {/* Welcome banner */}
+        <section className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h1 className="text-4xl font-display font-extrabold text-on-surface tracking-tight mb-2">
+                {t("welcome", { name: userName })}
+              </h1>
+              <p className="text-on-surface-variant max-w-lg">
+                {t("welcomeSubtitle")}
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <StatCard
+                title={t("activeJobsTitle")}
+                value={jobs.length}
+                accent="text-primary"
+              />
+              <StatCard
+                title={t("activeProfilesTitle")}
+                value={activeProfiles.length}
+                accent="text-secondary"
+              />
+              <StatCard
+                title={t("lastSearchedTitle")}
+                value={formatLastSearched(lastSearched)}
+                accent="text-tertiary"
+              />
+            </div>
           </div>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" opacity="0.7">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-          </svg>
-        </div>
+        </section>
 
-        {/* Stats */}
-        <div className="flex gap-6">
-          <StatCard
-            title={t("activeJobsTitle")}
-            value={jobs.length}
-            color="#000000"
-          />
-          <StatCard
-            title={t("activeProfilesTitle")}
-            value={activeProfiles.length}
-            color="#000000"
-          />
-          <StatCard
-            title={t("lastSearchedTitle")}
-            value={formatLastSearched(lastSearched)}
-            color="#FFC107"
-          />
-        </div>
-
-        {/* Search Profiles */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold font-heading text-text-primary">
+        {/* Active Search Profiles */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-display font-bold text-xl text-on-surface flex items-center gap-2">
               {t("activeSearchProfiles")}
+              <span className="text-xs bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full font-bold">
+                {profiles.length}/3
+              </span>
             </h3>
             <div className="relative group">
               <Link
                 href={atMax ? "#" : `${prefix}/dashboard/profiles/new`}
-                className="px-5 py-2 text-sm font-bold font-heading border-2 transition-colors"
-                style={{
-                  backgroundColor: atMax ? "#E0E0E0" : "#1E88E5",
-                  color: atMax ? "#999999" : "#ffffff",
-                  borderColor: atMax ? "#E0E0E0" : "#000000",
-                  pointerEvents: atMax ? "none" : "auto",
-                }}
                 aria-disabled={atMax}
                 onClick={(e) => atMax && e.preventDefault()}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  atMax
+                    ? "bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-60"
+                    : "bg-primary text-on-primary hover:bg-primary-container active:scale-95"
+                }`}
               >
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>
                 {t("addProfile")}
               </Link>
               {atMax && (
-                <div
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs font-heading text-white bg-text-primary opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap"
-                >
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs text-inverse-on-surface bg-inverse-surface rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
                   {t("addProfileTooltip")}
                 </div>
               )}
@@ -161,68 +154,72 @@ export default function DashboardPage() {
           </div>
 
           {profiles.length === 0 ? (
-            <div
-              className="flex flex-col items-center gap-4 py-16 bg-bg-card"
-              style={{ border: "2px solid #E0E0E0" }}
-            >
-              <div className="w-16 h-16 flex items-center justify-center" style={{ backgroundColor: "#FAFAFA", border: "2px solid #E0E0E0" }}>
-                <svg width="28" height="28" fill="none" stroke="#999" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                </svg>
+            <div className="bg-surface-container-lowest rounded-xl p-16 flex flex-col items-center shadow-[var(--shadow-card)]">
+              <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-3xl text-outline">search</span>
               </div>
-              <p className="text-base font-bold font-heading text-text-primary">
+              <p className="font-display font-bold text-lg text-on-surface mb-2">
                 {t("noProfiles")}
               </p>
-              <p className="text-sm font-heading text-text-secondary text-center max-w-sm">
+              <p className="text-on-surface-variant text-sm text-center max-w-sm mb-6">
                 {t("noProfilesHint")}
               </p>
               <Link
                 href={`${prefix}/dashboard/profiles/new`}
-                className="px-6 py-2.5 text-sm font-bold font-heading text-white bg-accent-red border-2 border-border-color"
+                className="px-8 py-3 bg-primary-gradient text-on-primary rounded-xl font-bold text-sm shadow-[var(--shadow-ambient)] active:scale-95 transition-transform"
               >
                 {t("createFirstProfile")}
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {profiles.map((profile, idx) => (
                 <Link
                   key={profile.id}
                   href={`${prefix}/dashboard/profiles/${profile.id}`}
-                  className="flex items-center justify-between px-6 py-4 bg-bg-card hover:bg-bg-page transition-colors"
-                  style={{ border: "2px solid #000000" }}
+                  className={`bg-surface-container-lowest rounded-xl p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-ambient)] transition-all border-l-4 ${PROFILE_ACCENTS[idx % PROFILE_ACCENTS.length]}`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-1 h-10 rounded-sm"
-                      style={{ backgroundColor: PROFILE_COLORS[idx % PROFILE_COLORS.length] }}
-                    />
-                    <div>
-                      <p className="text-sm font-bold font-heading text-text-primary">
-                        {profile.name}
-                      </p>
-                      <p className="text-xs font-heading text-text-muted mt-0.5">
-                        {profile.job_titles.slice(0, 3).join(" · ")}
-                      </p>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-12 h-12 bg-secondary-container rounded-xl flex items-center justify-center text-on-secondary-container">
+                      <span
+                        className="material-symbols-outlined text-[22px]"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        {PROFILE_ICONS[idx % PROFILE_ICONS.length]}
+                      </span>
                     </div>
+                    <span
+                      className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest ${
+                        profile.is_active ? "text-secondary" : "text-outline"
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${profile.is_active ? "bg-secondary" : "bg-outline"}`}
+                      />
+                      {profile.is_active ? "Active" : "Paused"}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-xs font-mono text-text-muted">
+
+                  <h4 className="font-display font-bold text-on-surface mb-1 truncate">
+                    {profile.name}
+                  </h4>
+                  <p className="text-xs text-on-surface-variant mb-4 line-clamp-1">
+                    {profile.job_titles.slice(0, 3).join(" · ")}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
+                    <div>
+                      <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
                         {t("lastRun")}
                       </p>
-                      <p className="text-xs font-mono text-text-secondary">
+                      <p className="text-xs font-semibold text-on-surface">
                         {formatLastSearched(profile.updated_at)}
                       </p>
                     </div>
                     <Link
                       href={`${prefix}/dashboard/jobs?search_config_id=${profile.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="px-4 py-1.5 text-xs font-bold font-heading text-white border-2 transition-colors hover:opacity-80"
-                      style={{
-                        backgroundColor: PROFILE_COLORS[idx % PROFILE_COLORS.length],
-                        borderColor: "#000000",
-                      }}
+                      className="px-3 py-1.5 text-xs font-bold text-secondary border border-secondary-container rounded-lg hover:bg-secondary-container transition-colors"
                     >
                       {t("viewJobs")}
                     </Link>
@@ -231,7 +228,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
+        </section>
       </main>
     </div>
   );

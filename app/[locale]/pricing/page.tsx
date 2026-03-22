@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
+import { PublicNavbar } from "@/components/layout/PublicNavbar";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { Link } from "@/i18n/navigation";
 
 export async function generateMetadata({
   params,
@@ -11,62 +14,50 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
   return { title: t("pricingTitle") };
 }
-import { PublicNavbar } from "@/components/layout/PublicNavbar";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { Link } from "@/i18n/navigation";
 
-function CheckIcon({ color = "#4CAF50" }: { color?: string }) {
+function CheckIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
+    <span className="material-symbols-outlined text-[18px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+      check_circle
+    </span>
   );
 }
 
 function PricingContent() {
   const t = useTranslations("pricing");
-  const tNav = useTranslations("nav");
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg-page">
+    <div className="flex flex-col min-h-screen bg-surface">
       <PublicNavbar />
 
       {/* Header */}
-      <section className="flex flex-col items-center gap-3 px-12 py-16">
-        <span className="text-xs font-bold tracking-widest font-mono text-accent-red uppercase">
+      <section className="flex flex-col items-center gap-3 px-8 py-16">
+        <span className="text-xs font-bold tracking-widest text-secondary uppercase">
           {t("tag")}
         </span>
-        <h1 className="text-4xl font-bold font-heading text-text-primary text-center">
+        <h1 className="text-4xl font-display font-bold text-on-surface text-center">
           {t("title")}
         </h1>
-        <p className="text-base font-heading text-text-secondary text-center">
+        <p className="text-base text-on-surface-variant text-center max-w-lg">
           {t("subtitle")}
         </p>
       </section>
 
       {/* Plan Cards */}
-      <section className="flex flex-col md:flex-row gap-6 px-12 pb-16 justify-center max-w-5xl mx-auto w-full">
+      <section className="flex flex-col md:flex-row gap-6 px-8 pb-20 justify-center max-w-4xl mx-auto w-full">
         {/* Starter */}
-        <div
-          className="flex flex-col gap-6 p-10 bg-bg-card flex-1"
-          style={{ border: "2px solid #000000" }}
-        >
+        <div className="flex flex-col gap-6 p-8 bg-surface-container-lowest rounded-xl shadow-[var(--shadow-card)] flex-1">
           <div className="flex flex-col gap-2">
-            <span
-              className="text-xs font-bold tracking-widest font-mono px-3 py-1 self-start"
-              style={{ backgroundColor: "#FFC107", color: "#000000" }}
-            >
+            <span className="text-xs font-bold tracking-widest px-3 py-1 self-start bg-surface-container-high text-on-surface-variant rounded-full uppercase">
               {t("starterBadge")}
             </span>
-            <h2 className="text-2xl font-bold font-heading text-text-primary mt-2">
+            <h2 className="text-2xl font-display font-bold text-on-surface mt-2">
               {t("starterName")}
             </h2>
-            <p className="text-3xl font-bold font-mono text-text-primary">
+            <p className="text-3xl font-display font-bold text-on-surface">
               {t("starterPrice")}
             </p>
-            <p className="text-sm font-heading text-text-secondary">
-              {t("starterTagline")}
-            </p>
+            <p className="text-sm text-on-surface-variant">{t("starterTagline")}</p>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -78,7 +69,7 @@ function PricingContent() {
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3">
                 <CheckIcon />
-                <span className="text-sm font-heading text-text-secondary">{feature}</span>
+                <span className="text-sm text-on-surface-variant">{feature}</span>
               </div>
             ))}
           </div>
@@ -86,33 +77,25 @@ function PricingContent() {
           <button
             disabled
             title={t("starterComingSoonTooltip")}
-            className="mt-auto w-full py-3 text-sm font-bold font-heading text-text-muted border-2 border-border-light cursor-not-allowed opacity-60"
+            className="mt-auto w-full py-3 text-sm font-bold text-on-surface-variant border border-outline-variant rounded-xl cursor-not-allowed opacity-60"
           >
             {t("starterCta")}
           </button>
         </div>
 
         {/* Pro */}
-        <div
-          className="flex flex-col gap-6 p-10 flex-1"
-          style={{ backgroundColor: "#E53935", border: "2px solid #000000" }}
-        >
+        <div className="flex flex-col gap-6 p-8 bg-primary rounded-xl shadow-[var(--shadow-card)] flex-1">
           <div className="flex flex-col gap-2">
-            <span
-              className="text-xs font-bold tracking-widest font-mono px-3 py-1 self-start"
-              style={{ backgroundColor: "#000000", color: "#ffffff" }}
-            >
+            <span className="text-xs font-bold tracking-widest px-3 py-1 self-start bg-on-primary/10 text-primary-fixed rounded-full uppercase">
               {t("proBadge")}
             </span>
-            <h2 className="text-2xl font-bold font-heading text-white mt-2">
+            <h2 className="text-2xl font-display font-bold text-on-primary mt-2">
               {t("proName")}
             </h2>
-            <p className="text-3xl font-bold font-mono text-white">
+            <p className="text-3xl font-display font-bold text-on-primary">
               {t("proPrice")}
             </p>
-            <p className="text-sm font-heading" style={{ color: "rgba(255,255,255,0.85)" }}>
-              {t("proTagline")}
-            </p>
+            <p className="text-sm text-on-primary/80">{t("proTagline")}</p>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -124,15 +107,17 @@ function PricingContent() {
               t("proFeature5"),
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3">
-                <CheckIcon color="#ffffff" />
-                <span className="text-sm font-heading text-white">{feature}</span>
+                <span className="material-symbols-outlined text-[18px] text-primary-fixed" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  check_circle
+                </span>
+                <span className="text-sm text-on-primary">{feature}</span>
               </div>
             ))}
           </div>
 
           <Link
             href="/login"
-            className="mt-auto w-full py-3 text-sm font-bold font-heading text-text-primary bg-bg-card border-2 border-border-color hover:opacity-90 transition-opacity text-center"
+            className="mt-auto w-full py-3 text-sm font-bold text-primary bg-surface-container-lowest rounded-xl text-center hover:bg-surface-container-low transition-colors"
           >
             {t("proCta")}
           </Link>

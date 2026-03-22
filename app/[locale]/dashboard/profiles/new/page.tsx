@@ -51,9 +51,10 @@ export default function NewProfilePage() {
       <DashboardTopBar title={t("newProfileTitle")} />
       <main>
         <div className="px-8 pt-6 pb-0">
-          <h2 className="text-xl font-bold font-heading text-text-primary">{t("newProfileTitle")}</h2>
+          <h2 className="text-2xl font-display font-bold text-on-surface">{t("newProfileTitle")}</h2>
           {saveError && (
-            <div className="mt-4 px-4 py-3 text-sm font-heading text-white bg-accent-red border-2 border-border-color">
+            <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+              <span className="material-symbols-outlined text-[18px]">error</span>
               {saveError}
             </div>
           )}

@@ -9,41 +9,41 @@ export function PublicFooter() {
   const prefix = locale === "en" ? "" : `/${locale}`;
 
   return (
-    <footer
-      className="flex justify-between items-start p-12 bg-text-primary text-text-on-dark"
-    >
-      {/* Brand */}
-      <div className="flex flex-col gap-2">
-        <span className="text-xl font-bold tracking-widest font-heading">JOBLEO</span>
-        <span className="text-sm font-heading text-text-secondary">{t("tagline")}</span>
-      </div>
-
-      {/* Links */}
-      <div className="flex gap-16">
-        <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
-            {t("product")}
-          </span>
-          <Link href={`${prefix}/#features`} className="text-sm font-heading text-text-secondary hover:text-white transition-colors">
-            {t("features")}
-          </Link>
-          <Link href={`${prefix}/pricing`} className="text-sm font-heading text-text-secondary hover:text-white transition-colors">
-            {t("pricingLink")}
-          </Link>
-          <Link href={`${prefix}/login`} className="text-sm font-heading text-text-secondary hover:text-white transition-colors">
-            {t("loginLink")}
-          </Link>
+    <footer className="bg-surface-container-low border-t border-outline-variant/20">
+      <div className="max-w-6xl mx-auto px-12 py-12 flex flex-col md:flex-row justify-between gap-8">
+        {/* Brand */}
+        <div className="flex flex-col gap-2">
+          <span className="font-display font-black text-xl text-primary tracking-tight">jobleo</span>
+          <span className="text-sm text-on-surface-variant">{t("tagline")}</span>
         </div>
-        <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider font-mono text-text-muted">
-            {t("legal")}
-          </span>
-          <Link href="#" className="text-sm font-heading text-text-secondary hover:text-white transition-colors">
-            {t("termsOfService")}
-          </Link>
-          <Link href="#" className="text-sm font-heading text-text-secondary hover:text-white transition-colors">
-            {t("privacyPolicy")}
-          </Link>
+
+        {/* Links */}
+        <div className="flex gap-16">
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+              {t("product")}
+            </span>
+            <Link href={`${prefix}/#features`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              {t("features")}
+            </Link>
+            <Link href={`${prefix}/pricing`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              {t("pricingLink")}
+            </Link>
+            <Link href={`${prefix}/login`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              {t("loginLink")}
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+              {t("legal")}
+            </span>
+            <Link href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              {t("termsOfService")}
+            </Link>
+            <Link href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              {t("privacyPolicy")}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

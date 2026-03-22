@@ -51,25 +51,22 @@ export function TagInput({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <span className="font-mono text-xs font-medium tracking-wider text-text-secondary uppercase">
+        <span className="text-xs font-bold tracking-wider text-on-surface-variant uppercase">
           {label}
         </span>
       )}
-      <div
-        className="flex flex-wrap gap-2 p-2 bg-bg-card border-2 border-border-color min-h-[44px] focus-within:outline-2 focus-within:outline-accent-blue"
-        style={{ borderColor: "#000000" }}
-      >
+      <div className="flex flex-wrap gap-2 p-3 bg-surface-container-low rounded-xl min-h-[44px] focus-within:ring-2 focus-within:ring-primary transition-all">
         {value.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 px-3 py-1 bg-text-primary text-text-on-dark text-sm font-medium font-mono"
+            className="tag-chip flex items-center gap-1"
           >
             {tag}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-1 text-text-on-dark hover:opacity-70 text-xs leading-none"
+                className="ml-1 text-on-surface-variant hover:text-on-surface text-xs leading-none"
               >
                 ×
               </button>
@@ -84,12 +81,12 @@ export function TagInput({
             onKeyDown={handleKeyDown}
             onBlur={() => input && addTag(input)}
             placeholder={value.length === 0 ? placeholder : ""}
-            className="flex-1 min-w-24 outline-none text-sm bg-transparent text-text-primary placeholder:text-text-muted font-heading"
+            className="flex-1 min-w-24 outline-none text-sm bg-transparent text-on-surface placeholder:text-on-surface-variant"
           />
         )}
       </div>
       {helperText && (
-        <p className="text-xs text-text-secondary font-heading">{helperText}</p>
+        <p className="text-xs text-on-surface-variant">{helperText}</p>
       )}
     </div>
   );

@@ -19,26 +19,22 @@ export function Toggle({ checked, onChange, label, disabled }: ToggleProps) {
     >
       {/* Track */}
       <div
-        className="relative w-11 h-6 rounded-full transition-colors duration-200"
-        style={{
-          backgroundColor: checked ? "#4CAF50" : "#E0E0E0",
-          border: `2px solid ${checked ? "#4CAF50" : "#E0E0E0"}`,
-        }}
+        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+          checked ? "bg-primary" : "bg-surface-container-highest"
+        }`}
+        style={{ boxShadow: "inset 0 0 0 2px rgba(0,0,0,0.05)" }}
       >
         {/* Thumb */}
         <div
-          className="absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-200"
-          style={{
-            backgroundColor: "#ffffff",
-            transform: checked ? "translateX(20px)" : "translateX(2px)",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-          }}
+          className="absolute top-1 w-4 h-4 rounded-full bg-surface-container-lowest transition-transform duration-200 shadow-sm"
+          style={{ transform: checked ? "translateX(22px)" : "translateX(4px)" }}
         />
       </div>
       {label && (
         <span
-          className="text-sm font-semibold font-heading"
-          style={{ color: checked ? "#000000" : "#777777" }}
+          className={`text-sm font-semibold ${
+            checked ? "text-on-surface" : "text-on-surface-variant"
+          }`}
         >
           {label}
         </span>

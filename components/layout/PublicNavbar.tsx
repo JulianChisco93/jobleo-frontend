@@ -12,121 +12,104 @@ export function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header
-      className="relative bg-bg-card"
-      style={{ borderBottom: "2px solid #000000" }}
-    >
+    <header className="sticky top-0 z-10 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20">
       <div className="flex items-center justify-between px-6 md:px-12 h-16">
-        {/* Left: Logo + desktop nav links */}
+        {/* Left: Logo + desktop nav */}
         <div className="flex items-center gap-8">
           <Link
             href={`${prefix}/`}
-            className="text-2xl font-bold tracking-widest font-heading text-text-primary"
+            className="font-display font-black text-xl text-primary tracking-tight"
           >
-            JOBLEO
+            jobleo
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href={`${prefix}/#features`}
-              className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors"
+              className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
             >
               {t("features")}
             </Link>
             <Link
               href={`${prefix}/pricing`}
-              className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors"
+              className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
             >
               {t("pricing")}
             </Link>
             <Link
               href={`${prefix}/#how-it-works`}
-              className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors"
+              className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
             >
               {t("howItWorks")}
             </Link>
           </nav>
         </div>
 
-        {/* Right: Lang toggle + Login + Get Started (desktop) + Hamburger (mobile) */}
-        <div className="flex items-center gap-4">
-          <LangToggle variant="light" />
+        {/* Right: Lang toggle + auth buttons */}
+        <div className="flex items-center gap-3">
+          <LangToggle />
           <Link
             href={`${prefix}/login`}
-            className="hidden md:inline-flex px-6 py-2.5 text-sm font-bold font-heading text-text-primary border-2 border-border-color hover:bg-text-primary hover:text-text-on-dark transition-colors"
+            className="hidden md:inline-flex px-4 py-2 text-sm font-bold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
           >
             {t("login")}
           </Link>
           <Link
             href={`${prefix}/login`}
-            className="hidden md:inline-flex px-6 py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity"
+            className="hidden md:inline-flex px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors"
           >
             {t("getStarted")}
           </Link>
 
-          {/* Hamburger button — mobile only */}
+          {/* Hamburger — mobile only */}
           <button
-            className="md:hidden flex flex-col justify-center items-center gap-1.5 w-8 h-8"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-surface-container-low transition-colors text-on-surface-variant"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
-            {menuOpen ? (
-              /* X icon */
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            ) : (
-              /* Hamburger icon */
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            )}
+            <span className="material-symbols-outlined text-[22px]">
+              {menuOpen ? "close" : "menu"}
+            </span>
           </button>
         </div>
       </div>
 
       {/* Mobile drawer */}
       {menuOpen && (
-        <nav
-          className="md:hidden flex flex-col px-6 pb-6 pt-2 gap-4 bg-bg-card"
-          style={{ borderTop: "2px solid #000000" }}
-        >
+        <nav className="md:hidden flex flex-col px-6 pb-6 pt-2 gap-3 bg-surface-container-lowest border-t border-outline-variant/20">
           <Link
             href={`${prefix}/#features`}
             onClick={() => setMenuOpen(false)}
-            className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors py-1"
+            className="text-sm font-semibold text-on-surface-variant hover:text-on-surface py-2 transition-colors"
           >
             {t("features")}
           </Link>
           <Link
             href={`${prefix}/pricing`}
             onClick={() => setMenuOpen(false)}
-            className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors py-1"
+            className="text-sm font-semibold text-on-surface-variant hover:text-on-surface py-2 transition-colors"
           >
             {t("pricing")}
           </Link>
           <Link
             href={`${prefix}/#how-it-works`}
             onClick={() => setMenuOpen(false)}
-            className="text-sm font-semibold font-heading text-text-secondary hover:text-text-primary transition-colors py-1"
+            className="text-sm font-semibold text-on-surface-variant hover:text-on-surface py-2 transition-colors"
           >
             {t("howItWorks")}
           </Link>
-          <div className="flex flex-col gap-3 pt-2" style={{ borderTop: "1px solid #e0e0e0" }}>
+          <div className="flex flex-col gap-2 pt-3 border-t border-outline-variant/20">
             <Link
               href={`${prefix}/login`}
               onClick={() => setMenuOpen(false)}
-              className="w-full py-2.5 text-sm font-bold font-heading text-text-primary border-2 border-border-color hover:bg-text-primary hover:text-text-on-dark transition-colors text-center"
+              className="w-full py-2.5 text-sm font-bold text-on-surface border border-outline-variant rounded-xl text-center hover:bg-surface-container-low transition-colors"
             >
               {t("login")}
             </Link>
             <Link
               href={`${prefix}/login`}
               onClick={() => setMenuOpen(false)}
-              className="w-full py-2.5 text-sm font-bold font-heading text-text-on-dark bg-accent-red border-2 border-border-color hover:opacity-90 transition-opacity text-center"
+              className="w-full py-2.5 text-sm font-bold text-on-primary bg-primary rounded-xl text-center hover:bg-primary/90 transition-colors"
             >
               {t("getStarted")}
             </Link>

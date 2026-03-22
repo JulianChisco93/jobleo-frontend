@@ -1,39 +1,288 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
 @import "tailwindcss";
 
 @theme {
-  /* Brand colors */
-  --color-accent-red: #e53935;
-  --color-accent-blue: #1e88e5;
-  --color-accent-green: #4caf50;
-  --color-accent-yellow: #ffc107;
+  /* ============================================================
+     FONTS — Manrope (Display/Headlines) + Inter (Body/UI)
+     ============================================================ */
+  --font-sans: var(--font-inter, "Inter"), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope, "Manrope"), "Manrope", ui-sans-serif, system-ui, sans-serif;
 
-  /* Backgrounds */
-  --color-bg-card: #ffffff;
-  --color-bg-page: #fafafa;
-  --color-bg-sidebar: #000000;
+  /* ============================================================
+     COLORS — Bauhaus Digital Light (Jobleo v2 Design System)
+     ============================================================ */
 
-  /* Borders */
-  --color-border-color: #000000;
-  --color-border-light: #e0e0e0;
+  /* Primary — Deep authoritative blue */
+  --color-primary: #003874;
+  --color-primary-container: #1a4f95;
+  --color-primary-fixed: #d6e3ff;
+  --color-primary-fixed-dim: #aac7ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #a3c3ff;
+  --color-on-primary-fixed: #001b3e;
+  --color-on-primary-fixed-variant: #08458b;
+  --color-inverse-primary: #aac7ff;
 
-  /* Text */
-  --color-text-primary: #000000;
-  --color-text-secondary: #777777;
-  --color-text-muted: #999999;
-  --color-text-on-dark: #ffffff;
+  /* Secondary — Success-driven green */
+  --color-secondary: #006d37;
+  --color-secondary-container: #6bfe9c;
+  --color-secondary-fixed: #6bfe9c;
+  --color-secondary-fixed-dim: #4ae183;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #00743a;
+  --color-on-secondary-fixed: #00210c;
+  --color-on-secondary-fixed-variant: #005228;
 
-  /* Fonts */
-  --font-heading: "Space Grotesk", sans-serif;
-  --font-mono: "Space Mono", monospace;
+  /* Tertiary — Warm gold accent */
+  --color-tertiary: #735c00;
+  --color-tertiary-container: #cea700;
+  --color-tertiary-fixed: #ffe084;
+  --color-tertiary-fixed-dim: #eec219;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #4e3e00;
+  --color-on-tertiary-fixed: #231b00;
+  --color-on-tertiary-fixed-variant: #574500;
+
+  /* Surface hierarchy — stacked layers of fine paper */
+  --color-surface: #f8f9fa;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-dim: #d9dadb;
+  --color-surface-tint: #2e5ea5;
+  --color-surface-variant: #e1e3e4;
+
+  /* Background */
+  --color-background: #f8f9fa;
+  --color-on-background: #191c1d;
+
+  /* On Surface */
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #424751;
+  --color-inverse-surface: #2e3132;
+  --color-inverse-on-surface: #f0f1f2;
+
+  /* Outline — the "Ghost Border" rule */
+  --color-outline: #737782;
+  --color-outline-variant: #c3c6d2;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* ============================================================
+     BORDER RADIUS — matches Stitch config exactly
+     rounded-xl = 0.75rem (12px) for cards
+     ============================================================ */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;
+  --radius: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 0.75rem;   /* 12px — cards, inputs */
+  --radius-2xl: 1rem;     /* 16px */
+  --radius-3xl: 1.5rem;   /* 24px */
+  --radius-full: 9999px;  /* pills, badges */
+
+  /* ============================================================
+     SHADOWS — Tonal, never pure black
+     ============================================================ */
+  --shadow-ambient: 0 12px 40px rgba(25, 28, 29, 0.06);
+  --shadow-card: 0 4px 16px rgba(25, 28, 29, 0.04);
+  --shadow-modal: 0 20px 60px rgba(25, 28, 29, 0.10);
 }
 
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 body {
-  font-family: var(--font-heading);
-  background-color: var(--color-bg-page);
-  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Display sizes — Manrope, geometric, unapologetic */
+.text-display-lg {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.text-display-md {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+
+.text-display-sm {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.text-headline-lg {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  font-weight: 600;
+}
+
+.text-headline-md {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.text-headline-sm {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+/* ============================================================
+   GLASS & GRADIENT RULES
+   ============================================================ */
+
+/* Glassmorphism — for floating elements and persistent headers */
+.glass {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Primary CTA gradient — gives visual "soul" */
+.bg-primary-gradient {
+  background: linear-gradient(135deg, #003874 0%, #1a4f95 100%);
+}
+
+/* Secondary gradient — match score fills */
+.bg-secondary-gradient {
+  background: linear-gradient(135deg, #006d37 0%, #4ae183 100%);
+}
+
+/* ============================================================
+   MATCH SCORE BADGE COLORS
+   ============================================================ */
+
+/* High match > 60% */
+.badge-high {
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+}
+
+/* Medium match 40-60% */
+.badge-medium {
+  background-color: var(--color-tertiary-fixed);
+  color: var(--color-on-tertiary-fixed-variant);
+}
+
+/* Low match < 40% */
+.badge-low {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+
+/* ============================================================
+   COMPONENT PRIMITIVES
+   ============================================================ */
+
+/* Tag input chips */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+}
+
+/* Progress bar */
+.progress-track {
+  height: 4px;
+  background-color: rgba(195, 198, 210, 0.3); /* outline-variant at 30% */
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #006d37, #4ae183);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+/* Language toggle segmented control */
+.lang-segment {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-surface-container-high);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  gap: 2px;
+}
+
+.lang-segment-item {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--color-on-surface-variant);
+}
+
+.lang-segment-item.active {
+  background-color: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  box-shadow: 0 1px 4px rgba(25, 28, 29, 0.08);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container-low);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
 }

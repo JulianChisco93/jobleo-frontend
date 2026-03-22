@@ -63,7 +63,7 @@ export default function EditProfilePage({
       <div className="flex flex-col flex-1">
         <DashboardTopBar title={t("editProfileTitle")} />
         <div className="flex items-center justify-center flex-1">
-          <div className="w-6 h-6 border-2 border-accent-blue border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -75,14 +75,11 @@ export default function EditProfilePage({
       <main>
         <div className="flex items-center justify-between px-8 pt-6 pb-0">
           <div>
-            <h2 className="text-xl font-bold font-heading text-text-primary">{t("editProfileTitle")}</h2>
+            <h2 className="text-2xl font-display font-bold text-on-surface">{t("editProfileTitle")}</h2>
             {profile && (
-              <p className="text-sm font-heading text-text-secondary mt-1">
-                {profile.name}
-              </p>
+              <p className="text-sm text-on-surface-variant mt-1">{profile.name}</p>
             )}
           </div>
-          {/* Delete button shown in the form footer */}
         </div>
         {profile && (
           <ProfileForm

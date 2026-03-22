@@ -4,8 +4,23 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthCodeHandler } from "@/components/auth/AuthCodeHandler";
+import { Manrope, Inter } from "next/font/google";
 import { Suspense } from "react";
 import type { Metadata } from "next";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export async function generateMetadata({
   params,
@@ -42,7 +57,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${manrope.variable} ${inter.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
