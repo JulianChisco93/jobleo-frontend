@@ -29,6 +29,9 @@ export function PublicFooter() {
             <Link href={`${prefix}/pricing`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
               {t("pricingLink")}
             </Link>
+            <Link href={`${prefix}/about`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+              About
+            </Link>
             <Link href={`${prefix}/login`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
               {t("loginLink")}
             </Link>

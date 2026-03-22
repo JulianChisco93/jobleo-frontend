@@ -36,10 +36,10 @@ export function PublicNavbar() {
               {t("pricing")}
             </Link>
             <Link
-              href={`${prefix}/#how-it-works`}
+              href={`${prefix}/about`}
               className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
             >
-              {t("howItWorks")}
+              {t("about")}
             </Link>
           </nav>
         </div>
@@ -92,11 +92,11 @@ export function PublicNavbar() {
             {t("pricing")}
           </Link>
           <Link
-            href={`${prefix}/#how-it-works`}
+            href={`${prefix}/about`}
             onClick={() => setMenuOpen(false)}
             className="text-sm font-semibold text-on-surface-variant hover:text-on-surface py-2 transition-colors"
           >
-            {t("howItWorks")}
+            {t("about")}
           </Link>
           <div className="flex flex-col gap-2 pt-3 border-t border-outline-variant/20">
             <Link

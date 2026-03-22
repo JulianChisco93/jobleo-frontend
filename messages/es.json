@@ -2,7 +2,7 @@
   "nav": {
     "features": "Características",
     "pricing": "Precios",
-    "howItWorks": "Cómo Funciona",
+    "about": "Nosotros",
     "login": "Iniciar Sesión",
     "getStarted": "Comenzar",
     "en": "EN",
@@ -127,9 +127,38 @@
     "sending": "Enviando...",
     "backToLogin": "Volver al inicio de sesión"
   },
+  "about": {
+    "missionTag": "MISIÓN",
+    "missionTitle": "La Filosofía del",
+    "missionTitleAccent": "Curador",
+    "missionTitleSuffix": "Digital",
+    "missionDesc": "No listamos empleos; ingeniamos conexiones. Jobleo trata el reclutamiento como un arte de precisión, alejándose de dashboards saturados hacia una experiencia editorial de alto nivel.",
+    "whyWhatsappTitle": "¿Por qué WhatsApp?",
+    "whyWhatsappBadge": "Velocidad Primero",
+    "whyZeroNoiseTitle": "Cero Ruido",
+    "whyZeroNoiseDesc": "El email es donde las oportunidades van a morir. Evitamos el desorden de newsletters y spam, entregando coincidencias de empleo directamente donde realmente te comunicas.",
+    "whyRealTimeTitle": "Sincronización en Tiempo Real",
+    "whyRealTimeDesc": "Las notificaciones instantáneas significan que eres el primero en aplicar. En un mercado competitivo, la velocidad no es solo una ventaja — es el requisito.",
+    "aiEthicsTitle": "Ética de IA",
+    "aiEthicsDesc": "La puntuación no es un juicio; es una brújula. Usamos algoritmos propietarios para eliminar sesgos inconscientes, enfocándonos estrictamente en la alineación habilidad-demanda.",
+    "aiEthicsBullet1": "Sin Perfilado Demográfico",
+    "aiEthicsBullet2": "Puntuaciones de Coincidencia Transparentes",
+    "teamTitle": "Los Visionarios",
+    "teamDesc": "Jobleo nació de una frustración simple: el talento es universal, pero la visibilidad no. Nuestro equipo de reclutadores e ingenieros reimaginó la búsqueda como un stream curado.",
+    "founder1Name": "Elena Rodriguez",
+    "founder1Role": "CEO & Estrategia",
+    "founder1Desc": "Ex-Directora de Talento con una década de experiencia identificando potencial de alto crecimiento en ecosistemas tech.",
+    "founder2Name": "Marcus Thorne",
+    "founder2Role": "CTO & Ingeniería",
+    "founder2Desc": "Especialista en sistemas distribuidos y procesamiento de lenguaje natural para búsqueda semántica.",
+    "storyTitle": "Nuestra Historia",
+    "storyDesc": "Comenzando en un pequeño estudio en Madrid, nos dimos cuenta de que las mejores contrataciones ocurrían cuando la comunicación se sentía personal. Al automatizar lo personal, escalamos el elemento humano del reclutamiento.",
+    "storyButton": "Lee el Manifiesto"
+  },
   "meta": {
     "defaultTitle": "Jobleo — Tu Próximo Trabajo, Entregado en WhatsApp",
     "defaultDescription": "Sube tu CV, configura tu búsqueda de empleo y recibe coincidencias directamente en WhatsApp — impulsado por IA.",
+    "aboutTitle": "Sobre Jobleo | El Curador Digital",
     "pricingTitle": "Planes y Precios"
   },
   "onboarding": {

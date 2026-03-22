@@ -2,7 +2,7 @@
   "nav": {
     "features": "Features",
     "pricing": "Pricing",
-    "howItWorks": "How It Works",
+    "about": "About",
     "login": "Login",
     "getStarted": "Get Started",
     "en": "EN",
@@ -130,7 +130,36 @@
   "meta": {
     "defaultTitle": "Jobleo — Your Next Job, Delivered to WhatsApp",
     "defaultDescription": "Upload your CV, configure your job search, and receive curated job matches directly on WhatsApp — powered by AI.",
-    "pricingTitle": "Pricing Plans"
+    "pricingTitle": "Pricing Plans",
+    "aboutTitle": "About Jobleo | The Digital Curator"
+  },
+  "about": {
+    "missionTag": "MISSION",
+    "missionTitle": "The Digital",
+    "missionTitleAccent": "Curator",
+    "missionTitleSuffix": "Philosophy",
+    "missionDesc": "We don't just list jobs; we engineer connections. Jobleo treats recruitment as a precision craft, moving away from cluttered dashboards toward a high-end, editorial matching experience.",
+    "whyWhatsappTitle": "Why WhatsApp?",
+    "whyWhatsappBadge": "Speed First",
+    "whyZeroNoiseTitle": "Zero Noise",
+    "whyZeroNoiseDesc": "Email is where opportunities go to die. We bypass the clutter of newsletters and spam, delivering high-intent job matches directly to where you actually communicate.",
+    "whyRealTimeTitle": "Real-Time Sync",
+    "whyRealTimeDesc": "Instant notifications mean you're the first to apply. In a competitive market, speed isn't just an advantage — it's the requirement.",
+    "aiEthicsTitle": "AI Ethics",
+    "aiEthicsDesc": "Scoring is not a judgment; it's a compass. We use proprietary algorithms to remove unconscious bias, focusing strictly on skill-to-demand alignment.",
+    "aiEthicsBullet1": "No Demographic Profiling",
+    "aiEthicsBullet2": "Transparent Match Scores",
+    "teamTitle": "The Visionaries",
+    "teamDesc": "Jobleo was born out of a simple frustration: talent is universal, but visibility is not. Our team of recruiters and engineers reimagined the search as a curated stream.",
+    "founder1Name": "Elena Rodriguez",
+    "founder1Role": "CEO & Strategy",
+    "founder1Desc": "Ex-Head of Talent with a decade of experience in identifying high-growth potential in tech ecosystems.",
+    "founder2Name": "Marcus Thorne",
+    "founder2Role": "CTO & Engineering",
+    "founder2Desc": "Specialist in distributed systems and natural language processing for semantic search.",
+    "storyTitle": "Our Story",
+    "storyDesc": "Starting in a small studio in Madrid, we realized that the best hires happened when the communication felt personal. By automating the personal, we scale the human element of hiring.",
+    "storyButton": "Read the Manifesto"
   },
   "onboarding": {
     "step1of3": "STEP 1 OF 3",
