@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import { formatLastSearched } from "@/lib/utils";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
 const PROFILE_ACCENTS = [
@@ -16,16 +17,6 @@ const PROFILE_ACCENTS = [
   "border-primary-container",
   "border-tertiary-container",
 ];
-
-function formatLastSearched(dateStr: string) {
-  if (!dateStr) return "—";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins} min`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  return `${Math.floor(hrs / 24)}d`;
-}
 
 function StatCard({
   title,
