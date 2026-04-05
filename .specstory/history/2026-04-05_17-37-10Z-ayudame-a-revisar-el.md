@@ -2910,3 +2910,1152 @@ The user doesn't want to proceed with this tool use. The tool use was rejected (
 _**User (2026-04-05 17:48:04Z)**_
 
 [Request interrupted by user for tool use]
+
+_**User (2026-04-05 18:41:45Z)**_
+
+tengo este error al tratar de crear mi perfil que pasa?
+
+---
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:49Z)**_
+
+<think><details><summary>Thought Process</summary>
+The user is showing a screenshot of a "New Search Profile" page with the error "Failed to save profile. Please try again." They want to know what's causing this error. This is a different issue from the Google auth - they're now asking about a profile creation error.
+
+Let me find the relevant code for this search profile creation feature.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:50Z)**_
+
+Ese es un error diferente al del login. Déjame buscar el código de esa pantalla.
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:51Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `**/search-profile*/**`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:51Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `Failed to save profile|search.?profile|searchProfile|search_profile`
+
+```text
+Found 2 files
+.specstory\history\2026-04-05_17-37-10Z-ayudame-a-revisar-el.md
+messages\en.json
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:55Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `Failed to save profile|saveProfile|save.*profile|profile.*save`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:55Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `app/**/profile*`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:58Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `Failed to save profile|saveProfile|save.*profile`
+
+```text
+Found 4 files
+.specstory\history\2026-04-05_17-37-10Z-ayudame-a-revisar-el.md
+messages\es.json
+messages\en.json
+app\[locale]\dashboard\profiles\new\page.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:41:58Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `app/**/*search*`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:01Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\app\[locale]\dashboard\profiles\new\page.tsx`
+
+```text
+     1→"use client";
+     2→
+     3→import { useState } from "react";
+     4→import { useTranslations, useLocale } from "next-intl";
+     5→import { useRouter } from "next/navigation";
+     6→import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+     7→import { createSearchProfile, getSearchProfiles } from "@/lib/api";
+     8→import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
+     9→import { ProfileForm, type ProfileFormData } from "@/components/profiles/ProfileForm";
+    10→
+    11→export default function NewProfilePage() {
+    12→  const t = useTranslations("profiles");
+    13→  const router = useRouter();
+    14→  const locale = useLocale();
+    15→  const prefix = locale === "en" ? "" : `/${locale}`;
+    16→  const queryClient = useQueryClient();
+    17→  const [saveError, setSaveError] = useState<string | null>(null);
+    18→
+    19→  const { data: profiles = [] } = useQuery({
+    20→    queryKey: ["profiles"],
+    21→    queryFn: getSearchProfiles,
+    22→  });
+    23→
+    24→  const { mutateAsync } = useMutation({
+    25→    mutationFn: createSearchProfile,
+    26→    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profiles"] }),
+    27→  });
+    28→
+    29→  async function handleSubmit(data: ProfileFormData) {
+    30→    if (profiles.length >= 3) {
+    31→      alert(t("maxProfilesReached"));
+    32→      return;
+    33→    }
+    34→    setSaveError(null);
+    35→    try {
+    36→      const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+    37→      await mutateAsync({
+    38→        ...rest,
+    39→        title_exclude_terms: [],
+    40→        business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
+    41→        business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
+    42→      });
+    43→      router.push(`${prefix}/dashboard/profiles`);
+    44→    } catch {
+    45→      setSaveError(t("saveProfileError"));
+    46→    }
+    47→  }
+    48→
+    49→  return (
+    50→    <div className="flex flex-col flex-1 overflow-auto">
+    51→      <DashboardTopBar title={t("newProfileTitle")} />
+    52→      <main>
+    53→        <div className="px-8 pt-6 pb-0">
+    54→          <h2 className="text-2xl font-display font-bold text-on-surface">{t("newProfileTitle")}</h2>
+    55→          {saveError && (
+    56→            <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+    57→              <span className="material-symbols-outlined text-[18px]">error</span>
+    58→              {saveError}
+    59→            </div>
+    60→          )}
+    61→        </div>
+    62→        <ProfileForm onSubmit={handleSubmit} isNew />
+    63→      </main>
+    64→    </div>
+    65→  );
+    66→}
+    67→
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:03Z)**_
+
+<think><details><summary>Thought Process</summary>
+The error is being caught generically - any exception during `mutateAsync` shows "Failed to save profile". I need to look at the `createSearchProfile` API call and understand what could be failing.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:04Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `createSearchProfile|getSearchProfiles`
+
+```text
+No matches found
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:04Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\lib\api.ts`
+
+```text
+     1→import { createClient } from "./supabase/client";
+     2→import type {
+     3→  User,
+     4→  CV,
+     5→  SearchProfile,
+     6→  SearchProfileLog,
+     7→  Job,
+     8→  CreateSearchProfilePayload,
+     9→} from "./types";
+    10→
+    11→const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.jobleo.app";
+    12→
+    13→async function getAuthHeaders(): Promise<Record<string, string>> {
+    14→  const supabase = createClient();
+    15→  const {
+    16→    data: { session },
+    17→  } = await supabase.auth.getSession();
+    18→  const token = session?.access_token;
+    19→  return {
+    20→    "Content-Type": "application/json",
+    21→    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    22→  };
+    23→}
+    24→
+    25→async function request<T>(
+    26→  path: string,
+    27→  options: RequestInit = {}
+    28→): Promise<T> {
+    29→  const headers = await getAuthHeaders();
+    30→  const res = await fetch(`${BASE_URL}${path}`, {
+    31→    ...options,
+    32→    headers: { ...headers, ...(options.headers as Record<string, string>) },
+    33→  });
+    34→  if (!res.ok) {
+    35→    const err = await res.text();
+    36→    throw new Error(err || `Request failed: ${res.status}`);
+    37→  }
+    38→  if (res.status === 204) return undefined as T;
+    39→  return res.json();
+    40→}
+    41→
+    42→// ─── Users ───────────────────────────────────────────────────────────────────
+    43→
+    44→export const getMe = () => request<User>("/api/v1/users/me");
+    45→
+    46→export const updateMe = (data: Partial<Pick<User, "whatsapp_number" | "timezone" | "display_name">>) =>
+    47→  request<User>("/api/v1/users/me", {
+    48→    method: "PATCH",
+    49→    body: JSON.stringify(data),
+    50→  });
+    51→
+    52→// ─── CV ──────────────────────────────────────────────────────────────────────
+    53→
+    54→export const getCV = () => request<CV | null>("/api/v1/cv/");
+    55→
+    56→export const uploadCVFile = async (file: File): Promise<CV> => {
+    57→  const supabase = createClient();
+    58→  const {
+    59→    data: { session },
+    60→  } = await supabase.auth.getSession();
+    61→  const token = session?.access_token;
+    62→
+    63→  const formData = new FormData();
+    64→  formData.append("file", file);
+    65→
+    66→  const res = await fetch(`${BASE_URL}/api/v1/cv/upload`, {
+    67→    method: "POST",
+    68→    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    69→    body: formData,
+    70→  });
+    71→  if (!res.ok) throw new Error(await res.text());
+    72→  return res.json();
+    73→};
+    74→
+    75→export const uploadCVText = (extracted_text: string, filename: string) =>
+    76→  request<CV>("/api/v1/cv/text", {
+    77→    method: "POST",
+    78→    body: JSON.stringify({ extracted_text, filename }),
+    79→  });
+    80→
+    81→export const deleteCV = () =>
+    82→  request<void>("/api/v1/cv/", { method: "DELETE" });
+    83→
+    84→// ─── Search Profiles ─────────────────────────────────────────────────────────
+    85→
+    86→export const getSearchProfiles = () =>
+    87→  request<SearchProfile[]>("/api/v1/searches/");
+    88→
+    89→export const createSearchProfile = (data: CreateSearchProfilePayload) =>
+    90→  request<SearchProfile>("/api/v1/searches/", {
+    91→    method: "POST",
+    92→    body: JSON.stringify(data),
+    93→  });
+    94→
+    95→export const getSearchProfile = (id: string) =>
+    96→  request<SearchProfile>(`/api/v1/searches/${id}`);
+    97→
+    98→export const updateSearchProfile = (
+    99→  id: string,
+   100→  data: Partial<CreateSearchProfilePayload & { is_active: boolean }>
+   101→) =>
+   102→  request<SearchProfile>(`/api/v1/searches/${id}`, {
+   103→    method: "PATCH",
+   104→    body: JSON.stringify(data),
+   105→  });
+   106→
+   107→export const deleteSearchProfile = (id: string) =>
+   108→  request<void>(`/api/v1/searches/${id}`, { method: "DELETE" });
+   109→
+   110→export const getSearchProfileLogs = (id: string) =>
+   111→  request<SearchProfileLog[]>(`/api/v1/searches/${id}/logs`);
+   112→
+   113→// ─── Jobs ─────────────────────────────────────────────────────────────────────
+   114→
+   115→export interface JobsQuery {
+   116→  min_score?: number;
+   117→  limit?: number;
+   118→  offset?: number;
+   119→  search_config_id?: string;
+   120→}
+   121→
+   122→export const getJobs = (params: JobsQuery = {}) => {
+   123→  const qs = new URLSearchParams();
+   124→  if (params.min_score !== undefined) qs.set("min_score", String(params.min_score));
+   125→  if (params.limit !== undefined) qs.set("limit", String(params.limit));
+   126→  if (params.offset !== undefined) qs.set("offset", String(params.offset));
+   127→  if (params.search_config_id) qs.set("search_config_id", params.search_config_id);
+   128→  return request<Job[]>(`/api/v1/jobs/?${qs.toString()}`);
+   129→};
+   130→
+   131→export const getJob = (id: string) => request<Job>(`/api/v1/jobs/${id}`);
+   132→
+   133→export const getJobAlerts = () => request<Job[]>("/api/v1/jobs/alerts");
+   134→
+   135→// ─── Billing ──────────────────────────────────────────────────────────────────
+   136→
+   137→export const createCheckoutSession = () =>
+   138→  request<{ url: string }>("/api/v1/billing/checkout", { method: "POST" });
+   139→
+   140→export const createPortalSession = () =>
+   141→  request<{ url: string }>("/api/v1/billing/portal", { method: "POST" });
+   142→
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:09Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now I see the issue. Let me look at the `CreateSearchProfilePayload` type to understand what fields are being sent.
+
+The `handleSubmit` function in the page:
+```typescript
+async function handleSubmit(data: ProfileFormData) {
+  ...
+  const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+  await mutateAsync({
+    ...rest,
+    title_exclude_terms: [],
+    business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
+    business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
+  });
+}
+```
+
+I'm parsing the time strings to extract just the hour values before sending them to the API. Let me check the type definitions to see what `CreateSearchProfilePayload` expects.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:09Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\lib\types.ts`
+
+```text
+     1→export type Plan = "free" | "pro";
+     2→export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "incomplete";
+     3→
+     4→export interface User {
+     5→  id: string;
+     6→  email: string;
+     7→  display_name?: string;
+     8→  whatsapp_number?: string;
+     9→  timezone?: string;
+    10→  created_at: string;
+    11→  plan?: Plan;
+    12→  subscription_status?: SubscriptionStatus;
+    13→}
+    14→
+    15→export interface CV {
+    16→  id: string;
+    17→  filename: string;
+    18→  created_at: string;
+    19→}
+    20→
+    21→export interface SearchProfile {
+    22→  id: string;
+    23→  name: string;
+    24→  profession: string;
+    25→  job_titles: string[];
+    26→  locations: string[];
+    27→  include_terms: string[];
+    28→  exclude_terms: string[];
+    29→  frequency_minutes: number;
+    30→  business_hours_only: boolean;
+    31→  business_hours_start?: string;
+    32→  business_hours_end?: string;
+    33→  business_days_only: boolean;
+    34→  is_active: boolean;
+    35→  created_at: string;
+    36→  updated_at: string;
+    37→}
+    38→
+    39→export interface SearchProfileLog {
+    40→  id: string;
+    41→  search_config_id: string;
+    42→  jobs_found: number;
+    43→  ran_at: string;
+    44→}
+    45→
+    46→export interface Job {
+    47→  id: string;
+    48→  title: string;
+    49→  company: string;
+    50→  location: string;
+    51→  match_score: number;
+    52→  job_url: string;
+    53→  description?: string;
+    54→  job_type?: string;
+    55→  is_remote?: boolean;
+    56→  date_sent: string;
+    57→  search_config_id: string;
+    58→  skills?: string[];
+    59→}
+    60→
+    61→export interface CreateSearchProfilePayload {
+    62→  name: string;
+    63→  profession: string;
+    64→  job_titles: string[];        // max 5, puede ser []
+    65→  locations: string[];         // mínimo 1 elemento
+    66→  include_terms: string[];     // puede ser []
+    67→  exclude_terms: string[];     // puede ser []
+    68→  title_exclude_terms: string[]; // puede ser []
+    69→  frequency_minutes: number;
+    70→  business_hours_only: boolean;
+    71→  business_hours_start: number; // int 0-23
+    72→  business_hours_end: number;   // int 0-23
+    73→  business_days_only: boolean;
+    74→}
+    75→
+    76→export interface CreateCVPayload {
+    77→  extracted_text: string; // mínimo 200 chars, máximo 50,000
+    78→  filename?: string;
+    79→}
+    80→
+    81→export type Locale = "en" | "es";
+    82→
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:12Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Glob"><details>
+<summary>Tool use: **Glob**</summary>
+ pattern `components/profiles/ProfileForm*`
+
+```text
+d:\Chisco\Documents\App\jobleo-frontend\components\profiles\ProfileForm.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:14Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\components\profiles\ProfileForm.tsx`
+
+```text
+     1→"use client";
+     2→
+     3→import { useForm } from "react-hook-form";
+     4→import { useState } from "react";
+     5→import { zodResolver } from "@hookform/resolvers/zod";
+     6→import { z } from "zod";
+     7→import { useTranslations } from "next-intl";
+     8→import { TagInput } from "@/components/ui/TagInput";
+     9→import { Toggle } from "@/components/ui/Toggle";
+    10→import type { SearchProfile } from "@/lib/types";
+    11→
+    12→const schema = z.object({
+    13→  name: z.string().min(1),
+    14→  profession: z.string().min(1),
+    15→  frequency_minutes: z.number(),
+    16→  is_active: z.boolean().optional(),
+    17→  business_hours_only: z.boolean(),
+    18→  business_hours_start: z.string().optional(),
+    19→  business_hours_end: z.string().optional(),
+    20→  business_days_only: z.boolean(),
+    21→});
+    22→
+    23→export type ProfileFormData = z.infer<typeof schema> & {
+    24→  job_titles: string[];
+    25→  locations: string[];
+    26→  include_terms: string[];
+    27→  exclude_terms: string[];
+    28→  title_exclude_terms?: string[];
+    29→};
+    30→
+    31→interface ProfileFormProps {
+    32→  defaultValues?: Partial<SearchProfile>;
+    33→  onSubmit: (data: ProfileFormData) => Promise<void>;
+    34→  onDelete?: () => Promise<void>;
+    35→  isNew?: boolean;
+    36→}
+    37→
+    38→const FREQUENCY_OPTIONS = [
+    39→  { value: 30, labelKey: "freq30" },
+    40→  { value: 60, labelKey: "freq60" },
+    41→  { value: 120, labelKey: "freq120" },
+    42→  { value: 240, labelKey: "freq240" },
+    43→  { value: 480, labelKey: "freq480" },
+    44→  { value: 1440, labelKey: "freq1440" },
+    45→];
+    46→
+    47→const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => {
+    48→  const h = i.toString().padStart(2, "0");
+    49→  return `${h}:00`;
+    50→});
+    51→
+    52→const inputCls = "px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none transition-all w-full";
+    53→const labelCls = "text-xs font-bold text-on-surface-variant uppercase tracking-wider";
+    54→
+    55→export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: ProfileFormProps) {
+    56→  const t = useTranslations("profiles");
+    57→
+    58→  const {
+    59→    register,
+    60→    handleSubmit,
+    61→    watch,
+    62→    setValue,
+    63→    formState: { errors, isSubmitting },
+    64→  } = useForm<ProfileFormData>({
+    65→    resolver: zodResolver(schema) as any,
+    66→    defaultValues: {
+    67→      name: defaultValues?.name || "",
+    68→      profession: defaultValues?.profession || "",
+    69→      job_titles: defaultValues?.job_titles || [],
+    70→      locations: defaultValues?.locations || [] as string[],
+    71→      include_terms: defaultValues?.include_terms || [],
+    72→      exclude_terms: defaultValues?.exclude_terms || [],
+    73→      frequency_minutes: defaultValues?.frequency_minutes || 60,
+    74→      is_active: defaultValues?.is_active ?? true,
+    75→      business_hours_only: defaultValues?.business_hours_only || false,
+    76→      business_hours_start: defaultValues?.business_hours_start || "09:00",
+    77→      business_hours_end: defaultValues?.business_hours_end || "18:00",
+    78→      business_days_only: defaultValues?.business_days_only || false,
+    79→    },
+    80→  });
+    81→
+    82→  const businessHoursOnly = watch("business_hours_only");
+    83→  const isActive = watch("is_active");
+    84→
+    85→  const jobTitles = watch("job_titles" as any) as string[] || [];
+    86→  const locations = watch("locations" as any) as string[] || [];
+    87→  const includeTerms = watch("include_terms" as any) as string[] || [];
+    88→  const excludeTerms = watch("exclude_terms" as any) as string[] || [];
+    89→  const [locationsError, setLocationsError] = useState(false);
+    90→
+    91→  async function wrappedSubmit(data: ProfileFormData) {
+    92→    if (locations.length === 0) {
+    93→      setLocationsError(true);
+    94→      return;
+    95→    }
+    96→    setLocationsError(false);
+    97→    await onSubmit(data);
+    98→  }
+    99→
+   100→  async function handleDelete() {
+   101→    if (!onDelete) return;
+   102→    if (confirm(t("deleteConfirm"))) {
+   103→      await onDelete();
+   104→    }
+   105→  }
+   106→
+   107→  return (
+   108→    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8 max-w-3xl">
+   109→
+   110→      {/* Name + Profession row */}
+   111→      <div className="grid grid-cols-2 gap-6">
+   112→        <div className="flex flex-col gap-2">
+   113→          <label className={labelCls}>{t("profileNameLabel")}</label>
+   114→          <input {...register("name")} className={inputCls} />
+   115→          {errors.name && <span className="text-xs text-error">{t("profileNameLabel")} required</span>}
+   116→        </div>
+   117→        <div className="flex flex-col gap-2">
+   118→          <label className={labelCls}>{t("professionLabel")}</label>
+   119→          <input {...register("profession")} className={inputCls} />
+   120→        </div>
+   121→      </div>
+   122→
+   123→      {/* Job Titles */}
+   124→      <TagInput
+   125→        label={t("jobTitlesLabel")}
+   126→        value={jobTitles}
+   127→        onChange={(v) => setValue("job_titles" as any, v)}
+   128→        placeholder={t("addTitle")}
+   129→        maxTags={5}
+   130→      />
+   131→
+   132→      {/* Locations */}
+   133→      <div>
+   134→        <TagInput
+   135→          label={t("locationsLabel")}
+   136→          value={locations}
+   137→          onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
+   138→          placeholder={t("addLocation")}
+   139→          helperText={t("locationsTip")}
+   140→        />
+   141→        {locationsError && (
+   142→          <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
+   143→        )}
+   144→      </div>
+   145→
+   146→      {/* Include / Exclude */}
+   147→      <div className="grid grid-cols-2 gap-6">
+   148→        <TagInput
+   149→          label={t("includeKeywordsLabel")}
+   150→          value={includeTerms}
+   151→          onChange={(v) => setValue("include_terms" as any, v)}
+   152→          placeholder={t("addKeyword")}
+   153→        />
+   154→        <TagInput
+   155→          label={t("excludeKeywordsLabel")}
+   156→          value={excludeTerms}
+   157→          onChange={(v) => setValue("exclude_terms" as any, v)}
+   158→          placeholder={t("addKeyword")}
+   159→        />
+   160→      </div>
+   161→
+   162→      {/* Frequency + Active */}
+   163→      <div className="flex items-center gap-6">
+   164→        <div className="flex flex-col gap-2 flex-1">
+   165→          <label className={labelCls}>{t("frequencyLabel")}</label>
+   166→          <select
+   167→            {...register("frequency_minutes", { valueAsNumber: true })}
+   168→            className={inputCls}
+   169→          >
+   170→            {FREQUENCY_OPTIONS.map((opt) => (
+   171→              <option key={opt.value} value={opt.value}>
+   172→                {t(opt.labelKey as any)}
+   173→              </option>
+   174→            ))}
+   175→          </select>
+   176→        </div>
+   177→        <div className="flex items-center gap-3 pt-6">
+   178→          <Toggle
+   179→            checked={!!isActive}
+   180→            onChange={(v) => setValue("is_active", v)}
+   181→            label={t("profileActiveLabel")}
+   182→          />
+   183→        </div>
+   184→      </div>
+   185→
+   186→      {/* Business Hours */}
+   187→      <div className="flex flex-col gap-4 p-5 bg-surface-container-low rounded-xl">
+   188→        <div className="flex items-center justify-between">
+   189→          <span className="text-sm font-semibold text-on-surface">
+   190→            {t("businessHoursLabel")}
+   191→          </span>
+   192→          <Toggle
+   193→            checked={businessHoursOnly}
+   194→            onChange={(v) => setValue("business_hours_only", v)}
+   195→          />
+   196→        </div>
+   197→
+   198→        {businessHoursOnly && (
+   199→          <div className="flex items-center gap-6 pt-2 border-t border-outline-variant/20">
+   200→            <Toggle
+   201→              checked={watch("business_days_only")}
+   202→              onChange={(v) => setValue("business_days_only", v)}
+   203→              label={t("weekdaysOnlyLabel")}
+   204→            />
+   205→            <div className="flex gap-4 flex-1">
+   206→              <div className="flex flex-col gap-2 flex-1">
+   207→                <label className={labelCls}>{t("startHourLabel")}</label>
+   208→                <select {...register("business_hours_start")} className={inputCls}>
+   209→                  {HOUR_OPTIONS.map((h) => (
+   210→                    <option key={h} value={h}>{h}</option>
+   211→                  ))}
+   212→                </select>
+   213→              </div>
+   214→              <div className="flex flex-col gap-2 flex-1">
+   215→                <label className={labelCls}>{t("endHourLabel")}</label>
+   216→                <select {...register("business_hours_end")} className={inputCls}>
+   217→                  {HOUR_OPTIONS.map((h) => (
+   218→                    <option key={h} value={h}>{h}</option>
+   219→                  ))}
+   220→                </select>
+   221→              </div>
+   222→            </div>
+   223→          </div>
+   224→        )}
+   225→      </div>
+   226→
+   227→      {/* Footer actions */}
+   228→      <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
+   229→        {!isNew && onDelete && (
+   230→          <button
+   231→            type="button"
+   232→            onClick={handleDelete}
+   233→            className="px-5 py-2.5 text-sm font-bold text-error border border-error rounded-xl hover:bg-error-container transition-colors"
+   234→          >
+   235→            {t("deleteProfile")}
+   236→          </button>
+   237→        )}
+   238→        <button
+   239→          type="submit"
+   240→          disabled={isSubmitting}
+   241→          className="ml-auto flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
+   242→        >
+   243→          {isSubmitting ? (
+   244→            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+   245→          ) : (
+   246→            t("saveChanges")
+   247→          )}
+   248→        </button>
+   249→      </div>
+   250→    </form>
+   251→  );
+   252→}
+   253→
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:51Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now I have a clear picture of the issue. Let me trace the problem:
+
+1. The `ProfileForm` has `business_hours_only` and `business_hours_start`/`business_hours_end` fields.
+2. When `business_hours_only` is `false` (which it is by default), the hours inputs are not shown.
+3. In the `handleSubmit` in `new/page.tsx`:
+
+```typescript
+const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+
+
+```
+
+I'm extracting the hours from the form data and parsing them to get just the hour values. The defaults are `"09:00"` and `"18:00"`, which parse to 9 and 18 respectively, so that part checks out.
+
+Now I'm verifying that the `...rest` spread operator includes all the required fields for `CreateSearchProfilePayload`. Looking through the checklist: `name`, `profession`, `job_titles`, `locations`, `include_terms`, `exclude_terms` are all there, plus I'm explicitly adding `title_exclude_terms`, `business_hours_start`, and `business_hours_end` after parsing. The remaining fields like `frequency_minutes`, `business_hours_only`, and `business_days_only` should all be in the rest object.
+
+The time parsing logic looks right too—splitting `"09:00"` and converting to an integer gives `9`. So the payload structure should be correct, which means the problem is likely coming from the backend API itself. The error handling is catching the response as plain text, but it's being swallowed by the generic "Failed to save profile" message without showing what the actual API error is.
+
+Looking at the modified files, I should check if there were recent changes to the schema or API that might be causing validation failures. But the core issue is that the real error message from the backend is hidden—we're not exposing it to the user, so there's no visibility into what's actually failing. be a 401 unauthorized, 422 validation error, 403 forbidden, etc.) is lost. The real fix requires surfacing that actual error message to the UI so we can see what's happening, then addressing the root cause based on what the API returns. Looking at the modified `lib/api.ts` file, something there might be causing the request to fail in the first place. Looking at the form submission logic, I'm tracing through how `business_hours_start` gets processed—it comes in as a string like `"09:00"`, gets split on the colon to extract just the hour part, then parsed to an integer. That should work fine, but I'm wondering what happens if the value is undefined or missing from the form data.
+
+The schema marks these fields as optional, and while the form always provides defaults like `"09:00"` and `"18:00"`, there might be an edge case I'm missing. Let me check if there's a subscription or billing requirement that could be blocking the API call instead.
+
+Actually, I have enough information to move forward. The real problem is that errors are being silently caught without showing the user what actually failed. I should expose the actual API error message in the error banner so we can see what's really happening. For the Google auth issue, I also need to add proper error handling after the OAuth exchange and check whether the user needs onboarding before redirecting to the dashboard. Let me put together a plan addressing both problems.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:42:51Z)**_
+
+Ahora tengo contexto suficiente. Déjame escribir el plan.
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:43:06Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```md
+# Plan: Corregir errores de autenticación Google y guardado de perfil
+
+## Context
+Hay dos bugs independientes:
+1. **Google OAuth no funciona** - no hay manejo de errores en el botón, por lo que si falla silenciosamente no hay feedback al usuario. Además, el callback OAuth siempre redirige a `/dashboard` sin verificar si el usuario nuevo necesita ir a `/onboarding`.
+2. **"Failed to save profile"** - el error real de la API es capturado genéricamente y descartado. El usuario ve un mensaje vago sin saber qué está fallando (puede ser 401, 422, 403, etc.).
+
+---
+
+## Archivos críticos
+- `app/[locale]/login/page.tsx` — función `handleGoogle()` (línea 114)
+- `app/auth/callback/route.ts` — callback OAuth server-side
+- `app/[locale]/dashboard/profiles/new/page.tsx` — función `handleSubmit` (línea 29)
+- `lib/api.ts` — función `request()` que lanza el error con texto del backend
+
+---
+
+## Fix 1: Google OAuth — manejo de errores en `handleGoogle()`
+
+**Archivo:** `app/[locale]/login/page.tsx`
+
+\```typescript
+async function handleGoogle() {
+  setLoading(true);
+  setError(null);
+  try {
+    const supabase = createClient();
+    const { error: err } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (err) throw err;
+  } catch (err: unknown) {
+    setError(err instanceof Error ? err.message : t("loginFailed"));
+    setLoading(false);
+  }
+}
+\```
+
+## Fix 2: OAuth callback — redirigir a `/onboarding` si usuario nuevo
+
+**Archivo:** `app/auth/callback/route.ts`
+
+Después de `exchangeCodeForSession`, hacer fetch a `/api/v1/cv/` con el token para determinar si tiene CV. Si no tiene → `/onboarding`, si tiene → `/dashboard`.
+
+\```typescript
+const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+if (!error) {
+  // Verificar si tiene CV para saber a dónde redirigir
+  const { data: { session } } = await supabase.auth.getSession();
+  let destination = next;
+  if (next === "/dashboard" && session?.access_token) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cv/`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const cv = res.ok ? await res.json() : null;
+      destination = cv ? "/dashboard" : "/onboarding";
+    } catch {
+      destination = "/onboarding";
+    }
+  }
+  return NextResponse.redirect(`${origin}${destination}`);
+}
+\```
+
+Aplicar el mismo fix en `app/[locale]/auth/callback/route.ts`.
+
+## Fix 3: "Failed to save profile" — mostrar error real de la API
+
+**Archivo:** `app/[locale]/dashboard/profiles/new/page.tsx`
+
+\```typescript
+} catch (err: unknown) {
+  // Mostrar el mensaje real del backend en lugar del genérico
+  const message = err instanceof Error ? err.message : t("saveProfileError");
+  setSaveError(message);
+}
+\```
+
+Esto es suficiente porque `lib/api.ts` ya lanza el error con el texto real del backend:
+\```typescript
+throw new Error(err || `Request failed: ${res.status}`);
+\```
+
+---
+
+## Verificación
+1. **Google OAuth:** Hacer clic en "Continue With Google" → si el proveedor no está habilitado en Supabase, ahora aparecerá el error exacto en pantalla. Si funciona, verificar que usuarios nuevos (sin CV) vayan a `/onboarding`.
+2. **Save Profile:** Al intentar guardar el perfil, el banner ahora mostrará el mensaje real del backend (p.ej. `"Subscription required"`, `"422 Unprocessable Entity"`, etc.), revelando la causa raíz.
+
+```
+
+```text
+File created successfully at: C:\Users\Julia\.claude\plans\modular-meandering-willow.md
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:43:10Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me call ExitPlanMode to present the plan to the user.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:43:13Z)**_
+
+Identifiqué dos problemas distintos:
+
+**Bug 1 — "Failed to save profile"**
+El error real del backend (puede ser 401, 403, 422, etc.) se captura pero se descarta, mostrando solo un mensaje genérico. La solución es exponer el mensaje real en el banner, lo que inmediatamente revelará la causa raíz.
+
+**Bug 2 — Google OAuth**
+- `handleGoogle()` no tiene manejo de errores, así que si falla (ej: proveedor no habilitado en Supabase) no hay ningún feedback visible.
+- Además, el callback OAuth siempre redirige a `/dashboard`, a diferencia del login con email que verifica si el usuario tiene CV y lo manda a `/onboarding` si no.
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:43:14Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ToolSearch"><details>
+<summary>Tool use: **ToolSearch**</summary>
+
+**Input:**
+
+- max_results: `1`
+- query: `ExitPlanMode`
+
+**Result:**
+
+```
+
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:08Z)**_
+
+<tool-use data-tool-type="generic" data-tool-name="ExitPlanMode"><details>
+<summary>Tool use: **ExitPlanMode**</summary>
+
+```text
+User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: C:\Users\Julia\.claude\plans\modular-meandering-willow.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Corregir errores de autenticación Google y guardado de perfil
+
+## Context
+Hay dos bugs independientes:
+1. **Google OAuth no funciona** - no hay manejo de errores en el botón, por lo que si falla silenciosamente no hay feedback al usuario. Además, el callback OAuth siempre redirige a `/dashboard` sin verificar si el usuario nuevo necesita ir a `/onboarding`.
+2. **"Failed to save profile"** - el error real de la API es capturado genéricamente y descartado. El usuario ve un mensaje vago sin saber qué está fallando (puede ser 401, 422, 403, etc.).
+
+---
+
+## Archivos críticos
+- `app/[locale]/login/page.tsx` — función `handleGoogle()` (línea 114)
+- `app/auth/callback/route.ts` — callback OAuth server-side
+- `app/[locale]/dashboard/profiles/new/page.tsx` — función `handleSubmit` (línea 29)
+- `lib/api.ts` — función `request()` que lanza el error con texto del backend
+
+---
+
+## Fix 1: Google OAuth — manejo de errores en `handleGoogle()`
+
+**Archivo:** `app/[locale]/login/page.tsx`
+
+```typescript
+async function handleGoogle() {
+  setLoading(true);
+  setError(null);
+  try {
+    const supabase = createClient();
+    const { error: err } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (err) throw err;
+  } catch (err: unknown) {
+    setError(err instanceof Error ? err.message : t("loginFailed"));
+    setLoading(false);
+  }
+}
+```
+
+## Fix 2: OAuth callback — redirigir a `/onboarding` si usuario nuevo
+
+**Archivo:** `app/auth/callback/route.ts`
+
+Después de `exchangeCodeForSession`, hacer fetch a `/api/v1/cv/` con el token para determinar si tiene CV. Si no tiene → `/onboarding`, si tiene → `/dashboard`.
+
+```typescript
+const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+if (!error) {
+  // Verificar si tiene CV para saber a dónde redirigir
+  const { data: { session } } = await supabase.auth.getSession();
+  let destination = next;
+  if (next === "/dashboard" && session?.access_token) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cv/`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const cv = res.ok ? await res.json() : null;
+      destination = cv ? "/dashboard" : "/onboarding";
+    } catch {
+      destination = "/onboarding";
+    }
+  }
+  return NextResponse.redirect(`${origin}${destination}`);
+}
+```
+
+Aplicar el mismo fix en `app/[locale]/auth/callback/route.ts`.
+
+## Fix 3: "Failed to save profile" — mostrar error real de la API
+
+**Archivo:** `app/[locale]/dashboard/profiles/new/page.tsx`
+
+```typescript
+} catch (err: unknown) {
+  // Mostrar el mensaje real del backend en lugar del genérico
+  const message = err instanceof Error ? err.message : t("saveProfileError");
+  setSaveError(message);
+}
+```
+
+Esto es suficiente porque `lib/api.ts` ya lanza el error con el texto real del backend:
+```typescript
+throw new Error(err || `Request failed: ${res.status}`);
+```
+
+---
+
+## Verificación
+1. **Google OAuth:** Hacer clic en "Continue With Google" → si el proveedor no está habilitado en Supabase, ahora aparecerá el error exacto en pantalla. Si funciona, verificar que usuarios nuevos (sin CV) vayan a `/onboarding`.
+2. **Save Profile:** Al intentar guardar el perfil, el banner ahora mostrará el mensaje real del backend (p.ej. `"Subscription required"`, `"422 Unprocessable Entity"`, etc.), revelando la causa raíz.
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:11Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me implement the three fixes.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:11Z)**_
+
+Implementando los tres fixes.
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:13Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file d:\Chisco\Documents\App\jobleo-frontend\app\[locale]\login\page.tsx has been updated successfully.
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:17Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file d:\Chisco\Documents\App\jobleo-frontend\app\[locale]\dashboard\profiles\new\page.tsx has been updated successfully.
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:21Z)**_
+
+Ahora el fix del callback OAuth para redirigir a `/onboarding` si es usuario nuevo:
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:23Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file d:\Chisco\Documents\App\jobleo-frontend\app\auth\callback\route.ts has been updated successfully.
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:29Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file d:\Chisco\Documents\App\jobleo-frontend\app\[locale]\auth\callback\route.ts has been updated successfully.
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:50:34Z)**_
+
+Los tres fixes están aplicados. Ahora:
+
+1. **Google OAuth** — si falla al iniciar (proveedor no habilitado, etc.) verás el error exacto en el banner rojo de la pantalla de login.
+
+2. **"Failed to save profile"** — el banner ahora mostrará el mensaje real del backend (ej: `"Subscription required"`, `"Unprocessable Entity"`, etc.). Intenta guardar el perfil de nuevo y dime qué dice exactamente, así podemos solucionar la causa raíz.
+
+3. **Callback OAuth** — usuarios nuevos que se registren con Google ahora serán redirigidos a `/onboarding` si no tienen CV, igual que el flujo de email/password.
+
+---
+
+_**User (2026-04-05 18:51:39Z)**_
+
+ahora en el dashboard tengo este error al estar creando mi perfil,
+
+---
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:51:59Z)**_
+
+<think><details><summary>Thought Process</summary>
+The user is still seeing the same generic error "Failed to save profile. Please try again." - this means the code changes haven't been deployed/hot-reloaded yet, OR the error message from the backend is also "Failed to save profile. Please try again." which would mean my fix surfaced the same message.
+
+Wait - looking at the translation key, `t("saveProfileError")` is the translation key used as the fallback. If the error from the API is not an Error instance, it falls back to that key. But if the API did throw an `Error` instance, it would show `err.message`.
+
+Actually, looking at the code more carefully:
+
+In `lib/api.ts`:
+
+
+The error handling code checks the response status and throws an Error with either the response text or a fallback message including the status code. Since this creates an Error instance, my fix should display `err.message` with the backend's actual response.
+
+The fact that it still shows the generic message means either the app hasn't reloaded with my changes, or the backend is returning an empty response body - which would result in throwing an Error with just the status code like "Request failed: 422", still an Error instance but without the detailed message I'm expecting.
+
+Let me verify what the `saveProfileError` translation actually says to understand if the displayed message is coming from my error handling or the fallback translation.
+
+Looking at the screenshot showing "Failed to save profile. Please try again." - if my code change were active, it should display the actual API error message instead. Since it's still showing the same text, either the code hasn't been recompiled or the backend is coincidentally returning that exact string. Given this is a Next.js dev environment, the changes should hot reload automatically, so I'm leaning toward the code not being reloaded yet. I should ask the user to refresh or restart their dev server to see if the new error message appears. Looking at the messages files to see what the `saveProfileError` translation actually contains, so I can understand what error message the user is seeing.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:51:59Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ pattern `saveProfileError`
+
+```text
+d:\Chisco\Documents\App\jobleo-frontend\messages\en.json:263:    "saveProfileError": "Failed to save profile. Please try again.",
+```
+</details></tool-use>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:52:10Z)**_
+
+<think><details><summary>Thought Process</summary>
+So "Failed to save profile. Please try again." IS `t("saveProfileError")`. This means either:
+1. The code changes haven't been applied (hot reload didn't pick them up)
+2. The error thrown is NOT an `Error` instance (but looking at the API code, it should be)
+
+Wait, actually... could there be a different error path? Let me look at the mutation setup:
+
+```typescript
+const { mutateAsync } = useMutation({
+  mutationFn: createSearchProfile,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profiles"] }),
+
+
+```
+
+There's no `onError` handler. The `mutateAsync` should throw if the mutation function throws. And in my updated `handleSubmit`:
+```typescript
+} catch (err: unknown) {
+  const message = err instanceof Error ? err.message : t("saveProfileError");
+  setSaveError(message);
+}
+```
+
+This should catch it. But if the screenshot is BEFORE my changes were applied... 
+
+OR maybe the error IS being thrown as `Error` with message from the API, but the API returns something that when shown equals to the translation string? No that doesn't make sense.
+
+Most likely the dev server hasn't picked up the changes. Let me suggest the user save and refresh to ensure the latest code is running.
+
+I should also have them open the browser DevTools Network tab to inspect the actual API response from the POST request to `/api/v1/searches/` so we can see what the backend is actually returning. That'll help us diagnose whether the issue is on the frontend or backend side. If they're on a production build or the page is cached, a hard refresh with Ctrl+Shift+R should force the latest changes to load.
+</details></think>
+
+_**Agent (claude-sonnet-4-6 2026-04-05 18:52:11Z)**_
+
+El mensaje sigue siendo el genérico, lo que significa que el dev server aún no recompilò mis cambios. Para diagnosticar el problema **ahora mismo** sin esperar:
+
+1. Abre DevTools del navegador (`F12`)
+2. Ve a la pestaña **Network**
+3. Intenta guardar el perfil de nuevo
+4. Busca la petición `POST` a `/api/v1/searches/`
+5. Dime qué **status code** y **respuesta** devuelve el backend
+
+Eso nos dirá exactamente qué está fallando. ¿Puedes compartir esa info?

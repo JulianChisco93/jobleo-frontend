@@ -28,7 +28,22 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      let destination = next;
+      if (next === "/dashboard") {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cv/`, {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            });
+            const cv = res.ok ? await res.json() : null;
+            destination = cv ? "/dashboard" : "/onboarding";
+          } catch {
+            destination = "/onboarding";
+          }
+        }
+      }
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 

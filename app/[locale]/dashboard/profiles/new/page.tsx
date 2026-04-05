@@ -41,8 +41,9 @@ export default function NewProfilePage() {
         business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
       });
       router.push(`${prefix}/dashboard/profiles`);
-    } catch {
-      setSaveError(t("saveProfileError"));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("saveProfileError");
+      setSaveError(message);
     }
   }
 

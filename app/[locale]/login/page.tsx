@@ -112,11 +112,19 @@ function LoginForm() {
   }
 
   async function handleGoogle() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    setLoading(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (err) throw err;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("loginFailed"));
+      setLoading(false);
+    }
   }
 
   async function handleForgotPassword() {
