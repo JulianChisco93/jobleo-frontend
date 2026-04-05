@@ -131,3 +131,11 @@ export const getJobs = (params: JobsQuery = {}) => {
 export const getJob = (id: string) => request<Job>(`/api/v1/jobs/${id}`);
 
 export const getJobAlerts = () => request<Job[]>("/api/v1/jobs/alerts");
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+
+export const createCheckoutSession = () =>
+  request<{ url: string }>("/api/v1/billing/checkout", { method: "POST" });
+
+export const createPortalSession = () =>
+  request<{ url: string }>("/api/v1/billing/portal", { method: "POST" });

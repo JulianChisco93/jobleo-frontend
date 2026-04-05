@@ -308,12 +308,29 @@
     "english": "English",
     "spanish": "Español",
     "phoneFormatError": "El número debe estar en formato E.164 (ej. +15551234567).",
-    "phoneSaveError": "No se pudo guardar el número. Por favor intenta de nuevo."
+    "phoneSaveError": "No se pudo guardar el número. Por favor intenta de nuevo.",
+    "subscriptionSection": "Suscripción",
+    "currentPlanLabel": "PLAN ACTUAL",
+    "subscriptionStatus": "Estado",
+    "manageSubscription": "Gestionar Suscripción",
+    "upgradeToPro": "Mejorar a Pro"
   },
   "sidebar": {
     "myProfiles": "Mis Perfiles",
     "jobHistory": "Historial",
     "settings": "Configuración",
     "dashboard": "Panel"
+  },
+  "billing": {
+    "successTitle": "¡Ya eres Pro!",
+    "successDesc": "Tu suscripción está activa. Todas las funciones Pro están desbloqueadas.",
+    "successRedirect": "Serás redirigido al dashboard en unos segundos.",
+    "planActivated": "Plan Pro activado",
+    "goToDashboard": "Ir al Dashboard",
+    "viewSubscription": "Ver Suscripción",
+    "cancelTitle": "Pago Cancelado",
+    "cancelDesc": "No se realizó ningún cobro. Puedes mejorar a Pro cuando estés listo.",
+    "tryAgain": "Intentar de Nuevo",
+    "backToDashboard": "Volver al Dashboard"
   }
 }

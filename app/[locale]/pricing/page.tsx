@@ -3,7 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import { Link } from "@/i18n/navigation";
+import { CheckoutButton } from "@/components/billing/CheckoutButton";
 
 export async function generateMetadata({
   params,
@@ -115,12 +115,10 @@ function PricingContent() {
             ))}
           </div>
 
-          <Link
-            href="/login"
-            className="mt-auto w-full py-3 text-sm font-bold text-primary bg-surface-container-lowest rounded-xl text-center hover:bg-surface-container-low transition-colors"
-          >
-            {t("proCta")}
-          </Link>
+          <CheckoutButton
+            label={t("proCta")}
+            className="mt-auto w-full py-3 text-sm font-bold text-primary bg-surface-container-lowest rounded-xl hover:bg-surface-container-low transition-colors disabled:opacity-60"
+          />
         </div>
       </section>
 

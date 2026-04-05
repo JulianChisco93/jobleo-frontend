@@ -1,3 +1,6 @@
+export type Plan = "free" | "pro";
+export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "incomplete";
+
 export interface User {
   id: string;
   email: string;
@@ -5,6 +8,8 @@ export interface User {
   whatsapp_number?: string;
   timezone?: string;
   created_at: string;
+  plan?: Plan;
+  subscription_status?: SubscriptionStatus;
 }
 
 export interface CV {

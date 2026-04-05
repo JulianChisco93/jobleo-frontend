@@ -308,12 +308,29 @@
     "english": "English",
     "spanish": "Español",
     "phoneFormatError": "Phone number must be in E.164 format (e.g. +15551234567).",
-    "phoneSaveError": "Failed to save phone number. Please try again."
+    "phoneSaveError": "Failed to save phone number. Please try again.",
+    "subscriptionSection": "Subscription",
+    "currentPlanLabel": "CURRENT PLAN",
+    "subscriptionStatus": "Status",
+    "manageSubscription": "Manage Subscription",
+    "upgradeToPro": "Upgrade to Pro"
   },
   "sidebar": {
     "myProfiles": "My Profiles",
     "jobHistory": "Job History",
     "settings": "Settings",
     "dashboard": "Dashboard"
+  },
+  "billing": {
+    "successTitle": "You're now Pro!",
+    "successDesc": "Your subscription is active. All Pro features are now unlocked.",
+    "successRedirect": "You will be redirected to your dashboard in a few seconds.",
+    "planActivated": "Pro plan activated",
+    "goToDashboard": "Go to Dashboard",
+    "viewSubscription": "View Subscription",
+    "cancelTitle": "Payment Cancelled",
+    "cancelDesc": "No charges were made. You can upgrade to Pro whenever you're ready.",
+    "tryAgain": "Try Again",
+    "backToDashboard": "Back to Dashboard"
   }
 }

@@ -8,6 +8,8 @@ import { getMe, updateMe } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Toggle } from "@/components/ui/Toggle";
 import { LangToggle } from "@/components/ui/LangToggle";
+import { CheckoutButton } from "@/components/billing/CheckoutButton";
+import { PortalButton } from "@/components/billing/PortalButton";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -202,6 +204,44 @@ export default function SettingsPage() {
                 </button>
               </div>
             )}
+          </Section>
+
+          {/* Subscription */}
+          <Section title={t("subscriptionSection")}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                  {t("currentPlanLabel")}
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-on-surface capitalize">
+                    {me?.plan ?? "free"}
+                  </p>
+                  {me?.plan === "pro" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-primary text-on-primary rounded-full uppercase tracking-widest">
+                      Pro
+                    </span>
+                  )}
+                </div>
+                {me?.subscription_status && me.subscription_status !== "active" && (
+                  <p className="text-xs text-error mt-1 capitalize">
+                    {t("subscriptionStatus")}: {me.subscription_status.replace("_", " ")}
+                  </p>
+                )}
+              </div>
+
+              {me?.plan === "pro" ? (
+                <PortalButton
+                  label={t("manageSubscription")}
+                  className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
+                />
+              ) : (
+                <CheckoutButton
+                  label={t("upgradeToPro")}
+                  className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
+                />
+              )}
+            </div>
           </Section>
 
           {/* Notifications */}
