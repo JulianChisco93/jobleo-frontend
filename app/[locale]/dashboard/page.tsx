@@ -28,9 +28,9 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="bg-surface-container-low px-6 py-5 rounded-xl flex flex-col items-center min-w-[130px] flex-1">
+    <div className="bg-surface-container-low px-3 py-4 md:px-6 md:py-5 rounded-xl flex flex-col items-center flex-1 min-w-0">
       <span
-        className={`text-3xl font-black font-display ${accent ?? "text-primary"}`}
+        className={`text-2xl md:text-3xl font-black font-display ${accent ?? "text-primary"}`}
       >
         {value}
       </span>
@@ -81,19 +81,19 @@ export default function DashboardPage() {
     <div className="flex flex-col flex-1 overflow-auto">
       <DashboardTopBar title={t("title")} userName={userName} />
 
-      <main className="max-w-6xl mx-auto w-full px-6 py-10">
+      <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
         {/* Welcome banner */}
-        <section className="mb-12">
+        <section className="mb-8 md:mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-display font-extrabold text-on-surface tracking-tight mb-2">
+              <h1 className="text-2xl md:text-4xl font-display font-extrabold text-on-surface tracking-tight mb-2">
                 {t("welcome", { name: userName })}
               </h1>
               <p className="text-on-surface-variant max-w-lg">
                 {t("welcomeSubtitle")}
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-2 md:gap-4 w-full md:w-auto">
               <StatCard
                 title={t("activeJobsTitle")}
                 value={jobs.length}

@@ -45,7 +45,11 @@ export async function GET(request: NextRequest) {
       }
       return NextResponse.redirect(`${origin}${destination}`);
     }
+
+    console.error("[locale/auth/callback] exchangeCodeForSession error:", error?.message, error?.status);
+    const msg = encodeURIComponent(error?.message ?? "Unknown error");
+    return NextResponse.redirect(`${origin}/login?error=auth&msg=${msg}`);
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  return NextResponse.redirect(`${origin}/login?error=auth&msg=no_code`);
 }

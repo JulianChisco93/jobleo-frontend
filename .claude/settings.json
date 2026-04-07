@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Julia/.claude/skills/ui-ux-pro-max/scripts/**)"
+    ]
+  }
+}
