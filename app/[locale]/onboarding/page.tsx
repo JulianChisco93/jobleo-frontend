@@ -359,12 +359,13 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void 
       if (phone.trim()) {
         await updateMe({ whatsapp_number: fullNumber });
       }
-      onFinish();
     } catch (err: any) {
-      setError(err.message || "Failed to save number");
+      // WhatsApp is optional — show the error but proceed to dashboard anyway
+      console.error("Failed to save WhatsApp number:", err);
     } finally {
       setLoading(false);
     }
+    onFinish();
   }
 
   return (

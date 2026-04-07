@@ -12,6 +12,10 @@ import type { SearchProfile } from "@/lib/types";
 const schema = z.object({
   name: z.string().min(1),
   profession: z.string().min(1),
+  job_titles: z.array(z.string()),
+  locations: z.array(z.string()),
+  include_terms: z.array(z.string()),
+  exclude_terms: z.array(z.string()),
   frequency_minutes: z.number(),
   is_active: z.boolean().optional(),
   business_hours_only: z.boolean(),
@@ -20,13 +24,7 @@ const schema = z.object({
   business_days_only: z.boolean(),
 });
 
-export type ProfileFormData = z.infer<typeof schema> & {
-  job_titles: string[];
-  locations: string[];
-  include_terms: string[];
-  exclude_terms: string[];
-  title_exclude_terms?: string[];
-};
+export type ProfileFormData = z.infer<typeof schema>;
 
 interface ProfileFormProps {
   defaultValues?: Partial<SearchProfile>;
