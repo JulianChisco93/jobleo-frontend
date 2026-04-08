@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Link } from "@/i18n/navigation";
+import HeroBackground from "@/components/HeroBackground";
 
 export async function generateMetadata({
   params,
@@ -23,49 +24,50 @@ function LandingContent() {
       <PublicNavbar />
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden px-6 py-20 lg:py-32 bg-surface">
+      <section className="relative overflow-hidden px-6 py-20 lg:py-32">
+        <HeroBackground />
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           {/* Left copy */}
           <div className="z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-xs font-bold mb-6">
               <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
               {t("heroTag")}
             </div>
-            <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-on-surface leading-[1.1] mb-6 tracking-tight">
+            <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-white leading-[1.1] mb-6 tracking-tight">
               Your dream job,{" "}
-              <span className="text-primary italic">on WhatsApp.</span>
+              <span className="text-[#5DCAA5] italic">on WhatsApp.</span>
             </h1>
-            <p className="text-lg text-on-surface-variant max-w-xl mb-10 leading-relaxed">
+            <p className="text-lg text-white/60 max-w-xl mb-10 leading-relaxed">
               {t("heroSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/login"
-                className="flex items-center justify-center gap-2 bg-primary text-on-primary px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all active:scale-95"
+                className="flex items-center justify-center gap-2 bg-[#5DCAA5] text-[#04342C] px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:opacity-90 transition-all active:scale-95"
               >
                 {t("heroCtaPrimary")}
                 <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
               <a
                 href="#how-it-works"
-                className="flex items-center justify-center bg-surface-container-lowest border border-outline-variant text-on-surface px-8 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-all"
+                className="flex items-center justify-center border border-white/25 text-white/80 px-8 py-4 rounded-xl font-bold text-lg hover:border-white/50 hover:text-white transition-all"
               >
                 {t("heroCtaSecondary")}
               </a>
             </div>
             {/* Social proof */}
-            <div className="mt-10 flex items-center gap-4 text-sm text-on-surface-variant">
+            <div className="mt-10 flex items-center gap-4 text-sm text-white/40">
               <div className="flex -space-x-2">
                 {[
-                  "bg-secondary-container",
-                  "bg-primary-fixed",
-                  "bg-tertiary-fixed",
+                  "bg-[#1D9E75]",
+                  "bg-[#185FA5]",
+                  "bg-[#5DCAA5]",
                 ].map((bg, i) => (
                   <div
                     key={i}
-                    className={`w-8 h-8 rounded-full border-2 border-surface ${bg} flex items-center justify-center`}
+                    className={`w-8 h-8 rounded-full border-2 border-[#0a1628] ${bg} flex items-center justify-center`}
                   >
-                    <span className="material-symbols-outlined text-[14px] text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[14px] text-white">
                       person
                     </span>
                   </div>
@@ -77,33 +79,33 @@ function LandingContent() {
 
           {/* Right: WhatsApp mockup card */}
           <div className="relative hidden lg:block">
-            <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-            <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-2xl relative border border-surface-container-high">
+            <div className="absolute -top-20 -right-20 w-96 h-96 bg-[#1D9E75]/10 rounded-full blur-3xl" />
+            <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-2xl relative border border-white/10">
               {/* Chat header */}
-              <div className="flex items-center gap-4 border-b border-surface-container-high pb-4 mb-4">
-                <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
-                  <span className="material-symbols-outlined text-on-secondary-container" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
+              <div className="flex items-center gap-4 border-b border-white/10 pb-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#1D9E75]/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#5DCAA5]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
                 </div>
                 <div>
-                  <p className="font-bold text-on-surface text-sm">{t("mockupHeader")}</p>
-                  <p className="text-xs text-secondary font-semibold">Online</p>
+                  <p className="font-bold text-white text-sm">{t("mockupHeader")}</p>
+                  <p className="text-xs text-[#5DCAA5] font-semibold">Online</p>
                 </div>
               </div>
               {/* Chat messages */}
               <div className="space-y-4">
-                <div className="bg-surface-container-low p-3 rounded-lg rounded-tl-none max-w-[80%]">
-                  <p className="text-sm text-on-surface">Hey! We found a <b>98% match</b> for you: <b>{t("mockupTitle")}</b></p>
+                <div className="bg-white/10 p-3 rounded-lg rounded-tl-none max-w-[80%]">
+                  <p className="text-sm text-white/80">Hey! We found a <b>98% match</b> for you: <b>{t("mockupTitle")}</b></p>
                 </div>
                 {/* Job card */}
-                <div className="bg-primary text-on-primary p-4 rounded-xl shadow-md border border-primary-container">
+                <div className="bg-[#185FA5] text-white p-4 rounded-xl shadow-md border border-[#1D9E75]/30">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold uppercase tracking-widest opacity-80">New Match Found</span>
-                    <span className="bg-secondary text-on-secondary text-[10px] px-2 py-0.5 rounded-full font-bold">98% SCORE</span>
+                    <span className="bg-[#1D9E75] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">98% SCORE</span>
                   </div>
                   <h4 className="font-bold text-lg mb-1">{t("mockupTitle")}</h4>
                   <p className="text-xs mb-3 opacity-90">{t("mockupCompany")}</p>
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-white text-primary text-xs font-bold py-2 rounded-lg">{t("mockupApply")}</button>
+                    <button className="flex-1 bg-white text-[#185FA5] text-xs font-bold py-2 rounded-lg">{t("mockupApply")}</button>
                     <button className="px-3 bg-white/20 text-white rounded-lg">
                       <span className="material-symbols-outlined text-sm">bookmark</span>
                     </button>
