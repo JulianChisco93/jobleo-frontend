@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getSearchProfiles, getJobs } from "@/lib/api";
+import { getSearchProfiles, getJobAlerts } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import Link from "next/link";
@@ -65,9 +65,9 @@ export default function DashboardPage() {
     queryFn: getSearchProfiles,
   });
 
-  const { data: jobs = [] } = useQuery({
-    queryKey: ["jobs"],
-    queryFn: () => getJobs({ limit: 50 }),
+  const { data: alerts = [] } = useQuery({
+    queryKey: ["jobAlerts"],
+    queryFn: () => getJobAlerts({ limit: 50 }),
   });
 
   const activeProfiles = profiles.filter((p) => p.is_active);
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             <div className="flex gap-2 md:gap-4 w-full md:w-auto">
               <StatCard
                 title={t("activeJobsTitle")}
-                value={jobs.length}
+                value={alerts.length}
                 accent="text-primary"
               />
               <StatCard
