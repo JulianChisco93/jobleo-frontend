@@ -111,20 +111,12 @@ function LoginForm() {
     }
   }
 
-  async function handleGoogle() {
+  function handleGoogle() {
     setLoading(true);
     setError(null);
-    try {
-      const supabase = createClient();
-      const { error: err } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (err) throw err;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("loginFailed"));
-      setLoading(false);
-    }
+    // Use server-side OAuth initiation so the code_verifier is set
+    // in the response cookies (more reliable than document.cookie on first visit)
+    window.location.href = "/auth/login";
   }
 
   async function handleForgotPassword() {

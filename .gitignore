@@ -26,6 +26,8 @@
 
 # SpecStory (IDE conversation history)
 .specstory/
+.claude/
+.cursor/
 
 # debug
 npm-debug.log*
