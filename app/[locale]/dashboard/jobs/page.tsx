@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getJobs, getSearchProfiles } from "@/lib/api";
+import { getJobAlerts, getSearchProfiles } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
-import type { Job } from "@/lib/types";
+import type { JobAlert } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 
-function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
+function JobDetailModal({ alert, onClose }: { alert: JobAlert; onClose: () => void }) {
+  const job = alert.job;
   const t = useTranslations("jobs");
 
   return (
@@ -62,9 +63,9 @@ function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
                 {t("matchScore")}
               </span>
               <div className="flex items-center gap-3">
-                <ScoreBadge score={job.match_score} />
+                <ScoreBadge score={alert.match_score} />
                 <div className="progress-track flex-1">
-                  <div className="progress-fill" style={{ width: `${job.match_score}%` }} />
+                  <div className="progress-fill" style={{ width: `${(alert.match_score / 35) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -130,14 +131,13 @@ function formatDate(dateStr: string | null | undefined): string {
 export default function JobHistoryPage() {
   const t = useTranslations("jobs");
   const searchParams = useSearchParams();
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<JobAlert | null>(null);
   const [profileFilter, setProfileFilter] = useState(searchParams.get("search_config_id") || "");
-  const [scoreFilter, setScoreFilter] = useState<number>(0);
 
   const { data: profiles = [] } = useQuery({ queryKey: ["profiles"], queryFn: getSearchProfiles });
-  const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ["jobs", profileFilter, scoreFilter],
-    queryFn: () => getJobs({ min_score: scoreFilter || undefined, search_config_id: profileFilter || undefined, limit: 50 }),
+  const { data: alerts = [], isLoading } = useQuery({
+    queryKey: ["jobAlerts", profileFilter],
+    queryFn: () => getJobAlerts({ search_config_id: profileFilter || undefined, limit: 50 }),
   });
 
   return (
@@ -162,15 +162,6 @@ export default function JobHistoryPage() {
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-          <select
-            value={scoreFilter}
-            onChange={(e) => setScoreFilter(Number(e.target.value))}
-            className="px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value={0}>{t("filterScore")}</option>
-            <option value={60}>≥ 60%</option>
-            <option value={40}>≥ 40%</option>
-          </select>
         </div>
 
         {/* Content */}
@@ -178,7 +169,7 @@ export default function JobHistoryPage() {
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : jobs.length === 0 ? (
+        ) : alerts.length === 0 ? (
           <div className="bg-surface-container-lowest rounded-xl p-16 flex flex-col items-center shadow-[var(--shadow-card)]">
             <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-6">
               <span className="material-symbols-outlined text-3xl text-outline">work_history</span>
@@ -197,20 +188,20 @@ export default function JobHistoryPage() {
               ))}
             </div>
             {/* Rows */}
-            {jobs.map((job) => (
+            {alerts.map((alert) => (
               <div
-                key={job.id}
+                key={alert.id}
                 className="grid grid-cols-[2fr_1fr_auto_auto_auto] gap-4 px-6 py-4 border-t border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors items-center"
               >
                 <div>
-                  <p className="font-display font-bold text-sm text-on-surface">{job.title}</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">{job.company}</p>
+                  <p className="font-display font-bold text-sm text-on-surface">{alert.job.title}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">{alert.job.company}</p>
                 </div>
-                <p className="text-sm text-on-surface-variant">{job.location}</p>
-                <ScoreBadge score={job.match_score} />
-                <p className="text-xs text-on-surface-variant">{formatDate(job.date_sent)}</p>
+                <p className="text-sm text-on-surface-variant">{alert.job.location}</p>
+                <ScoreBadge score={alert.match_score} />
+                <p className="text-xs text-on-surface-variant">{formatDate(alert.sent_at)}</p>
                 <button
-                  onClick={() => setSelectedJob(job)}
+                  onClick={() => setSelectedAlert(alert)}
                   className="px-3 py-1.5 text-xs font-bold text-primary border border-primary-container rounded-lg hover:bg-primary-fixed transition-colors"
                 >
                   {t("view")}
@@ -221,7 +212,7 @@ export default function JobHistoryPage() {
         )}
       </main>
 
-      {selectedJob && <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
+      {selectedAlert && <JobDetailModal alert={selectedAlert} onClose={() => setSelectedAlert(null)} />}
     </div>
   );
 }

@@ -44,18 +44,27 @@ export interface SearchProfileLog {
 }
 
 export interface Job {
-  id: string;
+  id: number;
   title: string;
   company: string;
   location: string;
-  match_score: number;
   job_url: string;
   description?: string;
   job_type?: string;
   is_remote?: boolean;
-  date_sent: string;
-  search_config_id: string;
+  date_posted?: string;
+  date_scraped?: string;
   skills?: string[];
+}
+
+export interface JobAlert {
+  id: number;
+  job_id: number;
+  match_score: number;
+  sent_at: string;
+  was_opened: boolean;
+  sent_via: string;
+  job: Job;
 }
 
 export interface CreateSearchProfilePayload {
