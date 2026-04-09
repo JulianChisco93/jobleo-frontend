@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "Jobleo — Your Next Job, Delivered to WhatsApp",
   description:
     "Upload your CV, configure your job search, and receive curated job matches directly on WhatsApp — powered by AI.",
+  other: {
+    "facebook-domain-verification": "h0mivuut4fggji5yhzpa18snx0wo84",
+  },
 };
 
 export default function RootLayout({
