@@ -19,6 +19,7 @@ export default function EditProfilePage({
   const queryClient = useQueryClient();
 
   const [resolvedParams, setResolvedParams] = React.useState<{ id: string } | null>(null);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     params.then(setResolvedParams);
@@ -47,15 +48,21 @@ export default function EditProfilePage({
   });
 
   async function handleSubmit(data: ProfileFormData) {
-    const { is_active, business_hours_start, business_hours_end, ...rest } = data;
-    await update({
-      ...rest,
-      is_active: is_active ?? true,
-      title_exclude_terms: (rest as any).title_exclude_terms ?? [],
-      business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
-      business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
-    });
-    router.push(`${prefix}/dashboard/profiles`);
+    setSaveError(null);
+    try {
+      const { is_active, business_hours_start, business_hours_end, ...rest } = data;
+      await update({
+        ...rest,
+        is_active: is_active ?? true,
+        title_exclude_terms: (rest as any).title_exclude_terms ?? [],
+        business_hours_start: parseInt((business_hours_start as string).split(":")[0], 10),
+        business_hours_end: parseInt((business_hours_end as string).split(":")[0], 10),
+      });
+      router.push(`${prefix}/dashboard/profiles`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("saveProfileError");
+      setSaveError(message);
+    }
   }
 
   if (isLoading || !resolvedParams) {
@@ -81,6 +88,12 @@ export default function EditProfilePage({
             )}
           </div>
         </div>
+        {saveError && (
+          <div className="mx-8 mt-4 flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            {saveError}
+          </div>
+        )}
         {profile && (
           <ProfileForm
             defaultValues={profile}
@@ -93,5 +106,4 @@ export default function EditProfilePage({
   );
 }
 
-// Need React import for useEffect/useState
 import React from "react";

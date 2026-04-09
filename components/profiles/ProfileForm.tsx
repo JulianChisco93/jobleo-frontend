@@ -16,7 +16,7 @@ const schema = z.object({
   locations: z.array(z.string()),
   include_terms: z.array(z.string()),
   exclude_terms: z.array(z.string()),
-  frequency_minutes: z.number(),
+  frequency_minutes: z.coerce.number(),
   is_active: z.boolean().optional(),
   business_hours_only: z.boolean(),
   business_hours_start: z.string().optional(),
@@ -50,6 +50,18 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => {
 const inputCls = "px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none transition-all w-full";
 const labelCls = "text-xs font-bold text-on-surface-variant uppercase tracking-wider";
 
+// The API may return business_hours_start/end as integers (0-23) or strings.
+// Normalize to "HH:00" format so the select and Zod (z.string) work correctly.
+function toHourStr(val: unknown): string {
+  if (typeof val === "number") return `${String(val).padStart(2, "0")}:00`;
+  if (typeof val === "string") {
+    if (val.includes(":")) return val;
+    const n = parseInt(val, 10);
+    return isNaN(n) ? "09:00" : `${String(n).padStart(2, "0")}:00`;
+  }
+  return "09:00";
+}
+
 export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: ProfileFormProps) {
   const t = useTranslations("profiles");
 
@@ -71,8 +83,8 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       frequency_minutes: defaultValues?.frequency_minutes || 60,
       is_active: defaultValues?.is_active ?? true,
       business_hours_only: defaultValues?.business_hours_only || false,
-      business_hours_start: defaultValues?.business_hours_start || "09:00",
-      business_hours_end: defaultValues?.business_hours_end || "18:00",
+      business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
+      business_hours_end: toHourStr(defaultValues?.business_hours_end) || "18:00",
       business_days_only: defaultValues?.business_days_only || false,
     },
   });
