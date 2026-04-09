@@ -4,7 +4,7 @@ import type {
   CV,
   SearchProfile,
   SearchProfileLog,
-  JobAlert,
+  Job,
   CreateSearchProfilePayload,
 } from "./types";
 
@@ -112,18 +112,20 @@ export const getSearchProfileLogs = (id: string) =>
 
 // ─── Jobs ─────────────────────────────────────────────────────────────────────
 
-export interface JobAlertsQuery {
+export interface JobsQuery {
+  min_score?: number;
   limit?: number;
   offset?: number;
   search_config_id?: string;
 }
 
-export const getJobAlerts = (params: JobAlertsQuery = {}) => {
+export const getJobs = (params: JobsQuery = {}) => {
   const qs = new URLSearchParams();
+  if (params.min_score !== undefined) qs.set("min_score", String(params.min_score));
   if (params.limit !== undefined) qs.set("limit", String(params.limit));
   if (params.offset !== undefined) qs.set("offset", String(params.offset));
   if (params.search_config_id) qs.set("search_config_id", params.search_config_id);
-  return request<JobAlert[]>(`/api/v1/jobs/alerts?${qs.toString()}`);
+  return request<Job[]>(`/api/v1/jobs/?${qs.toString()}`);
 };
 
 // ─── Billing ──────────────────────────────────────────────────────────────────

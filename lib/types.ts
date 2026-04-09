@@ -49,22 +49,12 @@ export interface Job {
   company: string;
   location: string;
   job_url: string;
-  description?: string;
-  job_type?: string;
+  site?: string;
   is_remote?: boolean;
+  score: number;
+  matched_keywords?: string[];
   date_posted?: string;
   date_scraped?: string;
-  skills?: string[];
-}
-
-export interface JobAlert {
-  id: number;
-  job_id: number;
-  match_score: number;
-  sent_at: string;
-  was_opened: boolean;
-  sent_via: string;
-  job: Job;
 }
 
 export interface CreateSearchProfilePayload {

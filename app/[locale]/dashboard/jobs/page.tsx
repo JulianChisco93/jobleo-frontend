@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getJobAlerts, getSearchProfiles } from "@/lib/api";
+import { getJobs, getSearchProfiles } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
-import type { JobAlert } from "@/lib/types";
+import type { Job } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 
-function JobDetailModal({ alert, onClose }: { alert: JobAlert; onClose: () => void }) {
-  const job = alert.job;
+function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
   const t = useTranslations("jobs");
 
   return (
@@ -40,18 +39,13 @@ function JobDetailModal({ alert, onClose }: { alert: JobAlert; onClose: () => vo
             <h3 className="text-xl font-display font-bold text-on-surface mb-1">{job.title}</h3>
             <p className="text-on-surface-variant mb-3">{job.company} · {job.location}</p>
             <div className="flex gap-2 flex-wrap">
-              {job.job_type && (
-                <span className="px-3 py-1 text-xs font-bold bg-secondary-container text-on-secondary-container rounded-full">
-                  {job.job_type}
-                </span>
-              )}
               {job.is_remote && (
                 <span className="px-3 py-1 text-xs font-bold bg-primary-fixed text-on-primary-fixed rounded-full">
                   {t("remote")}
                 </span>
               )}
               <span className="text-xs text-on-surface-variant self-center">
-                {formatDate(alert.sent_at)}
+                {formatDate(job.date_scraped)}
               </span>
             </div>
           </div>
@@ -63,36 +57,24 @@ function JobDetailModal({ alert, onClose }: { alert: JobAlert; onClose: () => vo
                 {t("matchScore")}
               </span>
               <div className="flex items-center gap-3">
-                <ScoreBadge score={alert.match_score} />
+                <ScoreBadge score={job.score} />
                 <div className="progress-track flex-1">
-                  <div className="progress-fill" style={{ width: `${(alert.match_score / 35) * 100}%` }} />
+                  <div className="progress-fill" style={{ width: `${(job.score / 35) * 100}%` }} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Skills */}
-          {job.skills && job.skills.length > 0 && (
+          {/* Matched Keywords */}
+          {job.matched_keywords && job.matched_keywords.length > 0 && (
             <div>
               <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-3">
                 {t("matchedSkills")}
               </span>
               <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill) => (
-                  <span key={skill} className="tag-chip">{skill}</span>
+                {job.matched_keywords.map((kw) => (
+                  <span key={kw} className="tag-chip">{kw}</span>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Description */}
-          {job.description && (
-            <div>
-              <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-3">
-                {t("jobDescription")}
-              </span>
-              <div className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
-                {job.description}
               </div>
             </div>
           )}
@@ -131,13 +113,13 @@ function formatDate(dateStr: string | null | undefined): string {
 export default function JobHistoryPage() {
   const t = useTranslations("jobs");
   const searchParams = useSearchParams();
-  const [selectedAlert, setSelectedAlert] = useState<JobAlert | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [profileFilter, setProfileFilter] = useState(searchParams.get("search_config_id") || "");
 
   const { data: profiles = [] } = useQuery({ queryKey: ["profiles"], queryFn: getSearchProfiles });
-  const { data: alerts = [], isLoading } = useQuery({
-    queryKey: ["jobAlerts", profileFilter],
-    queryFn: () => getJobAlerts({ search_config_id: profileFilter || undefined, limit: 50 }),
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ["jobs", profileFilter],
+    queryFn: () => getJobs({ search_config_id: profileFilter || undefined, limit: 50 }),
   });
 
   return (
@@ -169,7 +151,7 @@ export default function JobHistoryPage() {
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : alerts.length === 0 ? (
+        ) : jobs.length === 0 ? (
           <div className="bg-surface-container-lowest rounded-xl p-16 flex flex-col items-center shadow-[var(--shadow-card)]">
             <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-6">
               <span className="material-symbols-outlined text-3xl text-outline">work_history</span>
@@ -188,20 +170,20 @@ export default function JobHistoryPage() {
               ))}
             </div>
             {/* Rows */}
-            {alerts.map((alert) => (
+            {jobs.map((job) => (
               <div
-                key={alert.id}
+                key={job.id}
                 className="grid grid-cols-[2fr_1fr_auto_auto_auto] gap-4 px-6 py-4 border-t border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors items-center"
               >
                 <div>
-                  <p className="font-display font-bold text-sm text-on-surface">{alert.job.title}</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">{alert.job.company}</p>
+                  <p className="font-display font-bold text-sm text-on-surface">{job.title}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">{job.company}</p>
                 </div>
-                <p className="text-sm text-on-surface-variant">{alert.job.location}</p>
-                <ScoreBadge score={alert.match_score} />
-                <p className="text-xs text-on-surface-variant">{formatDate(alert.sent_at)}</p>
+                <p className="text-sm text-on-surface-variant">{job.location}</p>
+                <ScoreBadge score={job.score} />
+                <p className="text-xs text-on-surface-variant">{formatDate(job.date_scraped)}</p>
                 <button
-                  onClick={() => setSelectedAlert(alert)}
+                  onClick={() => setSelectedJob(job)}
                   className="px-3 py-1.5 text-xs font-bold text-primary border border-primary-container rounded-lg hover:bg-primary-fixed transition-colors"
                 >
                   {t("view")}
@@ -212,7 +194,7 @@ export default function JobHistoryPage() {
         )}
       </main>
 
-      {selectedAlert && <JobDetailModal alert={selectedAlert} onClose={() => setSelectedAlert(null)} />}
+      {selectedJob && <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
     </div>
   );
 }
