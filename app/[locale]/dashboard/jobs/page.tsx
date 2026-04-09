@@ -51,7 +51,7 @@ function JobDetailModal({ alert, onClose }: { alert: JobAlert; onClose: () => vo
                 </span>
               )}
               <span className="text-xs text-on-surface-variant self-center">
-                {formatDate(job.date_sent)}
+                {formatDate(alert.sent_at)}
               </span>
             </div>
           </div>
