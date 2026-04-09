@@ -50,7 +50,7 @@ function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
                 </span>
               )}
               <span className="text-xs text-on-surface-variant self-center">
-                {new Date(job.date_sent).toLocaleDateString()}
+                {formatDate(job.date_sent)}
               </span>
             </div>
           </div>
@@ -117,6 +117,14 @@ function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "—";
+  // Normalize space-separated datetime to ISO format (e.g. "2024-01-15 10:30:00" → "2024-01-15T10:30:00")
+  const normalized = dateStr.replace(" ", "T");
+  const d = new Date(normalized);
+  return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
 }
 
 export default function JobHistoryPage() {
@@ -200,7 +208,7 @@ export default function JobHistoryPage() {
                 </div>
                 <p className="text-sm text-on-surface-variant">{job.location}</p>
                 <ScoreBadge score={job.match_score} />
-                <p className="text-xs text-on-surface-variant">{new Date(job.date_sent).toLocaleDateString()}</p>
+                <p className="text-xs text-on-surface-variant">{formatDate(job.date_sent)}</p>
                 <button
                   onClick={() => setSelectedJob(job)}
                   className="px-3 py-1.5 text-xs font-bold text-primary border border-primary-container rounded-lg hover:bg-primary-fixed transition-colors"
