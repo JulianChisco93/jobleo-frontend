@@ -11,10 +11,10 @@ import { LangToggle } from "@/components/ui/LangToggle";
 import { uploadCVFile, uploadCVText, createSearchProfile, updateMe } from "@/lib/api";
 
 // ─── Step progress bar ──────────────────────────────────────
-function StepBar({ step }: { step: 1 | 2 | 3 }) {
+function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
   return (
     <div className="flex gap-1.5">
-      {[1, 2, 3].map((s) => (
+      {[1, 2, 3, 4].map((s) => (
         <div
           key={s}
           className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
@@ -343,7 +343,7 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
 }
 
 // ─── Step 3: WhatsApp ─────────────────────────────────────────
-function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void }) {
+function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void; }) {
   const t = useTranslations("onboarding");
   const tPreview = useTranslations("onboarding.whatsappPreview");
   const [phone, setPhone] = useState("");
@@ -460,10 +460,149 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void 
             <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              {t("finishSetup")}
-              <span className="material-symbols-outlined text-[18px]">check</span>
+              {t("continue")}
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </>
           )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 4: Plan Selection ───────────────────────────────────
+function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "starter" | "pro") => void }) {
+  const t = useTranslations("onboarding");
+  const [selected, setSelected] = useState<"starter" | "pro">("pro");
+
+  const starterFeatures = [
+    t("planStarterFeature1"),
+    t("planStarterFeature2"),
+    t("planStarterFeature3"),
+    t("planStarterFeature4"),
+  ];
+  const proFeatures = [
+    t("planProFeature1"),
+    t("planProFeature2"),
+    t("planProFeature3"),
+    t("planProFeature4"),
+    t("planProFeature5"),
+  ];
+
+  return (
+    <div className="flex flex-col gap-7">
+      <div>
+        <p className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2">
+          {t("step4of4")}
+        </p>
+        <StepBar step={4} />
+        <h2 className="text-2xl font-display font-bold text-on-surface mt-4">
+          {t("step4Title")}
+        </h2>
+        <p className="text-sm text-on-surface-variant mt-1">{t("step4Subtitle")}</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Starter Card */}
+        <button
+          type="button"
+          onClick={() => setSelected("starter")}
+          className={`flex flex-col gap-4 p-6 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+            selected === "starter"
+              ? "border-secondary bg-secondary-container shadow-lg"
+              : "border-outline-variant bg-surface-container-lowest"
+          }`}
+        >
+          <div className="flex flex-col gap-1">
+            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
+              selected === "starter"
+                ? "bg-secondary/20 text-on-secondary-container"
+                : "bg-surface-container-high text-on-surface-variant"
+            }`}>
+              {t("planStarterBadge")}
+            </span>
+            <h3 className="text-lg font-display font-bold text-on-surface mt-2">
+              {t("planStarterName")}
+            </h3>
+            <p className="text-2xl font-display font-bold text-on-surface">
+              {t("planStarterPrice")}
+            </p>
+            <p className="text-xs text-on-surface-variant">{t("planStarterTagline")}</p>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {starterFeatures.map((f) => (
+              <li key={f} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[16px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  check_circle
+                </span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </button>
+
+        {/* Pro Card */}
+        <button
+          type="button"
+          onClick={() => setSelected("pro")}
+          className={`flex flex-col gap-4 p-6 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+            selected === "pro"
+              ? "border-primary bg-primary text-on-primary shadow-lg"
+              : "border-outline-variant bg-surface-container-lowest"
+          }`}
+        >
+          <div className="flex flex-col gap-1">
+            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
+              selected === "pro"
+                ? "bg-on-primary/20 text-on-primary"
+                : "bg-secondary-container text-on-secondary-container"
+            }`}>
+              {t("planProBadge")}
+            </span>
+            <h3 className={`text-lg font-display font-bold mt-2 ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
+              {t("planProName")}
+            </h3>
+            <p className={`text-2xl font-display font-bold ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
+              {t("planProPrice")}
+            </p>
+            <p className={`text-xs ${selected === "pro" ? "text-on-primary/80" : "text-on-surface-variant"}`}>
+              {t("planProTagline")}
+            </p>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {proFeatures.map((f) => (
+              <li key={f} className={`flex items-center gap-2 text-sm ${selected === "pro" ? "text-on-primary/90" : "text-on-surface-variant"}`}>
+                <span
+                  className="material-symbols-outlined text-[16px]"
+                  style={{
+                    color: selected === "pro" ? "#4ae183" : undefined,
+                    fontVariationSettings: "'FILL' 1",
+                  }}
+                >
+                  check_circle
+                </span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </button>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
+        >
+          {t("back")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onFinish(selected)}
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          {selected === "pro" ? t("planProCta") : t("planStarterCta")}
+          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
       </div>
     </div>
@@ -473,7 +612,7 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void 
 // ─── Onboarding Page ──────────────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
@@ -492,7 +631,19 @@ export default function OnboardingPage() {
         <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)]">
           {step === 1 && <Step1 onNext={() => setStep(2)} />}
           {step === 2 && <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
-          {step === 3 && <Step3 onBack={() => setStep(2)} onFinish={() => router.push("/dashboard")} />}
+          {step === 3 && <Step3 onBack={() => setStep(2)} onFinish={() => setStep(4)} />}
+          {step === 4 && (
+            <Step4
+              onBack={() => setStep(3)}
+              onFinish={(plan) => {
+                if (plan === "pro") {
+                  router.push("/pricing");
+                } else {
+                  router.push("/dashboard");
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
