@@ -134,9 +134,8 @@ function AboutContent() {
                 </div>
               </div>
 
-              {/* Founder cards */}
-              <div className="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Founder 1 */}
+              {/* Founder card */}
+              <div className="w-full md:w-2/3 grid grid-cols-1 gap-6">
                 <div className="bg-surface-container-low rounded-xl p-8 hover:bg-surface-container transition-colors">
                   <div className="w-20 h-20 bg-surface-container-high rounded-full mb-6 flex items-center justify-center">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant"
@@ -147,19 +146,8 @@ function AboutContent() {
                   <p className="text-sm text-on-surface-variant leading-relaxed">{t("founder1Desc")}</p>
                 </div>
 
-                {/* Founder 2 */}
-                <div className="bg-surface-container-low rounded-xl p-8 hover:bg-surface-container transition-colors">
-                  <div className="w-20 h-20 bg-surface-container-high rounded-full mb-6 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant"
-                      style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-primary mb-1">{t("founder2Name")}</h3>
-                  <p className="text-secondary font-bold text-xs uppercase tracking-widest mb-4">{t("founder2Role")}</p>
-                  <p className="text-sm text-on-surface-variant leading-relaxed">{t("founder2Desc")}</p>
-                </div>
-
                 {/* Our Story — full width */}
-                <div className="sm:col-span-2 bg-tertiary-fixed rounded-xl p-10 flex flex-col md:flex-row gap-10 items-center">
+                <div className="bg-tertiary-fixed rounded-xl p-10 flex flex-col md:flex-row gap-10 items-center">
                   <div className="flex-1">
                     <h3 className="font-display text-2xl font-bold text-on-tertiary-fixed mb-4">{t("storyTitle")}</h3>
                     <p className="text-on-tertiary-fixed-variant leading-relaxed">{t("storyDesc")}</p>

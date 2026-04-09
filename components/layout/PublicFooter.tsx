@@ -15,6 +15,7 @@ export function PublicFooter() {
         <div className="flex flex-col gap-2">
           <span className="font-display font-black text-xl text-primary tracking-tight">jobleo</span>
           <span className="text-sm text-on-surface-variant">{t("tagline")}</span>
+          <span className="text-xs text-on-surface-variant mt-1">Operated by Julian David Chisco Henao</span>
         </div>
 
         {/* Links */}

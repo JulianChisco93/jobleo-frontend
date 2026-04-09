@@ -420,7 +420,7 @@ function LoginForm() {
       {/* Footer */}
       <footer className="w-full py-8 px-6 bg-surface-container-low border-t border-outline-variant/10">
         <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
-          <p className="text-xs text-on-surface-variant">© 2024 Jobleo. Precision-engineered recruitment.</p>
+          <p className="text-xs text-on-surface-variant">© 2026 Jobleo. Operated by Julian David Chisco Henao.</p>
           <div className="flex gap-6">
             <Link href="/" className="text-xs text-on-surface-variant font-bold hover:text-primary transition-colors">
               {t("backToHome")}

@@ -145,15 +145,15 @@
     "aiEthicsBullet2": "Puntuaciones de Coincidencia Transparentes",
     "teamTitle": "Los Visionarios",
     "teamDesc": "Jobleo nació de una frustración simple: el talento es universal, pero la visibilidad no. Nuestro equipo de reclutadores e ingenieros reimaginó la búsqueda como un stream curado.",
-    "founder1Name": "Elena Rodriguez",
-    "founder1Role": "CEO & Estrategia",
-    "founder1Desc": "Ex-Directora de Talento con una década de experiencia identificando potencial de alto crecimiento en ecosistemas tech.",
-    "founder2Name": "Marcus Thorne",
-    "founder2Role": "CTO & Ingeniería",
-    "founder2Desc": "Especialista en sistemas distribuidos y procesamiento de lenguaje natural para búsqueda semántica.",
+    "founder1Name": "Julian David Chisco Henao",
+    "founder1Role": "Fundador y Operador",
+    "founder1Desc": "Jobleo es operado como empresa individual por Julian David Chisco Henao, enfocado en crear herramientas que conecten a los buscadores de empleo con las oportunidades correctas.",
+    "founder2Name": "",
+    "founder2Role": "",
+    "founder2Desc": "",
     "storyTitle": "Nuestra Historia",
-    "storyDesc": "Comenzando en un pequeño estudio en Madrid, nos dimos cuenta de que las mejores contrataciones ocurrían cuando la comunicación se sentía personal. Al automatizar lo personal, escalamos el elemento humano del reclutamiento.",
-    "storyButton": "Lee el Manifiesto"
+    "storyDesc": "Jobleo nació de una frustración simple: encontrar trabajos relevantes toma demasiado tiempo. Combinando matching con IA y entrega por WhatsApp, Jobleo lleva las oportunidades correctas directamente a ti.",
+    "storyButton": "Comenzar"
   },
   "meta": {
     "defaultTitle": "Jobleo — Tu Próximo Trabajo, Entregado en WhatsApp",
