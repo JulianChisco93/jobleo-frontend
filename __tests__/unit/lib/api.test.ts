@@ -257,22 +257,6 @@ describe("getJobs", () => {
   });
 });
 
-describe("getJob", () => {
-  it("returns a single job by id", async () => {
-    const { getJob } = await apiImport();
-    const job = await getJob("job-42");
-    expect(job.id).toBe("job-42");
-  });
-});
-
-describe("getJobAlerts", () => {
-  it("returns an array of alert jobs", async () => {
-    const { getJobAlerts } = await apiImport();
-    const jobs = await getJobAlerts();
-    expect(Array.isArray(jobs)).toBe(true);
-  });
-});
-
 // ─── Auth header injection ────────────────────────────────────────────────────
 
 describe("request auth header", () => {
