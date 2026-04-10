@@ -152,14 +152,15 @@ export default function JobHistoryPage() {
   const { data: profiles = [] } = useQuery({ queryKey: ["profiles"], queryFn: getSearchProfiles });
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ["jobs", profileFilter],
-    queryFn: () => getJobs({ search_config_id: profileFilter || undefined, limit: 500 }),
+    queryFn: () => getJobs({ search_config_id: profileFilter || undefined, limit: 200 }),
   });
 
-  // Filter to last 7 days
+  // Filter to last 7 days — jobs with no parseable date are included
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const recent = jobs.filter((j) => {
-    const d = new Date((j.date_scraped ?? "").replace(" ", "T"));
-    return !isNaN(d.getTime()) && d.getTime() >= oneWeekAgo;
+    if (!j.date_scraped) return true;
+    const d = new Date(j.date_scraped.replace(" ", "T"));
+    return isNaN(d.getTime()) || d.getTime() >= oneWeekAgo;
   });
 
   // Sort
