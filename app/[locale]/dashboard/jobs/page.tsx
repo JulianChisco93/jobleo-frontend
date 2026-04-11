@@ -150,7 +150,7 @@ export default function JobHistoryPage() {
   const [page, setPage] = useState(0);
 
   const { data: profiles = [] } = useQuery({ queryKey: ["profiles"], queryFn: getSearchProfiles });
-  const { data: jobs = [], isLoading } = useQuery({
+  const { data: jobs = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ["jobs", profileFilter],
     queryFn: () => getJobs({ search_config_id: profileFilter || undefined, limit: 200 }),
   });
@@ -201,7 +201,7 @@ export default function JobHistoryPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-3 mb-6 items-center">
           <select
             value={profileFilter}
             onChange={(e) => handleProfileFilter(e.target.value)}
@@ -212,6 +212,14 @@ export default function JobHistoryPage() {
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low disabled:opacity-50 transition-colors"
+          >
+            <span className={`material-symbols-outlined text-[18px] ${isFetching ? "animate-spin" : ""}`}>refresh</span>
+            {isFetching ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
 
         {/* Content */}
