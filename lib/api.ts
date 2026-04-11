@@ -5,6 +5,7 @@ import type {
   SearchProfile,
   SearchProfileLog,
   Job,
+  JobAlert,
   CreateSearchProfilePayload,
 } from "./types";
 
@@ -126,6 +127,14 @@ export const getJobs = (params: JobsQuery = {}) => {
   if (params.offset !== undefined) qs.set("offset", String(params.offset));
   if (params.search_config_id) qs.set("search_config_id", params.search_config_id);
   return request<Job[]>(`/api/v1/jobs/?${qs.toString()}`);
+};
+
+export const getJobAlerts = (params: Pick<JobsQuery, "limit" | "offset" | "search_config_id"> = {}) => {
+  const qs = new URLSearchParams();
+  if (params.limit !== undefined) qs.set("limit", String(params.limit));
+  if (params.offset !== undefined) qs.set("offset", String(params.offset));
+  if (params.search_config_id) qs.set("search_config_id", params.search_config_id);
+  return request<JobAlert[]>(`/api/v1/jobs/alerts?${qs.toString()}`);
 };
 
 // ─── Billing ──────────────────────────────────────────────────────────────────

@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getJobs, getSearchProfiles } from "@/lib/api";
+import { getJobAlerts, getSearchProfiles } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
-import type { Job } from "@/lib/types";
+import type { JobAlert } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 
 const PAGE_SIZE = 20;
 
-type SortableField = "title" | "location" | "score" | "date_scraped";
+type SortableField = "title" | "location" | "score" | "sent_at";
 
 function SortableHeader({
   field,
@@ -40,7 +40,7 @@ function SortableHeader({
   );
 }
 
-function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
+function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }) {
   const t = useTranslations("jobs");
 
   return (
@@ -76,7 +76,7 @@ function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
                 </span>
               )}
               <span className="text-xs text-on-surface-variant self-center">
-                {formatDate(job.date_scraped)}
+                {formatDate(job.sent_at)}
               </span>
             </div>
           </div>
@@ -143,23 +143,23 @@ function formatDate(dateStr: string | null | undefined): string {
 export default function JobHistoryPage() {
   const t = useTranslations("jobs");
   const searchParams = useSearchParams();
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobAlert | null>(null);
   const [profileFilter, setProfileFilter] = useState(searchParams.get("search_config_id") || "");
-  const [sortField, setSortField] = useState<SortableField>("date_scraped");
+  const [sortField, setSortField] = useState<SortableField>("sent_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(0);
 
   const { data: profiles = [] } = useQuery({ queryKey: ["profiles"], queryFn: getSearchProfiles });
   const { data: jobs = [], isLoading, isFetching, refetch } = useQuery({
-    queryKey: ["jobs", profileFilter],
-    queryFn: () => getJobs({ search_config_id: profileFilter || undefined, limit: 200 }),
+    queryKey: ["job-alerts", profileFilter],
+    queryFn: () => getJobAlerts({ search_config_id: profileFilter || undefined, limit: 200 }),
   });
 
-  // Filter to last 7 days — jobs with no parseable date are included
+  // Filter to last 7 days — alerts with no parseable date are included
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const recent = jobs.filter((j) => {
-    if (!j.date_scraped) return true;
-    const d = new Date(j.date_scraped.replace(" ", "T"));
+    if (!j.sent_at) return true;
+    const d = new Date(j.sent_at.replace(" ", "T"));
     return isNaN(d.getTime()) || d.getTime() >= oneWeekAgo;
   });
 
@@ -242,7 +242,7 @@ export default function JobHistoryPage() {
               <SortableHeader field="title" label={t("colTitle")} sortField={sortField} sortDir={sortDir} onSort={handleSort} />
               <SortableHeader field="location" label={t("colLocation")} sortField={sortField} sortDir={sortDir} onSort={handleSort} />
               <SortableHeader field="score" label={t("colScore")} sortField={sortField} sortDir={sortDir} onSort={handleSort} />
-              <SortableHeader field="date_scraped" label={t("colDateSent")} sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+              <SortableHeader field="sent_at" label={t("colDateSent")} sortField={sortField} sortDir={sortDir} onSort={handleSort} />
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
                 {t("colAction")}
               </span>
@@ -260,7 +260,7 @@ export default function JobHistoryPage() {
                 </div>
                 <p className="text-sm text-on-surface-variant">{job.location}</p>
                 <ScoreBadge score={job.score} />
-                <p className="text-xs text-on-surface-variant">{formatDate(job.date_scraped)}</p>
+                <p className="text-xs text-on-surface-variant">{formatDate(job.sent_at)}</p>
                 <button
                   onClick={() => setSelectedJob(job)}
                   className="px-3 py-1.5 text-xs font-bold text-primary border border-primary-container rounded-lg hover:bg-primary-fixed transition-colors"

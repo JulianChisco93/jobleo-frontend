@@ -57,6 +57,11 @@ export interface Job {
   date_scraped?: string;
 }
 
+export interface JobAlert extends Job {
+  sent_at: string;
+  search_config_id?: string;
+}
+
 export interface CreateSearchProfilePayload {
   name: string;
   profession: string;
