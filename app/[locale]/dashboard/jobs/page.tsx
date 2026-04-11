@@ -67,10 +67,10 @@ function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }
         <div className="flex flex-col gap-6 p-8 overflow-auto">
           {/* Title + meta */}
           <div>
-            <h3 className="text-xl font-display font-bold text-on-surface mb-1">{job.title}</h3>
-            <p className="text-on-surface-variant mb-3">{job.company} · {job.location}</p>
+            <h3 className="text-xl font-display font-bold text-on-surface mb-1">{job.job.title}</h3>
+            <p className="text-on-surface-variant mb-3">{job.job.company} · {job.job.location}</p>
             <div className="flex gap-2 flex-wrap">
-              {job.is_remote && (
+              {job.job.is_remote && (
                 <span className="px-3 py-1 text-xs font-bold bg-primary-fixed text-on-primary-fixed rounded-full">
                   {t("remote")}
                 </span>
@@ -88,33 +88,19 @@ function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }
                 {t("matchScore")}
               </span>
               <div className="flex items-center gap-3">
-                <ScoreBadge score={job.score} />
+                <ScoreBadge score={job.match_score} />
                 <div className="progress-track flex-1">
-                  <div className="progress-fill" style={{ width: `${(job.score / 35) * 100}%` }} />
+                  <div className="progress-fill" style={{ width: `${(job.match_score / 35) * 100}%` }} />
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Matched Keywords */}
-          {job.matched_keywords && job.matched_keywords.length > 0 && (
-            <div>
-              <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest block mb-3">
-                {t("matchedSkills")}
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {job.matched_keywords.map((kw) => (
-                  <span key={kw} className="tag-chip">{kw}</span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between px-8 py-5 border-t border-outline-variant/20 mt-auto">
           <a
-            href={job.job_url}
+            href={job.job.job_url}
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-2.5 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg active:scale-95 transition-transform"
@@ -164,9 +150,16 @@ export default function JobHistoryPage() {
   });
 
   // Sort
+  function getSortValue(j: JobAlert, field: SortableField): string | number {
+    if (field === "sent_at") return j.sent_at ?? "";
+    if (field === "score") return j.match_score ?? 0;
+    if (field === "title") return j.job.title ?? "";
+    if (field === "location") return j.job.location ?? "";
+    return "";
+  }
   const sorted = [...recent].sort((a, b) => {
-    const av = a[sortField] ?? "";
-    const bv = b[sortField] ?? "";
+    const av = getSortValue(a, sortField);
+    const bv = getSortValue(b, sortField);
     const cmp = av < bv ? -1 : av > bv ? 1 : 0;
     return sortDir === "asc" ? cmp : -cmp;
   });
@@ -255,11 +248,11 @@ export default function JobHistoryPage() {
                 className="grid grid-cols-[2fr_1fr_auto_auto_auto] gap-4 px-6 py-4 border-t border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors items-center"
               >
                 <div>
-                  <p className="font-display font-bold text-sm text-on-surface">{job.title}</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">{job.company}</p>
+                  <p className="font-display font-bold text-sm text-on-surface">{job.job.title}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">{job.job.company}</p>
                 </div>
-                <p className="text-sm text-on-surface-variant">{job.location}</p>
-                <ScoreBadge score={job.score} />
+                <p className="text-sm text-on-surface-variant">{job.job.location}</p>
+                <ScoreBadge score={job.match_score} />
                 <p className="text-xs text-on-surface-variant">{formatDate(job.sent_at)}</p>
                 <button
                   onClick={() => setSelectedJob(job)}

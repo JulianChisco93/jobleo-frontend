@@ -57,9 +57,19 @@ export interface Job {
   date_scraped?: string;
 }
 
-export interface JobAlert extends Job {
+export interface JobAlert {
+  id: number;
+  match_score: number;
   sent_at: string;
   search_config_id?: string;
+  job: {
+    title: string;
+    company: string;
+    location: string;
+    job_url: string;
+    site?: string;
+    is_remote?: boolean;
+  };
 }
 
 export interface CreateSearchProfilePayload {
