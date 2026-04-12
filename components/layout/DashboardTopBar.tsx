@@ -1,6 +1,7 @@
 "use client";
 
 import { LangToggle } from "@/components/ui/LangToggle";
+import { useMobileSidebar } from "@/components/layout/MobileSidebarContext";
 
 interface DashboardTopBarProps {
   title?: string;
@@ -11,17 +12,28 @@ export function DashboardTopBar({ title, userName }: DashboardTopBarProps) {
   const initials = userName
     ? userName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "J";
+  const { open } = useMobileSidebar();
 
   return (
     <header className="sticky top-0 w-full z-30 bg-surface-container-lowest/80 backdrop-blur-md shadow-[var(--shadow-card)] flex justify-between items-center px-6 py-4">
+      {/* Mobile: hamburger + brand */}
+      <div className="flex items-center gap-3 md:hidden">
+        <button
+          onClick={open}
+          className="p-1 -ml-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors"
+          aria-label="Open menu"
+        >
+          <span className="material-symbols-outlined text-[26px]">menu</span>
+        </button>
+        <h2 className="font-display font-extrabold text-lg text-primary">Jobleo</h2>
+      </div>
+
       {/* Page title (desktop) */}
       {title && (
         <h2 className="font-display font-extrabold text-lg text-on-surface hidden md:block">
           {title}
         </h2>
       )}
-      {/* Jobleo brand (mobile only) */}
-      <h2 className="font-display font-extrabold text-lg text-primary md:hidden">Jobleo</h2>
 
       <div className="flex items-center gap-5">
         <LangToggle />
