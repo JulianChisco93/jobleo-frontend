@@ -34,7 +34,6 @@ interface ProfileFormProps {
 }
 
 const FREQUENCY_OPTIONS = [
-  { value: 30, labelKey: "freq30" },
   { value: 60, labelKey: "freq60" },
   { value: 120, labelKey: "freq120" },
   { value: 240, labelKey: "freq240" },
