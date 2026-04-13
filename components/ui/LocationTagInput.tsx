@@ -19,7 +19,18 @@ interface LocationTagInputProps {
 const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
 
 function formatSuggestion(result: Record<string, string>): Suggestion {
-  const parts = [result.city || result.county, result.state, result.country].filter(Boolean);
+  const { city, county, state, country, result_type } = result;
+
+  let parts: string[];
+  if (result_type === "country") {
+    parts = [country];
+  } else if (result_type === "state") {
+    parts = [state, country].filter(Boolean);
+  } else {
+    // city, county or locality
+    parts = [city || county, state, country].filter(Boolean);
+  }
+
   const label = parts.join(", ");
   return { label, value: label };
 }
@@ -66,7 +77,7 @@ export function LocationTagInput({
       setLoading(true);
       try {
         const res = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(input)}&type=city&format=json&limit=6&apiKey=${GEOAPIFY_KEY}`
+          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(input)}&type=city,state,country&format=json&limit=7&apiKey=${GEOAPIFY_KEY}`
         );
         const data = await res.json();
         const results: Suggestion[] = (data.results ?? [])
