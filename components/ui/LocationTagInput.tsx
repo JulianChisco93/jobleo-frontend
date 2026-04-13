@@ -77,7 +77,7 @@ export function LocationTagInput({
       setLoading(true);
       try {
         const res = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(input)}&type=city,state,country&format=json&limit=7&apiKey=${GEOAPIFY_KEY}`
+          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(input)}&format=json&limit=7&apiKey=${GEOAPIFY_KEY}`
         );
         const data = await res.json();
         const results: Suggestion[] = (data.results ?? [])
