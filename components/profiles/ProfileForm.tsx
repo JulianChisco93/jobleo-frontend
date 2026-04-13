@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { TagInput } from "@/components/ui/TagInput";
+import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { Toggle } from "@/components/ui/Toggle";
 import type { SearchProfile } from "@/lib/types";
 
@@ -140,7 +141,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
 
       {/* Locations */}
       <div>
-        <TagInput
+        <LocationTagInput
           label={t("locationsLabel")}
           value={locations}
           onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
