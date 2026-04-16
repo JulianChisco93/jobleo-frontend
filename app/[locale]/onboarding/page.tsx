@@ -7,8 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { TagInput } from "@/components/ui/TagInput";
+import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { LangToggle } from "@/components/ui/LangToggle";
-import { uploadCVFile, uploadCVText, createSearchProfile, updateMe } from "@/lib/api";
+import { uploadCVFile, uploadCVText, createSearchProfile, getSearchProfiles, updateMe, createCheckoutSession } from "@/lib/api";
 
 // ─── Step progress bar ──────────────────────────────────────
 function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
@@ -240,7 +241,18 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
       });
       onNext({ profileId: profile.id });
     } catch (err: any) {
-      setError(err.message || "Failed to create profile");
+      const msg: string = err.message || "";
+      // If user already hit the plan profile limit, reuse the existing profile
+      if (msg.includes("máximo") || msg.includes("maximum") || msg.includes("plan") || msg.includes("perfil")) {
+        try {
+          const existing = await getSearchProfiles();
+          if (existing.length > 0) {
+            onNext({ profileId: existing[0].id });
+            return;
+          }
+        } catch {}
+      }
+      setError(msg || "Failed to create profile");
     } finally {
       setLoading(false);
     }
@@ -284,7 +296,7 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
       />
 
       {/* Locations */}
-      <TagInput
+      <LocationTagInput
         label={t("locationsLabel")}
         value={locations}
         onChange={setLocations}
@@ -474,6 +486,24 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void;
 function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "starter" | "pro") => void }) {
   const t = useTranslations("onboarding");
   const [selected, setSelected] = useState<"starter" | "pro">("pro");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFinish() {
+    if (selected === "starter") {
+      onFinish("starter");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const { url } = await createCheckoutSession();
+      window.location.href = url;
+    } catch (err: any) {
+      setError(err.message || "Failed to start checkout");
+      setLoading(false);
+    }
+  }
 
   const starterFeatures = [
     t("planStarterFeature1"),
@@ -588,21 +618,36 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
         </button>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          {error}
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <button
           type="button"
           onClick={onBack}
-          className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
+          disabled={loading}
+          className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors disabled:opacity-50"
         >
           {t("back")}
         </button>
         <button
           type="button"
-          onClick={() => onFinish(selected)}
-          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+          onClick={handleFinish}
+          disabled={loading}
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
         >
-          {selected === "pro" ? t("planProCta") : t("planStarterCta")}
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          {loading ? (
+            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              {selected === "pro" ? t("planProCta") : t("planStarterCta")}
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -612,7 +657,22 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
 // ─── Onboarding Page ──────────────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = sessionStorage.getItem("onboarding_step");
+    const parsed = saved ? parseInt(saved) : 1;
+    return (parsed >= 1 && parsed <= 4 ? parsed : 1) as 1 | 2 | 3 | 4;
+  });
+
+  function goToStep(s: 1 | 2 | 3 | 4) {
+    sessionStorage.setItem("onboarding_step", String(s));
+    setStep(s);
+  }
+
+  function finish() {
+    sessionStorage.removeItem("onboarding_step");
+    router.push("/dashboard");
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
@@ -629,18 +689,14 @@ export default function OnboardingPage() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)]">
-          {step === 1 && <Step1 onNext={() => setStep(2)} />}
-          {step === 2 && <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
-          {step === 3 && <Step3 onBack={() => setStep(2)} onFinish={() => setStep(4)} />}
+          {step === 1 && <Step1 onNext={() => goToStep(2)} />}
+          {step === 2 && <Step2 onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
+          {step === 3 && <Step3 onBack={() => goToStep(2)} onFinish={() => goToStep(4)} />}
           {step === 4 && (
             <Step4
-              onBack={() => setStep(3)}
+              onBack={() => goToStep(3)}
               onFinish={(plan) => {
-                if (plan === "pro") {
-                  router.push("/pricing");
-                } else {
-                  router.push("/dashboard");
-                }
+                if (plan === "starter") finish();
               }}
             />
           )}
