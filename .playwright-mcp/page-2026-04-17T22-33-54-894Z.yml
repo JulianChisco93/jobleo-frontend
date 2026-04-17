@@ -1,0 +1,150 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - link "jobleo" [ref=e6] [cursor=pointer]:
+            - /url: /
+          - navigation [ref=e7]:
+            - link "Features" [ref=e8] [cursor=pointer]:
+              - /url: /#features
+            - link "Pricing" [ref=e9] [cursor=pointer]:
+              - /url: /pricing
+            - link "About" [ref=e10] [cursor=pointer]:
+              - /url: /about
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - button "EN" [ref=e13]
+            - button "ES" [ref=e14]
+          - link "Login" [ref=e15] [cursor=pointer]:
+            - /url: /login
+          - link "Get Started" [ref=e16] [cursor=pointer]:
+            - /url: /login
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: bolt
+          - text: AI-POWERED
+        - heading "Your dream job, on WhatsApp." [level=1] [ref=e23]
+        - paragraph [ref=e24]: Upload your CV, set your search criteria, and receive curated job matches directly on WhatsApp — automatically.
+        - generic [ref=e25]:
+          - link "Get Started Free arrow_forward" [ref=e26] [cursor=pointer]:
+            - /url: /login
+            - text: Get Started Free
+            - generic [ref=e27]: arrow_forward
+          - link "See How It Works" [ref=e28] [cursor=pointer]:
+            - /url: "#how-it-works"
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e32]: person
+            - generic [ref=e34]: person
+            - generic [ref=e36]: person
+          - generic [ref=e37]: Joined by 12,000+ job seekers
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e43]: chat
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Jobleo Match Alert
+            - paragraph [ref=e46]: Online
+        - generic [ref=e47]:
+          - paragraph [ref=e49]: "Hey! We found a 98% match for you: Senior Frontend Developer"
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - generic [ref=e52]: New Match Found
+              - generic [ref=e53]: 98% SCORE
+            - heading "Senior Frontend Developer" [level=4] [ref=e54]
+            - paragraph [ref=e55]: Acme Corp • Toronto, Canada
+            - generic [ref=e56]:
+              - button "Apply Now →" [ref=e57]
+              - button "bookmark" [ref=e58]:
+                - generic [ref=e59]: bookmark
+    - generic [ref=e61]:
+      - heading "Three Steps to Automated Job Search" [level=2] [ref=e62]
+      - paragraph [ref=e63]: Upload your CV, set your search criteria, and receive curated job matches directly on WhatsApp — automatically.
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e68]: upload_file
+          - heading "Upload Your CV" [level=3] [ref=e70]
+          - paragraph [ref=e71]: We analyze your resume to understand your skills and match you with the most relevant opportunities.
+        - generic [ref=e72]:
+          - generic [ref=e75]: tune
+          - heading "Configure Search" [level=3] [ref=e77]
+          - paragraph [ref=e78]: Define your job titles, locations, and preferences. Set how often you want to receive alerts.
+        - generic [ref=e79]:
+          - generic [ref=e82]: notifications_active
+          - heading "Receive on WhatsApp" [level=3] [ref=e83]
+          - paragraph [ref=e84]: Get real-time job alerts directly on WhatsApp with match scores and quick apply links.
+    - generic [ref=e86]:
+      - generic [ref=e88]:
+        - generic [ref=e89]: FEATURES
+        - heading "Everything You Need to Land Your Next Role" [level=2] [ref=e90]
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - generic [ref=e94]: analytics
+            - heading "AI CV Matching" [level=3] [ref=e95]
+            - paragraph [ref=e96]: Our AI analyzes your resume and scores each job based on skills alignment.
+          - generic [ref=e100]: 85% Match
+        - generic [ref=e101]:
+          - generic [ref=e102]: schedule
+          - generic [ref=e103]:
+            - heading "Multi-Platform Search" [level=3] [ref=e104]
+            - paragraph [ref=e105]: We search LinkedIn, Indeed, and more — all in one unified feed.
+        - generic [ref=e106]:
+          - generic [ref=e107]: filter_alt
+          - generic [ref=e108]:
+            - heading "Smart Filtering" [level=3] [ref=e109]
+            - paragraph [ref=e110]: Set keywords to include or exclude so you only see relevant opportunities.
+        - generic [ref=e111]:
+          - generic [ref=e113]: format_quote
+          - generic [ref=e114]:
+            - paragraph [ref=e115]: “I got my current job through Jobleo. The WhatsApp alerts were so convenient — I never missed a relevant posting.”
+            - generic [ref=e117]: — Maria G., Frontend Developer
+        - generic [ref=e118]:
+          - generic [ref=e119]: smartphone
+          - generic [ref=e120]:
+            - heading "Instant WhatsApp Alerts" [level=3] [ref=e121]
+            - paragraph [ref=e122]: Receive formatted job cards on WhatsApp with one-tap apply links.
+    - generic [ref=e125]:
+      - heading "Ready to Automate Your Job Search?" [level=2] [ref=e126]
+      - paragraph [ref=e127]: Join thousands of professionals getting jobs delivered to their WhatsApp.
+      - generic [ref=e128]:
+        - link "Get Started Free" [ref=e129] [cursor=pointer]:
+          - /url: /login
+        - link "Explore Pricing" [ref=e130] [cursor=pointer]:
+          - /url: /pricing
+    - contentinfo [ref=e131]:
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - generic [ref=e134]: jobleo
+          - generic [ref=e135]: Your next job, delivered to WhatsApp.
+          - generic [ref=e136]: Operated by Julian David Chisco Henao
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - generic [ref=e139]: Product
+            - link "Features" [ref=e140] [cursor=pointer]:
+              - /url: /#features
+            - link "Pricing" [ref=e141] [cursor=pointer]:
+              - /url: /pricing
+            - link "About" [ref=e142] [cursor=pointer]:
+              - /url: /about
+            - link "Login" [ref=e143] [cursor=pointer]:
+              - /url: /login
+          - generic [ref=e144]:
+            - generic [ref=e145]: Legal
+            - link "Terms of Service" [ref=e146] [cursor=pointer]:
+              - /url: "#"
+            - link "Privacy Policy" [ref=e147] [cursor=pointer]:
+              - /url: "#"
+  - generic [ref=e152] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e153]:
+      - img [ref=e154]
+    - generic [ref=e157]:
+      - button "Open issues overlay" [ref=e158]:
+        - generic [ref=e159]:
+          - generic [ref=e160]: "0"
+          - generic [ref=e161]: "1"
+        - generic [ref=e162]: Issue
+      - button "Collapse issues badge" [ref=e163]:
+        - img [ref=e164]
+  - alert [ref=e166]

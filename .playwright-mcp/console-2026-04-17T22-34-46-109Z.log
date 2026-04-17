@@ -1,0 +1,258 @@
+[     187ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[     292ms] [LOG] [Fast Refresh] done in 219ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[     684ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[     735ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[     951ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[    5674ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253Fredirect_to%253Dhttp%25253A%25252F%25252Flocalhost%25253A3000%25252Fauth%25252Fcallback&dsh=S37280526%3A1776465290827280&client_id=208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com&o2v=2&redirect_uri=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=email+profile&service=lso&state=be69a03b-bac5-45b6-8b03-6d4a5ca378dd&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANjCaFg5r6i71a_jimzd4YIIQGiJ9PwFEZ3e14GSj37o_g9g22jZ_vEJDKfcxZhQLtwqcflCSkjACH8Gbg-lcoNVmF53NenAxbPu5U-a8NWLjiVTshG93fOB4puqyo9iJpKKd57nQJDUrnFbGMJSXeRWP5jKhI5VvA1gqQe1mMeNGVtYWIwrPP8kR-EhUEDMdufL5rSIorxHPbW2HLXWGIPvoMKYEh7L7T5Y_woO3BZ3BUgnysptHjB4TfO0PCxRch5CfYCVIJcV5C3mBhpVUo5IT3pDvYV4Icyht1iKFiBl9ke4uxxMYbsdwV9vPwbVNuFALzk72b3UkPuV2V_41Fy1MqaiMC9ssHQMYz7OmzBtBH0a3tFtmHqQap_6nV_F-xwEw8nqkpiVUn9qoaoyYOLdfD-TRP2K7wHoiu2QZDXhOtReqo4iQb0G9mg0QQreN9oyZywWGlNnwdM4c2OvqBzF_REAXcwEQugr5tpuMIuRPG3uyk%26flowName%3DGeneralOAuthFlow%26as%3DS37280526%253A1776465290827280%26client_id%3D208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co&rart=ANgoxcfF6yibOXllk9NctKI16kTD2Ls3aG92Z3OL_b0IHcMGygvAZQK8O3UT1YK9O8wdX18RC9BBqPvea0-E1xALFokKXg6S_cOU9xL0HxE_bWjSuDquw5Q:0
+[    5715ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.8tJAv8mZf9w.es5.O/am=Kf8GAABCEUgGwP___zcAIACCaOB6FoAmEBkAAAAAAAAAALBAAAAaAQ/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlHY3YrFkmwUqXLobOFJ2A2NzhLFZw/dti=1/m=_b,_tp:468
+[    5715ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.8tJAv8mZf9w.es5.O/am=Kf8GAABCEUgGwP___zcAIACCaOB6FoAmEBkAAAAAAAAAALBAAAAaAQ/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlHY3YrFkmwUqXLobOFJ2A2NzhLFZw/dti=1/m=_b,_tp:468
+[   12830ms] [WARNING] Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+Element with focus: <div.sZwd7c B6Vhqe>
+Ancestor with aria-hidden: <div.TdwKnf> @ https://accounts.google.com/v3/signin/identifier?opparams=%253Fredirect_to%253Dhttp%25253A%25252F%25252Flocalhost%25253A3000%25252Fauth%25252Fcallback&dsh=S37280526%3A1776465290827280&client_id=208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com&o2v=2&redirect_uri=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=email+profile&service=lso&state=be69a03b-bac5-45b6-8b03-6d4a5ca378dd&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANjCaFg5r6i71a_jimzd4YIIQGiJ9PwFEZ3e14GSj37o_g9g22jZ_vEJDKfcxZhQLtwqcflCSkjACH8Gbg-lcoNVmF53NenAxbPu5U-a8NWLjiVTshG93fOB4puqyo9iJpKKd57nQJDUrnFbGMJSXeRWP5jKhI5VvA1gqQe1mMeNGVtYWIwrPP8kR-EhUEDMdufL5rSIorxHPbW2HLXWGIPvoMKYEh7L7T5Y_woO3BZ3BUgnysptHjB4TfO0PCxRch5CfYCVIJcV5C3mBhpVUo5IT3pDvYV4Icyht1iKFiBl9ke4uxxMYbsdwV9vPwbVNuFALzk72b3UkPuV2V_41Fy1MqaiMC9ssHQMYz7OmzBtBH0a3tFtmHqQap_6nV_F-xwEw8nqkpiVUn9qoaoyYOLdfD-TRP2K7wHoiu2QZDXhOtReqo4iQb0G9mg0QQreN9oyZywWGlNnwdM4c2OvqBzF_REAXcwEQugr5tpuMIuRPG3uyk%26flowName%3DGeneralOAuthFlow%26as%3DS37280526%253A1776465290827280%26client_id%3D208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co&rart=ANgoxcfF6yibOXllk9NctKI16kTD2Ls3aG92Z3OL_b0IHcMGygvAZQK8O3UT1YK9O8wdX18RC9BBqPvea0-E1xALFokKXg6S_cOU9xL0HxE_bWjSuDquw5Q:0
+[   17533ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   17818ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   18032ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[   18736ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   18737ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   18742ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   18742ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[   19796ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   19796ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[   19798ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   19798ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   20751ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   20971ms] [LOG] [Fast Refresh] done in 320ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   22425ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/jobs:0
+[   22425ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   22428ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/alerts?limit=200' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/jobs:0
+[   22429ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/alerts?limit=200:0
+[   23184ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   23219ms] [LOG] [Fast Refresh] done in 143ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   23468ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/jobs:0
+[   23468ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   23471ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/alerts?limit=200' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/jobs:0
+[   23471ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/alerts?limit=200:0
+[   25119ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   25379ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/profiles:0
+[   25380ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   25724ms] [LOG] [Fast Refresh] done in 717ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   26421ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/profiles:0
+[   26421ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   52301ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   52405ms] [LOG] [Fast Refresh] done in 208ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   52833ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   52907ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   53137ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard..." notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[   53409ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/profiles:0
+[   53409ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   54453ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard/profiles:0
+[   54453ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   58118ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   58118ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   58127ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   58127ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[   59151ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   59151ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[   59161ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[   59161ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  402958ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  408206ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  415841ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  416106ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  416925ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[  418342ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' (redirected from 'http://localhost:3000/api/v1/searches/') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  418343ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  418375ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' (redirected from 'http://localhost:3000/api/v1/jobs/?limit=50') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  418375ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  419579ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' (redirected from 'http://localhost:3000/api/v1/searches/') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  419583ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  419584ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' (redirected from 'http://localhost:3000/api/v1/jobs/?limit=50') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  419592ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  483312ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  483550ms] [LOG] [Fast Refresh] done in 205ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  483830ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' (redirected from 'http://localhost:3000/api/v1/searches/') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  483850ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  483921ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' (redirected from 'http://localhost:3000/api/v1/jobs/?limit=50') from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  483921ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  484890ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  484890ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  484968ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  484968ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  513384ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  520520ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  520784ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  522151ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[  522695ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  522695ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  522768ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  522768ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0
+[  523753ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/searches/' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  523754ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/searches/:0
+[  523803ms] [ERROR] Access to fetch at 'https://api.jobleo.app/api/v1/jobs/?limit=50' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/dashboard:0
+[  523803ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.jobleo.app/api/v1/jobs/?limit=50:0

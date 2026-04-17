@@ -143,132 +143,149 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
   }
 
   return (
-    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8 max-w-3xl">
+    <form onSubmit={handleSubmit(wrappedSubmit)} className="flex flex-col gap-6 p-8">
 
-      {/* Name + Profession row */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="flex flex-col gap-2">
-          <label className={labelCls}>{t("profileNameLabel")}</label>
-          <input {...register("name")} className={inputCls} />
-          {errors.name && <span className="text-xs text-error">{t("profileNameLabel")} required</span>}
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className={labelCls}>{t("professionLabel")}</label>
-          <input {...register("profession")} className={inputCls} />
-        </div>
-      </div>
+      {/* Body — two-panel grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
 
-      {/* Job Titles */}
-      <div className="flex flex-col gap-2">
-        <TagInput
-          label={t("jobTitlesLabel")}
-          value={jobTitles}
-          onChange={(v) => setValue("job_titles" as any, v)}
-          placeholder={t("addTitle")}
-          maxTags={5}
-        />
-        <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />
-      </div>
+        {/* LEFT — ¿Qué busco? */}
+        <div className="flex flex-col gap-6">
 
-      {/* Locations */}
-      <div>
-        <LocationTagInput
-          label={t("locationsLabel")}
-          value={locations}
-          onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
-          placeholder={t("addLocation")}
-          helperText={t("locationsTip")}
-        />
-        {locationsError && (
-          <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
-        )}
-        <div className="mt-2">
-          <TipBanner title={t("locationsTipTitle")} body={t("locationsTipBody")} />
-        </div>
-      </div>
-
-      {/* Include / Exclude */}
-      <div className="grid grid-cols-2 gap-6">
-        <TagInput
-          label={t("includeKeywordsLabel")}
-          value={includeTerms}
-          onChange={(v) => setValue("include_terms" as any, v)}
-          placeholder={t("addKeyword")}
-        />
-        <TagInput
-          label={t("excludeKeywordsLabel")}
-          value={excludeTerms}
-          onChange={(v) => setValue("exclude_terms" as any, v)}
-          placeholder={t("addKeyword")}
-        />
-      </div>
-
-      {/* Frequency + Active */}
-      <div className="flex items-center gap-6">
-        <div className="flex flex-col gap-2 flex-1">
-          <label className={labelCls}>{t("frequencyLabel")}</label>
-          <select
-            {...register("frequency_minutes", { valueAsNumber: true })}
-            className={inputCls}
-          >
-            {FREQUENCY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {t(opt.labelKey as any)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center gap-3 pt-6">
-          <Toggle
-            checked={!!isActive}
-            onChange={(v) => setValue("is_active", v)}
-            label={t("profileActiveLabel")}
-          />
-        </div>
-      </div>
-
-      {/* Business Hours */}
-      <div className="flex flex-col gap-4 p-5 bg-surface-container-low rounded-xl">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-on-surface">
-            {t("businessHoursLabel")}
-          </span>
-          <Toggle
-            checked={businessHoursOnly}
-            onChange={(v) => setValue("business_hours_only", v)}
-          />
-        </div>
-
-        {businessHoursOnly && (
-          <div className="flex items-center gap-6 pt-2 border-t border-outline-variant/20">
-            <Toggle
-              checked={watch("business_days_only")}
-              onChange={(v) => setValue("business_days_only", v)}
-              label={t("weekdaysOnlyLabel")}
-            />
-            <div className="flex gap-4 flex-1">
-              <div className="flex flex-col gap-2 flex-1">
-                <label className={labelCls}>{t("startHourLabel")}</label>
-                <select {...register("business_hours_start")} className={inputCls}>
-                  {HOUR_OPTIONS.map((h) => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <label className={labelCls}>{t("endHourLabel")}</label>
-                <select {...register("business_hours_end")} className={inputCls}>
-                  {HOUR_OPTIONS.map((h) => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
+          {/* Name + Profession */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <label className={labelCls}>{t("profileNameLabel")}</label>
+              <input {...register("name")} className={inputCls} />
+              {errors.name && <span className="text-xs text-error">{t("profileNameLabel")} required</span>}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className={labelCls}>{t("professionLabel")}</label>
+              <input {...register("profession")} className={inputCls} />
             </div>
           </div>
-        )}
+
+          {/* Job Titles */}
+          <div className="flex flex-col gap-2">
+            <TagInput
+              label={t("jobTitlesLabel")}
+              value={jobTitles}
+              onChange={(v) => setValue("job_titles" as any, v)}
+              placeholder={t("addTitle")}
+              maxTags={5}
+            />
+            <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />
+          </div>
+
+          {/* Locations */}
+          <div>
+            <LocationTagInput
+              label={t("locationsLabel")}
+              value={locations}
+              onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
+              placeholder={t("addLocation")}
+              helperText={t("locationsTip")}
+            />
+            {locationsError && (
+              <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
+            )}
+            <div className="mt-2">
+              <TipBanner title={t("locationsTipTitle")} body={t("locationsTipBody")} />
+            </div>
+          </div>
+
+          {/* Include / Exclude */}
+          <div className="grid grid-cols-2 gap-6">
+            <TagInput
+              label={t("includeKeywordsLabel")}
+              value={includeTerms}
+              onChange={(v) => setValue("include_terms" as any, v)}
+              placeholder={t("addKeyword")}
+            />
+            <TagInput
+              label={t("excludeKeywordsLabel")}
+              value={excludeTerms}
+              onChange={(v) => setValue("exclude_terms" as any, v)}
+              placeholder={t("addKeyword")}
+            />
+          </div>
+
+        </div>
+
+        {/* RIGHT — ¿Cómo busco? (settings card con Tonal Layering) */}
+        <div className="flex flex-col gap-5 p-6 bg-surface-container-lowest rounded-xl shadow-[var(--shadow-card)]">
+
+          {/* Frequency */}
+          <div className="flex flex-col gap-2">
+            <label className={labelCls}>{t("frequencyLabel")}</label>
+            <select
+              {...register("frequency_minutes", { valueAsNumber: true })}
+              className={inputCls}
+            >
+              {FREQUENCY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {t(opt.labelKey as any)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Active toggle — label ↔ toggle, sin pt-6 hack */}
+          <div className="flex items-center justify-between">
+            <span className={labelCls}>{t("profileActiveLabel")}</span>
+            <Toggle
+              checked={!!isActive}
+              onChange={(v) => setValue("is_active", v)}
+            />
+          </div>
+
+          {/* Tonal separator */}
+          <div className="h-px bg-surface-container-high" />
+
+          {/* Business Hours */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-on-surface">
+                {t("businessHoursLabel")}
+              </span>
+              <Toggle
+                checked={businessHoursOnly}
+                onChange={(v) => setValue("business_hours_only", v)}
+              />
+            </div>
+
+            {businessHoursOnly && (
+              <div className="flex flex-col gap-4 pt-3 border-t border-outline-variant/20">
+                <Toggle
+                  checked={watch("business_days_only")}
+                  onChange={(v) => setValue("business_days_only", v)}
+                  label={t("weekdaysOnlyLabel")}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-2">
+                    <label className={labelCls}>{t("startHourLabel")}</label>
+                    <select {...register("business_hours_start")} className={inputCls}>
+                      {HOUR_OPTIONS.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className={labelCls}>{t("endHourLabel")}</label>
+                    <select {...register("business_hours_end")} className={inputCls}>
+                      {HOUR_OPTIONS.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
 
-      {/* Footer actions */}
+      {/* Footer actions — ancho completo fuera del grid */}
       <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
         {!isNew && onDelete && (
           <button

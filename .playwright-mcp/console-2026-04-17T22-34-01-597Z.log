@@ -1,0 +1,78 @@
+[     199ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[     823ms] [LOG] [Fast Refresh] done in 727ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[    1577ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[    1625ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[    1866ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[   26482ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253Fredirect_to%253Dhttp%25253A%25252F%25252Flocalhost%25253A3000%25252Fauth%25252Fcallback&dsh=S120279870%3A1776465267089619&client_id=208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com&o2v=2&redirect_uri=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=email+profile&service=lso&state=89944fdc-bd86-4a4f-9e9c-5af1a09e2c1e&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANsiKsII-_IlTYrg7cRvnM9oFe7W1zQFJQxaiUjPL5o7DQscvw3jqxPZDwE6IzGXejGc0BU4gZbnO5CG34wi-kK6RgELRpQbPchbE3D2i2XO8rPpZGYKf63m2nUBVJd5x637sFItozvEZs4FQWLi_pCxL5JvtmfsXhUSQly0wJUOQu0Eo56jew-TqJSqMLhoQrVde2gO2z1lK_jfBn9dvDbqY5m1H-hqXYaJ1byEvck8gSgvava-ZS9PosCFfQLc-6ILKxQ17y22ovBHft9gGoaoAOmyN0beJOoqtQYxhmxZOfrcTJCODXnQJ6Vm4oKnl27-NiQ-QY_C8vosepQE_uKgiovwaGdX79SHwPf77t2MAbrMQ-BcfIN2LK7A3RPEobeeE2FuOOGAhEUYoZVYkB7zPtNGYwoib0yennghk2tajDoCW2CfIjxbFF8NoH1r3tUQVMmHflqSLZnEbLnrdtfk7SIySXjuAgq71dSgy3XJWd9HqE%26flowName%3DGeneralOAuthFlow%26as%3DS120279870%253A1776465267089619%26client_id%3D208948430332-4lsmgqokbp98ae5cei2d1v26eog1s01f.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fgwbufdxpxivvjksohvtn.supabase.co&rart=ANgoxceP8FUHsa1AZU4krOe5L6YujGfl399BSsMPIXcyEuzkjnPwS8hwpgKgKiJYaoDz8L_jEU3sKNaluqg-me7vSvKCtPnS3btGlq7HSW2cWEXdiPYGAwc:0
+[   26506ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.8tJAv8mZf9w.es5.O/am=Kf8GAABCEUgGwP___zcAIACCaOB6FoAmEBkAAAAAAAAAALBAAAAaAQ/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlHY3YrFkmwUqXLobOFJ2A2NzhLFZw/dti=1/m=_b,_tp:468
+[   26506ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.8tJAv8mZf9w.es5.O/am=Kf8GAABCEUgGwP___zcAIACCaOB6FoAmEBkAAAAAAAAAALBAAAAaAQ/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlHY3YrFkmwUqXLobOFJ2A2NzhLFZw/dti=1/m=_b,_tp:468
+[   33489ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   33833ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[   34003ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
