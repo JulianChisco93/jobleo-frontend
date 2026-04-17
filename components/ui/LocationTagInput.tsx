@@ -81,6 +81,7 @@ export function LocationTagInput({
         );
         const data = await res.json();
         const results: Suggestion[] = (data.results ?? [])
+          .filter((r: Record<string, string>) => r.result_type !== "country")
           .map((r: Record<string, string>) => formatSuggestion(r))
           .filter((s: Suggestion) => s.label)
           // deduplicate by label
