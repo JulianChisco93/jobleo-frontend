@@ -10,6 +10,34 @@ import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { Toggle } from "@/components/ui/Toggle";
 import type { SearchProfile } from "@/lib/types";
 
+function TipBanner({ title, body }: { title: string; body: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-xs overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-amber-100/60 transition-colors text-left"
+      >
+        <span className="material-symbols-outlined text-[15px] text-amber-500 flex-shrink-0"
+          style={{ fontVariationSettings: "'FILL' 1" }}>
+          lightbulb
+        </span>
+        <span className="font-semibold flex-1">{title}</span>
+        <span className="material-symbols-outlined text-[15px] text-amber-400 transition-transform duration-200"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+          expand_more
+        </span>
+      </button>
+      {open && (
+        <p className="px-3 pb-3 pt-0 leading-relaxed text-amber-800 border-t border-amber-200">
+          {body}
+        </p>
+      )}
+    </div>
+  );
+}
+
 const schema = z.object({
   name: z.string().min(1),
   profession: z.string().min(1),
@@ -131,13 +159,16 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       </div>
 
       {/* Job Titles */}
-      <TagInput
-        label={t("jobTitlesLabel")}
-        value={jobTitles}
-        onChange={(v) => setValue("job_titles" as any, v)}
-        placeholder={t("addTitle")}
-        maxTags={5}
-      />
+      <div className="flex flex-col gap-2">
+        <TagInput
+          label={t("jobTitlesLabel")}
+          value={jobTitles}
+          onChange={(v) => setValue("job_titles" as any, v)}
+          placeholder={t("addTitle")}
+          maxTags={5}
+        />
+        <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />
+      </div>
 
       {/* Locations */}
       <div>
@@ -151,6 +182,9 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
         {locationsError && (
           <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
         )}
+        <div className="mt-2">
+          <TipBanner title={t("locationsTipTitle")} body={t("locationsTipBody")} />
+        </div>
       </div>
 
       {/* Include / Exclude */}
