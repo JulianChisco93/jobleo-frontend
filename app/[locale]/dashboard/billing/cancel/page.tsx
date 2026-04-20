@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Link } from "@/i18n/navigation";
-import { CheckoutButton } from "@/components/billing/CheckoutButton";
 
 export default function BillingCancelPage() {
   const t = useTranslations("billing");
@@ -29,10 +28,12 @@ export default function BillingCancelPage() {
           </p>
 
           <div className="flex flex-col gap-3">
-            <CheckoutButton
-              label={t("tryAgain")}
-              className="w-full py-3 px-6 bg-primary-gradient text-on-primary font-bold text-sm rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60"
-            />
+            <Link
+              href="/dashboard/settings"
+              className="w-full py-3 px-6 bg-primary-gradient text-on-primary font-bold text-sm rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-center"
+            >
+              {t("tryAgain")}
+            </Link>
             <Link
               href="/dashboard"
               className="w-full py-3 px-6 text-on-surface-variant border border-outline-variant font-bold text-sm rounded-xl hover:bg-surface-container-low transition-colors text-center"

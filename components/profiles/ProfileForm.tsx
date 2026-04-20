@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { Toggle } from "@/components/ui/Toggle";
-import type { SearchProfile } from "@/lib/types";
+import type { SearchProfile, PlanLimits } from "@/lib/types";
 
 function TipBanner({ title, body }: { title: string; body: string }) {
   const [open, setOpen] = useState(false);
@@ -60,6 +60,7 @@ interface ProfileFormProps {
   onSubmit: (data: ProfileFormData) => Promise<void>;
   onDelete?: () => Promise<void>;
   isNew?: boolean;
+  limits?: PlanLimits;
 }
 
 const FREQUENCY_OPTIONS = [
@@ -90,8 +91,12 @@ function toHourStr(val: unknown): string {
   return "09:00";
 }
 
-export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: ProfileFormProps) {
+export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }: ProfileFormProps) {
   const t = useTranslations("profiles");
+  const plan = limits?.plan ?? "free";
+  const maxJobTitles = limits?.max_job_titles_per_profile ?? 0;
+  const maxLocations = limits?.max_locations_per_profile ?? 2;
+  const businessHoursEnforced = limits?.business_hours_only_enforced ?? false;
 
   const {
     register,
@@ -108,7 +113,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
       locations: defaultValues?.locations || [] as string[],
       include_terms: defaultValues?.include_terms || [],
       exclude_terms: defaultValues?.exclude_terms || [],
-      frequency_minutes: defaultValues?.frequency_minutes || 60,
+      frequency_minutes: defaultValues?.frequency_minutes || (plan === "free" ? 1440 : 60),
       is_active: defaultValues?.is_active ?? true,
       business_hours_only: defaultValues?.business_hours_only || false,
       business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
@@ -166,14 +171,24 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
 
           {/* Job Titles */}
           <div className="flex flex-col gap-2">
-            <TagInput
-              label={t("jobTitlesLabel")}
-              value={jobTitles}
-              onChange={(v) => setValue("job_titles" as any, v)}
-              placeholder={t("addTitle")}
-              maxTags={5}
-            />
-            <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />
+            {maxJobTitles === 0 ? (
+              <div className="flex flex-col gap-2">
+                <span className={labelCls}>{t("jobTitlesLabel")}</span>
+                <div className="flex items-center gap-2 px-4 py-3 bg-surface-container-low rounded-xl text-xs text-on-surface-variant">
+                  <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                  {t("jobTitlesDisabledFree")}
+                </div>
+              </div>
+            ) : (
+              <TagInput
+                label={t("jobTitlesLabel")}
+                value={jobTitles}
+                onChange={(v) => setValue("job_titles" as any, v)}
+                placeholder={t("addTitle")}
+                maxTags={maxJobTitles}
+              />
+            )}
+            {maxJobTitles > 0 && <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />}
           </div>
 
           {/* Locations */}
@@ -184,6 +199,8 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
               onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
               placeholder={t("addLocation")}
               helperText={t("locationsTip")}
+              maxTags={maxLocations}
+              upgradeMessage={t("locationLimitReached")}
             />
             {locationsError && (
               <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
@@ -217,16 +234,23 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
           {/* Frequency */}
           <div className="flex flex-col gap-2">
             <label className={labelCls}>{t("frequencyLabel")}</label>
-            <select
-              {...register("frequency_minutes", { valueAsNumber: true })}
-              className={inputCls}
-            >
-              {FREQUENCY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {t(opt.labelKey as any)}
-                </option>
-              ))}
-            </select>
+            {plan === "free" ? (
+              <div className="flex items-center gap-2 px-4 py-3 bg-surface-container-low rounded-xl text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                {t("freePlanFrequencyLocked")}
+              </div>
+            ) : (
+              <select
+                {...register("frequency_minutes", { valueAsNumber: true })}
+                className={inputCls}
+              >
+                {FREQUENCY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {t(opt.labelKey as any)}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Active toggle — label ↔ toggle, sin pt-6 hack */}
@@ -239,48 +263,57 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew }: Profil
           </div>
 
           {/* Tonal separator */}
-          <div className="h-px bg-surface-container-high" />
+          {plan !== "free" && <div className="h-px bg-surface-container-high" />}
 
-          {/* Business Hours */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-on-surface">
-                {t("businessHoursLabel")}
-              </span>
-              <Toggle
-                checked={businessHoursOnly}
-                onChange={(v) => setValue("business_hours_only", v)}
-              />
+          {/* Business Hours — hidden for free, informational for pro, editable for premium */}
+          {plan === "pro" && (
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-primary-fixed/30 rounded-xl text-xs text-primary">
+              <span className="material-symbols-outlined text-[15px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+              <span>{t("businessHoursEnforced")}</span>
             </div>
+          )}
 
-            {businessHoursOnly && (
-              <div className="flex flex-col gap-4 pt-3 border-t border-outline-variant/20">
+          {plan === "premium" && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-on-surface">
+                  {t("businessHoursLabel")}
+                </span>
                 <Toggle
-                  checked={watch("business_days_only")}
-                  onChange={(v) => setValue("business_days_only", v)}
-                  label={t("weekdaysOnlyLabel")}
+                  checked={businessHoursOnly}
+                  onChange={(v) => setValue("business_hours_only", v)}
                 />
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-2">
-                    <label className={labelCls}>{t("startHourLabel")}</label>
-                    <select {...register("business_hours_start")} className={inputCls}>
-                      {HOUR_OPTIONS.map((h) => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className={labelCls}>{t("endHourLabel")}</label>
-                    <select {...register("business_hours_end")} className={inputCls}>
-                      {HOUR_OPTIONS.map((h) => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
+              </div>
+
+              {businessHoursOnly && (
+                <div className="flex flex-col gap-4 pt-3 border-t border-outline-variant/20">
+                  <Toggle
+                    checked={watch("business_days_only")}
+                    onChange={(v) => setValue("business_days_only", v)}
+                    label={t("weekdaysOnlyLabel")}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-2">
+                      <label className={labelCls}>{t("startHourLabel")}</label>
+                      <select {...register("business_hours_start")} className={inputCls}>
+                        {HOUR_OPTIONS.map((h) => (
+                          <option key={h} value={h}>{h}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className={labelCls}>{t("endHourLabel")}</label>
+                      <select {...register("business_hours_end")} className={inputCls}>
+                        {HOUR_OPTIONS.map((h) => (
+                          <option key={h} value={h}>{h}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
         </div>
       </div>

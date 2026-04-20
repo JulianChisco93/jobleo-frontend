@@ -3,7 +3,8 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSearchProfile, updateSearchProfile, deleteSearchProfile } from "@/lib/api";
+import { getSearchProfile, updateSearchProfile, deleteSearchProfile, analyzeSearchConfig } from "@/lib/api";
+import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ProfileForm, type ProfileFormData } from "@/components/profiles/ProfileForm";
 
@@ -20,6 +21,10 @@ export default function EditProfilePage({
 
   const [resolvedParams, setResolvedParams] = React.useState<{ id: string } | null>(null);
   const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [analysis, setAnalysis] = React.useState<string | null>(null);
+  const [analyzingConfig, setAnalyzingConfig] = React.useState(false);
+  const [analyzeError, setAnalyzeError] = React.useState<string | null>(null);
+  const { limits } = usePlanLimits();
 
   React.useEffect(() => {
     params.then(setResolvedParams);
@@ -46,6 +51,21 @@ export default function EditProfilePage({
       router.push(`${prefix}/dashboard/profiles`);
     },
   });
+
+  async function handleAnalyze() {
+    if (!resolvedParams?.id) return;
+    setAnalyzingConfig(true);
+    setAnalyzeError(null);
+    setAnalysis(null);
+    try {
+      const result = await analyzeSearchConfig(resolvedParams.id);
+      setAnalysis(result.analysis);
+    } catch (err: unknown) {
+      setAnalyzeError(err instanceof Error ? err.message : t("analyzeError"));
+    } finally {
+      setAnalyzingConfig(false);
+    }
+  }
 
   async function handleSubmit(data: ProfileFormData) {
     setSaveError(null);
@@ -87,7 +107,55 @@ export default function EditProfilePage({
               <p className="text-sm text-on-surface-variant mt-1">{profile.name}</p>
             )}
           </div>
+          {profile && (
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={analyzingConfig}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
+            >
+              {analyzingConfig ? (
+                <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span
+                  className="material-symbols-outlined text-[16px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  auto_awesome
+                </span>
+              )}
+              {analyzingConfig ? t("analyzing") : t("analyzeConfig")}
+            </button>
+          )}
         </div>
+
+        {/* AI Analysis panel */}
+        {(analysis || analyzeError) && (
+          <div className="mx-8 mt-4 flex flex-col gap-3 p-4 bg-surface-container-low rounded-xl">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                {t("aiAnalysis")}
+              </span>
+              <button
+                type="button"
+                onClick={() => { setAnalysis(null); setAnalyzeError(null); }}
+                className="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high flex items-center justify-center transition-colors"
+              >
+                <span className="material-symbols-outlined text-[14px]">close</span>
+              </button>
+            </div>
+            {analyzeError ? (
+              <p className="text-sm text-error">{analyzeError}</p>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {analysis!.split("\n").filter(Boolean).map((line, i) => (
+                  <p key={i} className="text-sm text-on-surface leading-relaxed">{line}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {saveError && (
           <div className="mx-8 mt-4 flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
             <span className="material-symbols-outlined text-[18px]">error</span>
@@ -99,6 +167,7 @@ export default function EditProfilePage({
             defaultValues={profile}
             onSubmit={handleSubmit}
             onDelete={() => remove()}
+            limits={limits}
           />
         )}
       </main>

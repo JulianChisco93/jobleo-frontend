@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getJobAlerts, getSearchProfiles } from "@/lib/api";
+import { getJobAlerts, getSearchProfiles, generateJobExplanation } from "@/lib/api";
+import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import type { JobAlert } from "@/lib/types";
@@ -42,6 +43,22 @@ function SortableHeader({
 
 function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }) {
   const t = useTranslations("jobs");
+  const [explanation, setExplanation] = useState<string | null>(job.ai_explanation ?? null);
+  const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [explainError, setExplainError] = useState<string | null>(null);
+
+  async function handleExplain() {
+    setLoadingExplanation(true);
+    setExplainError(null);
+    try {
+      const result = await generateJobExplanation(job.id);
+      setExplanation(result.ai_explanation ?? null);
+    } catch (err: unknown) {
+      setExplainError(err instanceof Error ? err.message : t("explainError"));
+    } finally {
+      setLoadingExplanation(false);
+    }
+  }
 
   return (
     <div
@@ -95,6 +112,37 @@ function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }
               </div>
             </div>
           </div>
+
+          {/* AI Explanation */}
+          <div className="flex flex-col gap-3 p-4 bg-surface-container-low rounded-xl">
+            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+              {t("aiExplanation")}
+            </span>
+            {explanation ? (
+              <p className="text-sm text-on-surface leading-relaxed">{explanation}</p>
+            ) : loadingExplanation ? (
+              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                {t("explaining")}
+              </div>
+            ) : (
+              <button
+                onClick={handleExplain}
+                className="flex items-center gap-2 self-start px-4 py-2 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <span
+                  className="material-symbols-outlined text-[16px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  auto_awesome
+                </span>
+                {t("explainMatch")}
+              </button>
+            )}
+            {explainError && (
+              <p className="text-xs text-error mt-1">{explainError}</p>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
@@ -141,13 +189,17 @@ export default function JobHistoryPage() {
     queryFn: () => getJobAlerts({ search_config_id: profileFilter || undefined, limit: 200 }),
   });
 
-  // Filter to last 7 days — alerts with no parseable date are included
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const recent = jobs.filter((j) => {
-    if (!j.sent_at) return true;
-    const d = new Date(j.sent_at.replace(" ", "T"));
-    return isNaN(d.getTime()) || d.getTime() >= oneWeekAgo;
-  });
+  const { limits } = usePlanLimits();
+
+  // Free plan: filter to last 7 days. Pro/Premium: show full history (backend handles access).
+  const recent = limits.plan === "free"
+    ? jobs.filter((j) => {
+        if (!j.sent_at) return true;
+        const d = new Date(j.sent_at.replace(" ", "T"));
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        return isNaN(d.getTime()) || d.getTime() >= oneWeekAgo;
+      })
+    : jobs;
 
   // Sort
   function getSortValue(j: JobAlert, field: SortableField): string | number {

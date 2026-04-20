@@ -2,14 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getSearchProfiles, getJobs } from "@/lib/api";
+import { getSearchProfiles, getJobs, getMe } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
-import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { formatLastSearched } from "@/lib/utils";
+import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
 const PROFILE_ACCENTS = [
@@ -70,18 +70,32 @@ export default function DashboardPage() {
     queryFn: () => getJobs({ limit: 50 }),
   });
 
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
+  const { limits } = usePlanLimits();
+
   const activeProfiles = profiles.filter((p) => p.is_active);
   const lastSearched = profiles.reduce(
     (acc, p) => (p.updated_at > acc ? p.updated_at : acc),
     ""
   );
-  const atMax = profiles.length >= 3;
+  const atMax = profiles.length >= limits.max_profiles;
+  const showWhatsAppBanner =
+    (me?.plan === "pro" || me?.plan === "premium") && !me?.whatsapp_number;
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
       <DashboardTopBar title={t("title")} userName={userName} />
 
       <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
+        {/* WhatsApp missing banner */}
+        {showWhatsAppBanner && (
+          <Link href={`${prefix}/dashboard/settings`} className="flex items-center gap-3 mb-6 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl text-sm font-medium hover:bg-secondary-container/80 transition-colors">
+            <span className="material-symbols-outlined text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>whatsapp</span>
+            <span className="flex-1">{t("whatsappMissingBanner")}</span>
+            <span className="text-xs font-bold uppercase tracking-wider opacity-70">{t("whatsappMissingCta")}</span>
+          </Link>
+        )}
+
         {/* Welcome banner */}
         <section className="mb-8 md:mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -119,7 +133,7 @@ export default function DashboardPage() {
             <h3 className="font-display font-bold text-xl text-on-surface flex items-center gap-2">
               {t("activeSearchProfiles")}
               <span className="text-xs bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full font-bold">
-                {profiles.length}/3
+                {profiles.length}/{limits.max_profiles}
               </span>
             </h3>
             <div className="relative group">

@@ -5,6 +5,7 @@ import { createCheckoutSession } from "@/lib/api";
 
 interface Props {
   label: string;
+  plan: "pro" | "premium";
   className?: string;
 }
 
@@ -16,13 +17,13 @@ function Spinner() {
   );
 }
 
-export function CheckoutButton({ label, className }: Props) {
+export function CheckoutButton({ label, plan, className }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
     setLoading(true);
     try {
-      const { url } = await createCheckoutSession();
+      const { url } = await createCheckoutSession(plan);
       window.location.href = url;
     } catch {
       // Not authenticated or API unavailable → send to login

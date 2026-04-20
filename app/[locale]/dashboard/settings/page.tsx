@@ -222,6 +222,11 @@ export default function SettingsPage() {
                       Pro
                     </span>
                   )}
+                  {me?.plan === "premium" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-secondary text-on-secondary rounded-full uppercase tracking-widest">
+                      Premium
+                    </span>
+                  )}
                 </div>
                 {me?.subscription_status && me.subscription_status !== "active" && (
                   <p className="text-xs text-error mt-1 capitalize">
@@ -230,17 +235,41 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {me?.plan === "pro" ? (
-                <PortalButton
-                  label={t("manageSubscription")}
-                  className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
-                />
-              ) : (
-                <CheckoutButton
-                  label={t("upgradeToPro")}
-                  className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
-                />
-              )}
+              <div className="flex flex-col items-end gap-2">
+                {me?.plan === "free" && (
+                  <>
+                    <CheckoutButton
+                      plan="pro"
+                      label={t("upgradeToPro")}
+                      className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
+                    />
+                    <CheckoutButton
+                      plan="premium"
+                      label={t("upgradeToPremium")}
+                      className="px-4 py-2 text-sm font-bold text-secondary border border-secondary-container rounded-xl hover:bg-secondary-container/50 transition-colors disabled:opacity-60"
+                    />
+                  </>
+                )}
+                {me?.plan === "pro" && (
+                  <>
+                    <CheckoutButton
+                      plan="premium"
+                      label={t("upgradeToPremium")}
+                      className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
+                    />
+                    <PortalButton
+                      label={t("manageSubscription")}
+                      className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
+                    />
+                  </>
+                )}
+                {me?.plan === "premium" && (
+                  <PortalButton
+                    label={t("manageSubscription")}
+                    className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
+                  />
+                )}
+              </div>
             </div>
           </Section>
 

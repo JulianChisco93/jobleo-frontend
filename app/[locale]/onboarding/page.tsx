@@ -483,9 +483,9 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void;
 }
 
 // ─── Step 4: Plan Selection ───────────────────────────────────
-function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "starter" | "pro") => void }) {
+function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "starter" | "pro" | "premium") => void }) {
   const t = useTranslations("onboarding");
-  const [selected, setSelected] = useState<"starter" | "pro">("pro");
+  const [selected, setSelected] = useState<"starter" | "pro" | "premium">("pro");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -497,7 +497,7 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
     setLoading(true);
     setError(null);
     try {
-      const { url } = await createCheckoutSession();
+      const { url } = await createCheckoutSession(selected);
       window.location.href = url;
     } catch (err: any) {
       setError(err.message || "Failed to start checkout");
@@ -518,6 +518,20 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
     t("planProFeature4"),
     t("planProFeature5"),
   ];
+  const premiumFeatures = [
+    t("planPremiumFeature1"),
+    t("planPremiumFeature2"),
+    t("planPremiumFeature3"),
+    t("planPremiumFeature4"),
+    t("planPremiumFeature5"),
+  ];
+
+  const ctaLabel =
+    selected === "premium"
+      ? t("planPremiumCta")
+      : selected === "pro"
+      ? t("planProCta")
+      : t("planStarterCta");
 
   return (
     <div className="flex flex-col gap-7">
@@ -532,12 +546,12 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
         <p className="text-sm text-on-surface-variant mt-1">{t("step4Subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Starter Card */}
         <button
           type="button"
           onClick={() => setSelected("starter")}
-          className={`flex flex-col gap-4 p-6 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
             selected === "starter"
               ? "border-secondary bg-secondary-container shadow-lg"
               : "border-outline-variant bg-surface-container-lowest"
@@ -551,18 +565,18 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
             }`}>
               {t("planStarterBadge")}
             </span>
-            <h3 className="text-lg font-display font-bold text-on-surface mt-2">
+            <h3 className="text-base font-display font-bold text-on-surface mt-2">
               {t("planStarterName")}
             </h3>
-            <p className="text-2xl font-display font-bold text-on-surface">
+            <p className="text-xl font-display font-bold text-on-surface">
               {t("planStarterPrice")}
             </p>
             <p className="text-xs text-on-surface-variant">{t("planStarterTagline")}</p>
           </div>
           <ul className="flex flex-col gap-2">
             {starterFeatures.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[16px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <li key={f} className="flex items-center gap-2 text-xs text-on-surface-variant">
+                <span className="material-symbols-outlined text-[14px] text-secondary flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
                   check_circle
                 </span>
                 {f}
@@ -575,9 +589,9 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
         <button
           type="button"
           onClick={() => setSelected("pro")}
-          className={`flex flex-col gap-4 p-6 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
             selected === "pro"
-              ? "border-primary bg-primary text-on-primary shadow-lg"
+              ? "border-primary bg-primary shadow-lg"
               : "border-outline-variant bg-surface-container-lowest"
           }`}
         >
@@ -589,10 +603,10 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
             }`}>
               {t("planProBadge")}
             </span>
-            <h3 className={`text-lg font-display font-bold mt-2 ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
+            <h3 className={`text-base font-display font-bold mt-2 ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
               {t("planProName")}
             </h3>
-            <p className={`text-2xl font-display font-bold ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
+            <p className={`text-xl font-display font-bold ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
               {t("planProPrice")}
             </p>
             <p className={`text-xs ${selected === "pro" ? "text-on-primary/80" : "text-on-surface-variant"}`}>
@@ -601,11 +615,57 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
           </div>
           <ul className="flex flex-col gap-2">
             {proFeatures.map((f) => (
-              <li key={f} className={`flex items-center gap-2 text-sm ${selected === "pro" ? "text-on-primary/90" : "text-on-surface-variant"}`}>
+              <li key={f} className={`flex items-center gap-2 text-xs ${selected === "pro" ? "text-on-primary/90" : "text-on-surface-variant"}`}>
                 <span
-                  className="material-symbols-outlined text-[16px]"
+                  className="material-symbols-outlined text-[14px] flex-shrink-0"
                   style={{
                     color: selected === "pro" ? "#4ae183" : undefined,
+                    fontVariationSettings: "'FILL' 1",
+                  }}
+                >
+                  check_circle
+                </span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </button>
+
+        {/* Premium Card */}
+        <button
+          type="button"
+          onClick={() => setSelected("premium")}
+          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+            selected === "premium"
+              ? "border-secondary bg-secondary shadow-lg"
+              : "border-outline-variant bg-surface-container-lowest"
+          }`}
+        >
+          <div className="flex flex-col gap-1">
+            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
+              selected === "premium"
+                ? "bg-on-secondary/20 text-on-secondary"
+                : "bg-primary-container text-on-primary-container"
+            }`}>
+              {t("planPremiumBadge")}
+            </span>
+            <h3 className={`text-base font-display font-bold mt-2 ${selected === "premium" ? "text-on-secondary" : "text-on-surface"}`}>
+              {t("planPremiumName")}
+            </h3>
+            <p className={`text-xl font-display font-bold ${selected === "premium" ? "text-on-secondary" : "text-on-surface"}`}>
+              {t("planPremiumPrice")}
+            </p>
+            <p className={`text-xs ${selected === "premium" ? "text-on-secondary/80" : "text-on-surface-variant"}`}>
+              {t("planPremiumTagline")}
+            </p>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {premiumFeatures.map((f) => (
+              <li key={f} className={`flex items-center gap-2 text-xs ${selected === "premium" ? "text-on-secondary/90" : "text-on-surface-variant"}`}>
+                <span
+                  className="material-symbols-outlined text-[14px] flex-shrink-0"
+                  style={{
+                    color: selected === "premium" ? "#ffd966" : undefined,
                     fontVariationSettings: "'FILL' 1",
                   }}
                 >
@@ -644,7 +704,7 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
             <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              {selected === "pro" ? t("planProCta") : t("planStarterCta")}
+              {ctaLabel}
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </>
           )}
@@ -688,7 +748,7 @@ export default function OnboardingPage() {
 
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)]">
+        <div className={`w-full bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)] ${step === 4 ? "max-w-3xl" : "max-w-xl"}`}>
           {step === 1 && <Step1 onNext={() => goToStep(2)} />}
           {step === 2 && <Step2 onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
           {step === 3 && <Step3 onBack={() => goToStep(2)} onFinish={() => goToStep(4)} />}

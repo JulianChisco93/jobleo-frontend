@@ -6,7 +6,9 @@ import type {
   SearchProfileLog,
   Job,
   JobAlert,
+  ConfigAnalysis,
   CreateSearchProfilePayload,
+  PlanLimits,
 } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.jobleo.app";
@@ -84,6 +86,9 @@ export const deleteCV = () =>
 
 // ─── Search Profiles ─────────────────────────────────────────────────────────
 
+export const getLimits = () =>
+  request<PlanLimits>("/api/v1/searches/limits");
+
 export const getSearchProfiles = () =>
   request<SearchProfile[]>("/api/v1/searches/");
 
@@ -137,10 +142,16 @@ export const getJobAlerts = (params: Pick<JobsQuery, "limit" | "offset" | "searc
   return request<JobAlert[]>(`/api/v1/jobs/alerts?${qs.toString()}`);
 };
 
+export const generateJobExplanation = (jobAlertId: number) =>
+  request<JobAlert>(`/api/v1/jobs/${jobAlertId}/explanation`, { method: "POST" });
+
+export const analyzeSearchConfig = (configId: string) =>
+  request<ConfigAnalysis>(`/api/v1/search-configs/${configId}/analyze`, { method: "POST" });
+
 // ─── Billing ──────────────────────────────────────────────────────────────────
 
-export const createCheckoutSession = () =>
-  request<{ url: string }>("/api/v1/billing/checkout", { method: "POST" });
+export const createCheckoutSession = (plan: "pro" | "premium") =>
+  request<{ url: string }>(`/api/v1/billing/checkout?plan=${plan}`, { method: "POST" });
 
 export const createPortalSession = () =>
   request<{ url: string }>("/api/v1/billing/portal", { method: "POST" });

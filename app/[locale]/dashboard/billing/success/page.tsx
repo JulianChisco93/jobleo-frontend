@@ -3,14 +3,24 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Link } from "@/i18n/navigation";
+import { getMe } from "@/lib/api";
 
 export default function BillingSuccessPage() {
   const t = useTranslations("billing");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
+
+  const isPremium = me?.plan === "premium";
+  const title = isPremium ? t("successTitlePremium") : t("successTitlePro");
+  const planLabel = isPremium ? t("planActivatedPremium") : t("planActivatedPro");
+  const badgeColor = isPremium
+    ? "bg-secondary text-on-secondary"
+    : "bg-primary text-on-primary";
+  const badgeBg = isPremium ? "bg-secondary/10" : "bg-primary/10";
 
   useEffect(() => {
     // Invalidate the user query so plan info refreshes immediately
@@ -22,7 +32,7 @@ export default function BillingSuccessPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
-      <DashboardTopBar title={t("successTitle")} />
+      <DashboardTopBar title={title} />
 
       <main className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="max-w-md w-full text-center">
@@ -37,7 +47,7 @@ export default function BillingSuccessPage() {
           </div>
 
           <h1 className="text-3xl font-display font-extrabold text-on-surface mb-3">
-            {t("successTitle")}
+            {title}
           </h1>
           <p className="text-on-surface-variant mb-2">
             {t("successDesc")}
@@ -47,12 +57,12 @@ export default function BillingSuccessPage() {
           </p>
 
           {/* Plan badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-8">
-            <span className="text-[10px] font-bold px-2 py-0.5 bg-primary text-on-primary rounded-full uppercase tracking-widest">
-              Pro
+          <div className={`inline-flex items-center gap-2 px-4 py-2 ${badgeBg} rounded-full mb-8`}>
+            <span className={`text-[10px] font-bold px-2 py-0.5 ${badgeColor} rounded-full uppercase tracking-widest`}>
+              {isPremium ? "Premium" : "Pro"}
             </span>
             <span className="text-sm font-semibold text-on-surface">
-              {t("planActivated")}
+              {planLabel}
             </span>
           </div>
 

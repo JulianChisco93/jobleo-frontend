@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { getSearchProfiles } from "@/lib/api";
+import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 
@@ -19,7 +20,8 @@ export default function ProfilesPage() {
     queryFn: getSearchProfiles,
   });
 
-  const atMax = profiles.length >= 3;
+  const { limits } = usePlanLimits();
+  const atMax = profiles.length >= limits.max_profiles;
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">

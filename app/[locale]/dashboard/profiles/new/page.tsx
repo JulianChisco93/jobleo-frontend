@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createSearchProfile, getSearchProfiles } from "@/lib/api";
+import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ProfileForm, type ProfileFormData } from "@/components/profiles/ProfileForm";
 
@@ -21,13 +22,15 @@ export default function NewProfilePage() {
     queryFn: getSearchProfiles,
   });
 
+  const { limits } = usePlanLimits();
+
   const { mutateAsync } = useMutation({
     mutationFn: createSearchProfile,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profiles"] }),
   });
 
   async function handleSubmit(data: ProfileFormData) {
-    if (profiles.length >= 3) {
+    if (profiles.length >= limits.max_profiles) {
       alert(t("maxProfilesReached"));
       return;
     }
@@ -60,7 +63,7 @@ export default function NewProfilePage() {
             </div>
           )}
         </div>
-        <ProfileForm onSubmit={handleSubmit} isNew />
+        <ProfileForm onSubmit={handleSubmit} isNew limits={limits} />
       </main>
     </div>
   );

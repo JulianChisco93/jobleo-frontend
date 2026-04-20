@@ -14,6 +14,8 @@ interface LocationTagInputProps {
   placeholder?: string;
   helperText?: string;
   disabled?: boolean;
+  maxTags?: number;
+  upgradeMessage?: string;
 }
 
 const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
@@ -42,7 +44,10 @@ export function LocationTagInput({
   placeholder = "Add location...",
   helperText,
   disabled = false,
+  maxTags,
+  upgradeMessage,
 }: LocationTagInputProps) {
+  const atMax = maxTags !== undefined && value.length >= maxTags;
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -173,7 +178,7 @@ export function LocationTagInput({
               )}
             </span>
           ))}
-          {!disabled && (
+          {!disabled && !atMax && (
             <input
               type="text"
               value={input}
@@ -223,7 +228,13 @@ export function LocationTagInput({
           </ul>
         )}
       </div>
-      {helperText && (
+      {atMax && upgradeMessage && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-primary-fixed/40 rounded-xl text-xs text-primary font-medium">
+          <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+          {upgradeMessage}
+        </div>
+      )}
+      {helperText && !atMax && (
         <p className="text-xs text-on-surface-variant">{helperText}</p>
       )}
     </div>

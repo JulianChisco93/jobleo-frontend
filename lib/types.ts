@@ -1,4 +1,12 @@
-export type Plan = "free" | "pro";
+export type Plan = "free" | "pro" | "premium";
+
+export interface PlanLimits {
+  plan: Plan;
+  max_profiles: number;
+  max_job_titles_per_profile: number;
+  max_locations_per_profile: number;
+  business_hours_only_enforced: boolean;
+}
 export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "incomplete";
 
 export interface User {
@@ -62,6 +70,7 @@ export interface JobAlert {
   match_score: number;
   sent_at: string;
   search_config_id?: string;
+  ai_explanation?: string | null;
   job: {
     title: string;
     company: string;
@@ -70,6 +79,11 @@ export interface JobAlert {
     site?: string;
     is_remote?: boolean;
   };
+}
+
+export interface ConfigAnalysis {
+  config_id: number;
+  analysis: string;
 }
 
 export interface CreateSearchProfilePayload {

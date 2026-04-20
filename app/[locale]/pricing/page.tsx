@@ -44,7 +44,7 @@ function PricingContent() {
       </section>
 
       {/* Plan Cards */}
-      <section className="flex flex-col md:flex-row gap-6 px-8 pb-20 justify-center max-w-4xl mx-auto w-full">
+      <section className="flex flex-col md:flex-row gap-6 px-8 pb-20 justify-center max-w-6xl mx-auto w-full">
         {/* Starter */}
         <div className="flex flex-col gap-6 p-8 bg-surface-container-lowest rounded-xl shadow-[var(--shadow-card)] flex-1">
           <div className="flex flex-col gap-2">
@@ -116,8 +116,48 @@ function PricingContent() {
           </div>
 
           <CheckoutButton
+            plan="pro"
             label={t("proCta")}
             className="mt-auto w-full py-3 text-sm font-bold text-primary bg-surface-container-lowest rounded-xl hover:bg-surface-container-low transition-colors disabled:opacity-60"
+          />
+        </div>
+
+        {/* Premium */}
+        <div className="flex flex-col gap-6 p-8 bg-secondary rounded-xl shadow-[var(--shadow-card)] flex-1">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-bold tracking-widest px-3 py-1 self-start bg-on-secondary/10 text-secondary-fixed rounded-full uppercase">
+              {t("premiumBadge")}
+            </span>
+            <h2 className="text-2xl font-display font-bold text-on-secondary mt-2">
+              {t("premiumName")}
+            </h2>
+            <p className="text-3xl font-display font-bold text-on-secondary">
+              {t("premiumPrice")}
+            </p>
+            <p className="text-sm text-on-secondary/80">{t("premiumTagline")}</p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {[
+              t("premiumFeature1"),
+              t("premiumFeature2"),
+              t("premiumFeature3"),
+              t("premiumFeature4"),
+              t("premiumFeature5"),
+            ].map((feature) => (
+              <div key={feature} className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[18px] text-secondary-fixed" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  check_circle
+                </span>
+                <span className="text-sm text-on-secondary">{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          <CheckoutButton
+            plan="premium"
+            label={t("premiumCta")}
+            className="mt-auto w-full py-3 text-sm font-bold text-secondary bg-surface-container-lowest rounded-xl hover:bg-surface-container-low transition-colors disabled:opacity-60"
           />
         </div>
       </section>
