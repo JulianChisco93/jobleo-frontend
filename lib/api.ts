@@ -146,7 +146,7 @@ export const generateJobExplanation = (jobAlertId: number) =>
   request<JobAlert>(`/api/v1/jobs/${jobAlertId}/explanation`, { method: "POST" });
 
 export const analyzeSearchConfig = (configId: string) =>
-  request<ConfigAnalysis>(`/api/v1/search-configs/${configId}/analyze`, { method: "POST" });
+  request<ConfigAnalysis>(`/api/v1/searches/${configId}/analyze`, { method: "POST" });
 
 // ─── Billing ──────────────────────────────────────────────────────────────────
 
