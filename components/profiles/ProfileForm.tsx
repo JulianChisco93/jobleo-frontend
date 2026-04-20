@@ -181,7 +181,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
               </div>
             ) : (
               <TagInput
-                label={t("jobTitlesLabel")}
+                label={`${t("jobTitlesLabel")} (MAX ${maxJobTitles})`}
                 value={jobTitles}
                 onChange={(v) => setValue("job_titles" as any, v)}
                 placeholder={t("addTitle")}

@@ -280,7 +280,7 @@
     "editProfileSubtitle": "Last run {date} · {count} jobs found",
     "profileNameLabel": "PROFILE NAME",
     "professionLabel": "PROFESSION",
-    "jobTitlesLabel": "JOB TITLES (MAX 5)",
+    "jobTitlesLabel": "JOB TITLES",
     "jobTitlesTipTitle": "Avoid redundant titles",
     "jobTitlesTipBody": "LinkedIn and Indeed already return all variants of your main term. Adding \"Marketing Manager\", \"Marketing Specialist\" and \"Marketing Generalist\" when your main term is \"Marketing\" doesn't bring new jobs — it just duplicates the work and slows your search. Use additional titles for genuinely different roles (e.g. if searching \"Civil Engineer\", adding \"Project Manager\" or \"Site Superintendent\" makes sense).",
     "locationsLabel": "LOCATIONS",
