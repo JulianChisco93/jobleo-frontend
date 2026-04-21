@@ -9,7 +9,52 @@ import { useRouter } from "next/navigation";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { LangToggle } from "@/components/ui/LangToggle";
-import { uploadCVFile, uploadCVText, createSearchProfile, getSearchProfiles, updateMe, createCheckoutSession } from "@/lib/api";
+import {
+  uploadCVFile,
+  uploadCVText,
+  createSearchProfile,
+  getSearchProfiles,
+  updateMe,
+  createCheckoutSession,
+} from "@/lib/api";
+
+// ─── Shared state ────────────────────────────────────────────
+interface OnboardingData {
+  // Step 1
+  cvUploaded: boolean;
+  cvFilename: string;
+  cvTab: "upload" | "paste";
+  cvText: string;
+  // Step 2
+  profession: string;
+  jobTitles: string[];
+  locations: string[];
+  includeTerms: string[];
+  excludeTerms: string[];
+  // Step 3
+  phone: string;
+  countryCode: string;
+}
+
+const DEFAULT_ONBOARDING_DATA: OnboardingData = {
+  cvUploaded: false,
+  cvFilename: "",
+  cvTab: "upload",
+  cvText: "",
+  profession: "",
+  jobTitles: [],
+  locations: [],
+  includeTerms: [],
+  excludeTerms: [],
+  phone: "",
+  countryCode: "+1",
+};
+
+const PLAN_LIMITS = {
+  starter: { maxJobTitles: 0, maxLocations: 2 },
+  pro: { maxJobTitles: 3, maxLocations: 5 },
+  premium: { maxJobTitles: 5, maxLocations: Infinity },
+} as const;
 
 // ─── Step progress bar ──────────────────────────────────────
 function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
@@ -28,21 +73,44 @@ function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
 }
 
 // ─── Step 1: CV Upload ───────────────────────────────────────
-function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) {
+interface Step1Props {
+  initialData: OnboardingData;
+  onNext: (update: Partial<OnboardingData>) => void;
+}
+
+function Step1({ initialData, onNext }: Step1Props) {
   const t = useTranslations("onboarding");
-  const [cvTab, setCvTab] = useState<"upload" | "paste">("upload");
+  const [cvTab, setCvTab] = useState<"upload" | "paste">(initialData.cvTab);
   const [file, setFile] = useState<File | null>(null);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialData.cvText);
+  const [override, setOverride] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const alreadyUploaded = initialData.cvUploaded && !!initialData.cvFilename;
+  // Show the "already uploaded" state when: CV was uploaded before, user hasn't
+  // selected a new file, and hasn't clicked "upload a different one"
+  const showUploadedState = alreadyUploaded && !override && !file;
+
   async function handleContinue() {
+    // Branch 1: already uploaded, no new file/text selected → skip re-upload
+    if (alreadyUploaded && !override && !file && !text.trim()) {
+      onNext({ cvTab });
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       if (cvTab === "upload" && file) {
         await uploadCVFile(file);
+        onNext({
+          cvUploaded: true,
+          cvFilename: file.name,
+          cvTab,
+          cvText: "",
+        });
       } else if (cvTab === "paste" && text.trim()) {
         const trimmed = text.trim();
         if (trimmed.length < 200) {
@@ -56,8 +124,16 @@ function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) 
           return;
         }
         await uploadCVText(trimmed, "resume.txt");
+        onNext({
+          cvUploaded: true,
+          cvFilename: "resume.txt",
+          cvTab,
+          cvText: trimmed,
+        });
+      } else {
+        // Nothing selected but not already uploaded — treat as skip
+        onNext({ cvUploaded: false, cvFilename: "", cvTab, cvText: "" });
       }
-      onNext({ cvUploaded: !!(file || text.trim()) });
     } catch (err: any) {
       const raw = err.message || "";
       try {
@@ -90,7 +166,7 @@ function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) 
           <button
             key={tabKey}
             type="button"
-            onClick={() => { setCvTab(tabKey); setError(null); }}
+            onClick={() => { setCvTab(tabKey); setError(null); setOverride(false); }}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
               cvTab === tabKey
                 ? "bg-surface-container-lowest text-on-surface shadow-sm"
@@ -103,47 +179,70 @@ function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) 
       </div>
 
       {cvTab === "upload" ? (
-        <div
-          className="flex flex-col items-center justify-center gap-3 p-10 rounded-xl border-2 border-dashed border-outline-variant cursor-pointer hover:border-primary hover:bg-primary-fixed/30 transition-all"
-          style={{ minHeight: 160 }}
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const dropped = e.dataTransfer.files[0];
-            if (dropped?.type === "application/pdf") setFile(dropped);
-          }}
-        >
-          <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-2xl text-primary">upload_file</span>
+        showUploadedState ? (
+          /* Already uploaded state */
+          <div className="flex flex-col items-center justify-center gap-3 p-10 rounded-xl border-2 border-secondary bg-secondary-container/30">
+            <span
+              className="material-symbols-outlined text-4xl text-secondary"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              check_circle
+            </span>
+            <span className="text-sm font-bold text-on-secondary-container">
+              {initialData.cvFilename}
+            </span>
+            <button
+              type="button"
+              onClick={() => { setOverride(true); setFile(null); }}
+              className="text-xs text-on-surface-variant underline hover:text-on-surface transition-colors"
+            >
+              {t("uploadDifferentCV")}
+            </button>
           </div>
-          {file ? (
-            <span className="text-sm font-bold text-secondary">{file.name}</span>
-          ) : (
-            <>
-              <span className="text-sm font-semibold text-on-surface">{t("dragDropHint")}</span>
-              <span className="text-xs text-on-surface-variant">{t("orBrowseFiles")}</span>
-            </>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".pdf,application/pdf"
-            className="hidden"
-            onChange={(e) => {
-              const selected = e.target.files?.[0] || null;
-              if (selected && selected.type !== "application/pdf") {
-                setError(t("invalidFileType"));
-                setFile(null);
-                e.target.value = "";
-                return;
-              }
-              setError(null);
-              setFile(selected);
+        ) : (
+          <div
+            className="flex flex-col items-center justify-center gap-3 p-10 rounded-xl border-2 border-dashed border-outline-variant cursor-pointer hover:border-primary hover:bg-primary-fixed/30 transition-all"
+            style={{ minHeight: 160 }}
+            onClick={() => fileRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const dropped = e.dataTransfer.files[0];
+              if (dropped?.type === "application/pdf") setFile(dropped);
             }}
-          />
-        </div>
+          >
+            <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center">
+              <span className="material-symbols-outlined text-2xl text-primary">upload_file</span>
+            </div>
+            {file ? (
+              <span className="text-sm font-bold text-secondary">{file.name}</span>
+            ) : (
+              <>
+                <span className="text-sm font-semibold text-on-surface">{t("dragDropHint")}</span>
+                <span className="text-xs text-on-surface-variant">{t("orBrowseFiles")}</span>
+              </>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              className="hidden"
+              onChange={(e) => {
+                const selected = e.target.files?.[0] || null;
+                if (selected && selected.type !== "application/pdf") {
+                  setError(t("invalidFileType"));
+                  setFile(null);
+                  e.target.value = "";
+                  return;
+                }
+                setError(null);
+                setFile(selected);
+              }}
+            />
+          </div>
+        )
       ) : (
+        /* Paste tab — text is always shown and pre-filled from initialData */
         <div className="flex flex-col gap-2">
           <textarea
             value={text}
@@ -176,7 +275,7 @@ function Step1({ onNext }: { onNext: (data: { cvUploaded: boolean }) => void }) 
         <div className="flex flex-col gap-1">
           <button
             type="button"
-            onClick={() => onNext({ cvUploaded: false })}
+            onClick={() => onNext({ cvUploaded: false, cvFilename: "", cvTab, cvText: "" })}
             className="text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
           >
             {t("skipForNow")}
@@ -209,53 +308,33 @@ const searchSchema = z.object({
 });
 type SearchFormData = z.infer<typeof searchSchema>;
 
-function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) {
-  const t = useTranslations("onboarding");
-  const { register, handleSubmit, formState: { errors } } = useForm<SearchFormData>({
-    resolver: zodResolver(searchSchema),
-  });
-  const [jobTitles, setJobTitles] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
-  const [includeTerms, setIncludeTerms] = useState<string[]>([]);
-  const [excludeTerms, setExcludeTerms] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface Step2Props {
+  initialData: OnboardingData;
+  onNext: (update: Partial<OnboardingData>) => void;
+  onBack: (update: Partial<OnboardingData>) => void;
+}
 
-  async function onSubmit(data: SearchFormData) {
-    setLoading(true);
-    setError(null);
-    try {
-      const profile = await createSearchProfile({
-        name: `${data.profession} Search`,
-        profession: data.profession,
-        job_titles: jobTitles,
-        locations,
-        include_terms: includeTerms,
-        exclude_terms: excludeTerms,
-        title_exclude_terms: [],
-        frequency_minutes: 60,
-        business_hours_only: false,
-        business_hours_start: 9,
-        business_hours_end: 18,
-        business_days_only: false,
-      });
-      onNext({ profileId: profile.id });
-    } catch (err: any) {
-      const msg: string = err.message || "";
-      // If user already hit the plan profile limit, reuse the existing profile
-      if (msg.includes("máximo") || msg.includes("maximum") || msg.includes("plan") || msg.includes("perfil")) {
-        try {
-          const existing = await getSearchProfiles();
-          if (existing.length > 0) {
-            onNext({ profileId: existing[0].id });
-            return;
-          }
-        } catch {}
-      }
-      setError(msg || "Failed to create profile");
-    } finally {
-      setLoading(false);
-    }
+function Step2({ initialData, onNext, onBack }: Step2Props) {
+  const t = useTranslations("onboarding");
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: { profession: initialData.profession },
+  });
+  const [jobTitles, setJobTitles] = useState<string[]>(initialData.jobTitles);
+  const [locations, setLocations] = useState<string[]>(initialData.locations);
+  const [includeTerms, setIncludeTerms] = useState<string[]>(initialData.includeTerms);
+  const [excludeTerms, setExcludeTerms] = useState<string[]>(initialData.excludeTerms);
+
+  function collectData(profession: string): Partial<OnboardingData> {
+    return { profession, jobTitles, locations, includeTerms, excludeTerms };
+  }
+
+  function onSubmit(data: SearchFormData) {
+    onNext(collectData(data.profession));
+  }
+
+  function handleBack() {
+    onBack(collectData(getValues("profession")));
   }
 
   return (
@@ -286,13 +365,13 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
         )}
       </div>
 
-      {/* Job titles */}
+      {/* Job titles — max 3 during onboarding; extra slots unlocked with premium after */}
       <TagInput
         label={t("jobTitlesLabel")}
         value={jobTitles}
         onChange={setJobTitles}
         placeholder={t("jobTitlesPlaceholder")}
-        maxTags={5}
+        maxTags={3}
       />
 
       {/* Locations */}
@@ -320,34 +399,20 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
         />
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
-          <span className="material-symbols-outlined text-[18px]">error</span>
-          {error}
-        </div>
-      )}
-
       <div className="flex justify-between">
         <button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
         >
           {t("back")}
         </button>
         <button
           type="submit"
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
-          {loading ? (
-            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              {t("continue")}
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </>
-          )}
+          {t("continue")}
+          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -355,11 +420,17 @@ function Step2({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => 
 }
 
 // ─── Step 3: WhatsApp ─────────────────────────────────────────
-function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void; }) {
+interface Step3Props {
+  initialData: OnboardingData;
+  onNext: (update: Partial<OnboardingData>) => void;
+  onBack: (update: Partial<OnboardingData>) => void;
+}
+
+function Step3({ initialData, onNext, onBack }: Step3Props) {
   const t = useTranslations("onboarding");
   const tPreview = useTranslations("onboarding.whatsappPreview");
-  const [phone, setPhone] = useState("");
-  const [countryCode, setCountryCode] = useState("+1");
+  const [phone, setPhone] = useState(initialData.phone);
+  const [countryCode, setCountryCode] = useState(initialData.countryCode || "+1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -372,12 +443,16 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void;
         await updateMe({ whatsapp_number: fullNumber });
       }
     } catch (err: any) {
-      // WhatsApp is optional — show the error but proceed to dashboard anyway
+      // WhatsApp is optional — show the error but proceed anyway
       console.error("Failed to save WhatsApp number:", err);
     } finally {
       setLoading(false);
     }
-    onFinish();
+    onNext({ phone, countryCode });
+  }
+
+  function handleBack() {
+    onBack({ phone, countryCode });
   }
 
   return (
@@ -457,7 +532,7 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void;
       <div className="flex justify-between">
         <button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors"
         >
           {t("back")}
@@ -483,23 +558,95 @@ function Step3({ onBack, onFinish }: { onBack: () => void; onFinish: () => void;
 }
 
 // ─── Step 4: Plan Selection ───────────────────────────────────
-function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "starter" | "pro" | "premium") => void }) {
+interface Step4Props {
+  initialData: OnboardingData;
+  onBack: () => void;
+  onFinish: (plan: "starter" | "pro" | "premium") => void;
+}
+
+function Step4({ initialData, onBack, onFinish }: Step4Props) {
   const t = useTranslations("onboarding");
   const [selected, setSelected] = useState<"starter" | "pro" | "premium">("pro");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleFinish() {
-    if (selected === "starter") {
-      onFinish("starter");
-      return;
-    }
+    const { profession, jobTitles, locations, includeTerms, excludeTerms } = initialData;
+
     setLoading(true);
     setError(null);
+
+    if (selected === "starter") {
+      // Create the profile now with free-plan limits
+      try {
+        const profile = await createSearchProfile({
+          name: `${profession} Search`,
+          profession,
+          job_titles: [],
+          locations: locations.slice(0, 2),
+          include_terms: includeTerms,
+          exclude_terms: excludeTerms,
+          title_exclude_terms: [],
+          frequency_minutes: 60,
+          business_hours_only: false,
+          business_hours_start: 9,
+          business_hours_end: 18,
+          business_days_only: false,
+        });
+        // Save job titles for a future plan upgrade
+        if (jobTitles.length > 0) {
+          sessionStorage.setItem("onboarding_profile_id", String(profile.id));
+          sessionStorage.setItem("onboarding_job_titles", JSON.stringify(jobTitles));
+        }
+        // Clean up any leftover paid-plan payload from a previous attempt
+        sessionStorage.removeItem("onboarding_pending_profile");
+        onFinish("starter");
+      } catch (err: any) {
+        const msg: string = err.message || "";
+        // If the user somehow already has a profile, reuse it
+        if (msg.includes("máximo") || msg.includes("maximum") || msg.includes("plan") || msg.includes("perfil")) {
+          try {
+            const existing = await getSearchProfiles();
+            if (existing.length > 0) {
+              sessionStorage.removeItem("onboarding_pending_profile");
+              onFinish("starter");
+              return;
+            }
+          } catch {}
+        }
+        setError(msg || "Failed to create profile");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // pro / premium: save full payload, redirect to Stripe
+    const limits = PLAN_LIMITS[selected];
+    const pendingProfile = {
+      name: `${profession} Search`,
+      profession,
+      job_titles: jobTitles.slice(0, limits.maxJobTitles),
+      locations:
+        limits.maxLocations === Infinity
+          ? locations
+          : locations.slice(0, limits.maxLocations),
+      include_terms: includeTerms,
+      exclude_terms: excludeTerms,
+      title_exclude_terms: [] as string[],
+      frequency_minutes: 60,
+      business_hours_only: false,
+      business_hours_start: 9,
+      business_hours_end: 18,
+      business_days_only: false,
+    };
+    sessionStorage.setItem("onboarding_pending_profile", JSON.stringify(pendingProfile));
+
     try {
       const { url } = await createCheckoutSession(selected);
       window.location.href = url;
     } catch (err: any) {
+      sessionStorage.removeItem("onboarding_pending_profile");
       setError(err.message || "Failed to start checkout");
       setLoading(false);
     }
@@ -717,6 +864,7 @@ function Step4({ onBack, onFinish }: { onBack: () => void; onFinish: (plan: "sta
 // ─── Onboarding Page ──────────────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter();
+
   const [step, setStep] = useState<1 | 2 | 3 | 4>(() => {
     if (typeof window === "undefined") return 1;
     const saved = sessionStorage.getItem("onboarding_step");
@@ -724,13 +872,33 @@ export default function OnboardingPage() {
     return (parsed >= 1 && parsed <= 4 ? parsed : 1) as 1 | 2 | 3 | 4;
   });
 
-  function goToStep(s: 1 | 2 | 3 | 4) {
+  const [data, setData] = useState<OnboardingData>(() => {
+    if (typeof window === "undefined") return DEFAULT_ONBOARDING_DATA;
+    try {
+      const saved = sessionStorage.getItem("onboarding_data");
+      return saved
+        ? { ...DEFAULT_ONBOARDING_DATA, ...JSON.parse(saved) }
+        : DEFAULT_ONBOARDING_DATA;
+    } catch {
+      return DEFAULT_ONBOARDING_DATA;
+    }
+  });
+
+  function persistData(update: Partial<OnboardingData>) {
+    const next = { ...data, ...update };
+    setData(next);
+    sessionStorage.setItem("onboarding_data", JSON.stringify(next));
+  }
+
+  function goToStep(s: 1 | 2 | 3 | 4, update?: Partial<OnboardingData>) {
+    if (update) persistData(update);
     sessionStorage.setItem("onboarding_step", String(s));
     setStep(s);
   }
 
   function finish() {
     sessionStorage.removeItem("onboarding_step");
+    sessionStorage.removeItem("onboarding_data");
     router.push("/dashboard");
   }
 
@@ -749,11 +917,29 @@ export default function OnboardingPage() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className={`w-full bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)] ${step === 4 ? "max-w-3xl" : "max-w-xl"}`}>
-          {step === 1 && <Step1 onNext={() => goToStep(2)} />}
-          {step === 2 && <Step2 onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
-          {step === 3 && <Step3 onBack={() => goToStep(2)} onFinish={() => goToStep(4)} />}
+          {step === 1 && (
+            <Step1
+              initialData={data}
+              onNext={(u) => goToStep(2, u)}
+            />
+          )}
+          {step === 2 && (
+            <Step2
+              initialData={data}
+              onNext={(u) => goToStep(3, u)}
+              onBack={(u) => goToStep(1, u)}
+            />
+          )}
+          {step === 3 && (
+            <Step3
+              initialData={data}
+              onNext={(u) => goToStep(4, u)}
+              onBack={(u) => goToStep(2, u)}
+            />
+          )}
           {step === 4 && (
             <Step4
+              initialData={data}
               onBack={() => goToStep(3)}
               onFinish={(plan) => {
                 if (plan === "starter") finish();

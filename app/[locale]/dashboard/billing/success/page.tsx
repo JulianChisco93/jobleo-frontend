@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Link } from "@/i18n/navigation";
-import { getMe } from "@/lib/api";
+import { getMe, updateSearchProfile, createSearchProfile } from "@/lib/api";
 
 export default function BillingSuccessPage() {
   const t = useTranslations("billing");
@@ -25,6 +25,39 @@ export default function BillingSuccessPage() {
   useEffect(() => {
     // Invalidate the user query so plan info refreshes immediately
     queryClient.invalidateQueries({ queryKey: ["me"] });
+
+    // Create the search profile saved during onboarding for pro/premium plans
+    const pendingProfileRaw = sessionStorage.getItem("onboarding_pending_profile");
+    if (pendingProfileRaw) {
+      try {
+        const payload = JSON.parse(pendingProfileRaw);
+        createSearchProfile(payload)
+          .then(() => queryClient.invalidateQueries({ queryKey: ["search-profiles"] }))
+          .catch(() => {})
+          .finally(() => sessionStorage.removeItem("onboarding_pending_profile"));
+      } catch {
+        sessionStorage.removeItem("onboarding_pending_profile");
+      }
+    }
+
+    // Apply job titles saved during onboarding (starter plan users who later upgraded)
+    const pendingProfileId = sessionStorage.getItem("onboarding_profile_id");
+    const pendingJobTitles = sessionStorage.getItem("onboarding_job_titles");
+    if (pendingProfileId && pendingJobTitles) {
+      try {
+        const jobTitles: string[] = JSON.parse(pendingJobTitles);
+        updateSearchProfile(pendingProfileId, { job_titles: jobTitles })
+          .then(() => queryClient.invalidateQueries({ queryKey: ["search-profiles"] }))
+          .catch(() => {})
+          .finally(() => {
+            sessionStorage.removeItem("onboarding_profile_id");
+            sessionStorage.removeItem("onboarding_job_titles");
+          });
+      } catch {
+        sessionStorage.removeItem("onboarding_profile_id");
+        sessionStorage.removeItem("onboarding_job_titles");
+      }
+    }
 
     const timer = setTimeout(() => router.push("/dashboard"), 5000);
     return () => clearTimeout(timer);

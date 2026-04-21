@@ -1,0 +1,134 @@
+[  256247ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/login:0
+[  256725ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  257041ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  257252ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  257255ms] [LOG] [Fast Refresh] done in 115ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  260200ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  260718ms] [LOG] [Fast Refresh] done in 624ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  261140ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  261220ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  261394ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[  262879ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  262996ms] [LOG] [Fast Refresh] done in 221ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  266063ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  266460ms] [LOG] [Fast Refresh] done in 502ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  267379ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  267620ms] [LOG] [Fast Refresh] done in 345ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  268362ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  268482ms] [LOG] [Fast Refresh] done in 223ms @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  272291ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  272358ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:2297
+[  272575ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/dashboard" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/jobleo-fr...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          className="manrope_27215d39-module__o15HXW__variable inter_a5565242-module__MR89TW__variable"
+-                         lang="en"
+                        >
+                  ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[  273127ms] [ERROR] In HTML, %s cannot be a descendant of <%s>.
+This will cause a hydration error.%s <a> a 
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/dashboard" tree={[...]} params={{locale:"en"}} cacheNode={{rsc:<Fragment>, ...}} ...>
+            <SegmentViewNode type="page" pagePath="/jobleo-fr...">
+              <SegmentTrieNode>
+              <ClientPageRoot Component={function DashboardPage} serverProvidedParams={{...}}>
+                <DashboardPage params={Promise} searchParams={Promise}>
+                  <div className="flex flex-...">
+                    <DashboardTopBar>
+                    <main className="max-w-6xl ...">
+                      <section>
+                      <section>
+                        <div>
+                        <div className="grid grid-...">
+                          <LinkComponent href="/dashboard..." className="bg-surface...">
+>                           <a
+>                             className="bg-surface-container-lowest rounded-xl p-6 shadow-[var(--shadow-card)] hover:..."
+>                             ref={function}
+>                             onClick={function onClick}
+>                             onMouseEnter={function onMouseEnter}
+>                             onTouchStart={function onTouchStart}
+>                             href="/dashboard/profiles/86"
+>                           >
+                              <div>
+                              <h4>
+                              <p>
+                              <div className="flex items...">
+                                <div>
+                                <LinkComponent href="/dashboard..." onClick={function onClick} className="px-3 py-1....">
+>                                 <a
+>                                   className="px-3 py-1.5 text-xs font-bold text-secondary border border-secondary-co..."
+>                                   ref={function}
+>                                   onClick={function onClick}
+>                                   onMouseEnter={function onMouseEnter}
+>                                   onTouchStart={function onTouchStart}
+>                                   href="/dashboard/jobs?search_config_id=86"
+>                                 >
+            ...
+          ...
+ @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127
+[  273127ms] [ERROR] <%s> cannot contain a nested %s.
+See this log for the ancestor stack trace. a <a> @ http://localhost:3000/_next/static/chunks/74010_next_dist_04ad74f5._.js:3127

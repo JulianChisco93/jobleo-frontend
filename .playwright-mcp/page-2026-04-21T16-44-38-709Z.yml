@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Jobleo" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "EN" [ref=e7]
+          - button "ES" [ref=e8]
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - heading "Welcome Back" [level=1] [ref=e12]
+          - paragraph [ref=e13]: Sign in to your account to continue
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - button "Login" [ref=e16]
+            - button "Register" [ref=e17]
+          - button "Continue With Google" [ref=e18]:
+            - img [ref=e19]
+            - generic [ref=e24]: Continue With Google
+          - generic [ref=e25]: or
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e30]: Email
+              - textbox "you@example.com" [ref=e31]
+            - generic [ref=e32]:
+              - generic [ref=e33]:
+                - generic [ref=e34]: Password
+                - button "Forgot password?" [ref=e35]
+              - generic [ref=e36]:
+                - textbox "••••••••" [ref=e37]
+                - button "visibility" [ref=e38]:
+                  - generic [ref=e39]: visibility
+            - button "Sign In" [ref=e40]
+        - paragraph [ref=e41]: By continuing, you agree to our Terms of Service and Privacy Policy.
+    - contentinfo [ref=e42]:
+      - generic [ref=e43]:
+        - paragraph [ref=e44]: © 2026 Jobleo. Operated by Julian David Chisco Henao.
+        - link "Back to home" [ref=e46] [cursor=pointer]:
+          - /url: /
+  - alert [ref=e47]

@@ -180,13 +180,21 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
                 </div>
               </div>
             ) : (
-              <TagInput
-                label={`${t("jobTitlesLabel")} (MAX ${maxJobTitles})`}
-                value={jobTitles}
-                onChange={(v) => setValue("job_titles" as any, v)}
-                placeholder={t("addTitle")}
-                maxTags={maxJobTitles}
-              />
+              <>
+                <TagInput
+                  label={`${t("jobTitlesLabel")} (MAX ${maxJobTitles})`}
+                  value={jobTitles}
+                  onChange={(v) => setValue("job_titles" as any, v)}
+                  placeholder={t("addTitle")}
+                  maxTags={maxJobTitles}
+                />
+                {plan === "premium" && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-secondary-container/40 rounded-xl text-xs text-on-secondary-container">
+                    <span className="material-symbols-outlined text-[15px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+                    {t("jobTitlesPremiumBonus")}
+                  </div>
+                )}
+              </>
             )}
             {maxJobTitles > 0 && <TipBanner title={t("jobTitlesTipTitle")} body={t("jobTitlesTipBody")} />}
           </div>
