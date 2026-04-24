@@ -126,8 +126,10 @@ export default function PricingShader({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext('webgl', { antialias: true });
-    if (!gl) return;
+    const glOrNull = canvas.getContext('webgl', { antialias: true });
+    if (!glOrNull) return;
+    // Capture as a narrowed const so TypeScript tracks the non-null type inside closures
+    const gl: WebGLRenderingContext = glOrNull;
     glRef.current = gl;
 
     // Compile helpers
