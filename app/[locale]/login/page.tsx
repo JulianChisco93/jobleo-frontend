@@ -91,7 +91,10 @@ function LoginForm() {
       const { data: signUpData, error: err } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        options: { data: { display_name: data.name } },
+        options: {
+          data: { display_name: data.name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (err) throw err;
       if (signUpData?.user && !signUpData.session) {
@@ -141,6 +144,7 @@ function LoginForm() {
 
   const displayError =
     error ||
+    (urlError === "pkce" ? t("pkceError") : null) ||
     (urlError === "auth" ? (urlMsg ? decodeURIComponent(urlMsg) : "Authentication failed. Please try again.") : null);
 
   return (

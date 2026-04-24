@@ -47,6 +47,10 @@ export async function GET(request: NextRequest) {
     }
 
     console.error("[locale/auth/callback] exchangeCodeForSession error:", error?.message, error?.status);
+    // PKCE verifier missing → user opened the link in a different browser/device
+    if (error?.message?.toLowerCase().includes("pkce") || error?.message?.toLowerCase().includes("code verifier")) {
+      return NextResponse.redirect(`${origin}/login?error=pkce`);
+    }
     const msg = encodeURIComponent(error?.message ?? "Unknown error");
     return NextResponse.redirect(`${origin}/login?error=auth&msg=${msg}`);
   }

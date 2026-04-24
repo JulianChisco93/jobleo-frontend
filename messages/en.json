@@ -126,6 +126,7 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "checkEmailSuccess": "Check your email to confirm your account.",
+    "pkceError": "This confirmation link was opened in a different browser or device than where you signed up. Please open it in the same browser, or sign up again to receive a new link.",
     "loginFailed": "Login failed. Please try again.",
     "registrationFailed": "Registration failed. Please try again.",
     "forgotPassword": "Forgot password?",
