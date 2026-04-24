@@ -41,10 +41,10 @@ export function PublicFooter() {
             <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
               {t("legal")}
             </span>
-            <Link href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+            <Link href={`${prefix}/terms`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
               {t("termsOfService")}
             </Link>
-            <Link href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+            <Link href={`${prefix}/privacy`} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
               {t("privacyPolicy")}
             </Link>
           </div>

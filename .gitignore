@@ -28,6 +28,7 @@
 .specstory/
 .claude/
 .cursor/
+.playwright-mcp/
 
 # debug
 npm-debug.log*

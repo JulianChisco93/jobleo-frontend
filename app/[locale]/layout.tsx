@@ -7,6 +7,7 @@ import { AuthCodeHandler } from "@/components/auth/AuthCodeHandler";
 import { Manrope, Inter } from "next/font/google";
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import "../globals.css";
 
 const manrope = Manrope({
   subsets: ["latin"],
