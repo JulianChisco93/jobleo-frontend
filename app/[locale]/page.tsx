@@ -55,26 +55,6 @@ function LandingContent() {
                 {t("heroCtaSecondary")}
               </a>
             </div>
-            {/* Social proof */}
-            <div className="mt-10 flex items-center gap-4 text-sm text-white/40">
-              <div className="flex -space-x-2">
-                {[
-                  "bg-[#1D9E75]",
-                  "bg-[#185FA5]",
-                  "bg-[#5DCAA5]",
-                ].map((bg, i) => (
-                  <div
-                    key={i}
-                    className={`w-8 h-8 rounded-full border-2 border-[#0a1628] ${bg} flex items-center justify-center`}
-                  >
-                    <span className="material-symbols-outlined text-[14px] text-white">
-                      person
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <span>Joined by {t("stat1Value")} job seekers</span>
-            </div>
           </div>
 
           {/* Right: WhatsApp mockup card */}

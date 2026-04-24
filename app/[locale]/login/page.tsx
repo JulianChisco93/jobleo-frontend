@@ -16,11 +16,22 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Enter a valid email"),
+    password: z
+      .string()
+      .min(10, "Password must be at least 10 characters")
+      .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+      .regex(/[0-9]/, "Must contain at least one number")
+      .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -30,6 +41,32 @@ function Spinner() {
     <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
     </svg>
+  );
+}
+
+function PasswordRequirements({ password }: { password: string }) {
+  const t = useTranslations("auth");
+  const rules = [
+    { key: "pwdMin10" as const, met: password.length >= 10 },
+    { key: "pwdUppercase" as const, met: /[A-Z]/.test(password) },
+    { key: "pwdNumber" as const, met: /[0-9]/.test(password) },
+    { key: "pwdSpecial" as const, met: /[^A-Za-z0-9]/.test(password) },
+  ];
+  if (!password) return null;
+  return (
+    <div className="mt-2 grid grid-cols-2 gap-1">
+      {rules.map(({ key, met }) => (
+        <div key={key} className={`flex items-center gap-1.5 text-xs transition-colors ${met ? "text-secondary" : "text-on-surface-variant"}`}>
+          <span
+            className="material-symbols-outlined text-[14px] flex-shrink-0"
+            style={{ fontVariationSettings: `'FILL' ${met ? 1 : 0}` }}
+          >
+            {met ? "check_circle" : "radio_button_unchecked"}
+          </span>
+          {t(key)}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -46,6 +83,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -343,6 +381,7 @@ function LoginForm() {
             {/* Register form */}
             {tab === "register" && (
               <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-5">
+                {/* Full name */}
                 <div>
                   <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 px-1">
                     {t("nameLabel")}
@@ -359,6 +398,7 @@ function LoginForm() {
                   )}
                 </div>
 
+                {/* Email */}
                 <div>
                   <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 px-1">
                     {t("emailLabel")}
@@ -375,6 +415,7 @@ function LoginForm() {
                   )}
                 </div>
 
+                {/* Password */}
                 <div>
                   <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 px-1">
                     {t("passwordLabel")}
@@ -398,8 +439,37 @@ function LoginForm() {
                       </span>
                     </button>
                   </div>
-                  {registerForm.formState.errors.password && (
-                    <span className="text-xs text-error mt-1 block">{registerForm.formState.errors.password.message}</span>
+
+                  {/* Password requirements checklist */}
+                  <PasswordRequirements password={registerForm.watch("password") ?? ""} />
+                </div>
+
+                {/* Confirm password */}
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 px-1">
+                    {t("confirmPasswordLabel")}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      {...registerForm.register("confirmPassword")}
+                      className="w-full px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 transition-all text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+                      tabIndex={-1}
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        {showConfirmPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
+                  {registerForm.formState.errors.confirmPassword && (
+                    <span className="text-xs text-error mt-1 block">{registerForm.formState.errors.confirmPassword.message}</span>
                   )}
                 </div>
 
