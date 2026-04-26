@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationTagInput } from "@/components/ui/LocationTagInput";
 import { Toggle } from "@/components/ui/Toggle";
+import { NocCombobox } from "@/components/ui/NocCombobox";
 import type { SearchProfile, PlanLimits } from "@/lib/types";
 
 function TipBanner({ title, body }: { title: string; body: string }) {
@@ -130,6 +131,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
   const includeTerms = watch("include_terms" as any) as string[] || [];
   const excludeTerms = watch("exclude_terms" as any) as string[] || [];
   const [locationsError, setLocationsError] = useState(false);
+  const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
 
   async function wrappedSubmit(data: ProfileFormData) {
     if (locations.length === 0) {
@@ -165,7 +167,12 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
             </div>
             <div className="flex flex-col gap-2">
               <label className={labelCls}>{t("professionLabel")}</label>
-              <input {...register("profession")} className={inputCls} />
+              <NocCombobox
+                value={watch("profession")}
+                onChange={(val) => setValue("profession", val)}
+                onSelect={(data) => setNocSuggestions(data?.examples ?? [])}
+                disabled={isSubmitting}
+              />
             </div>
           </div>
 
@@ -187,6 +194,12 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
                   onChange={(v) => setValue("job_titles" as any, v)}
                   placeholder={t("addTitle")}
                   maxTags={maxJobTitles}
+                  suggestions={nocSuggestions.filter((s) => !jobTitles.includes(s))}
+                  onSuggestionAdd={(tag) => {
+                    if (jobTitles.length < maxJobTitles) {
+                      setValue("job_titles" as any, [...jobTitles, tag]);
+                    }
+                  }}
                 />
                 {plan === "premium" && (
                   <div className="flex items-center gap-2 px-3 py-2 bg-secondary-container/40 rounded-xl text-xs text-on-secondary-container">

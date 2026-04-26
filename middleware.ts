@@ -25,6 +25,11 @@ function isDashboardPath(pathname: string): boolean {
   return stripped.startsWith("/dashboard");
 }
 
+function isAdminPath(pathname: string): boolean {
+  const stripped = pathname.replace(/^\/(en|es)/, "") || "/";
+  return stripped.startsWith("/admin");
+}
+
 function isLoginPath(pathname: string): boolean {
   const stripped = pathname.replace(/^\/(en|es)/, "") || "/";
   return stripped === "/login";
@@ -46,7 +51,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Only check auth for protected routes and login page
-  if (!isDashboardPath(pathname) && !isOnboardingPath(pathname) && !isLoginPath(pathname)) {
+  if (!isDashboardPath(pathname) && !isOnboardingPath(pathname) && !isLoginPath(pathname) && !isAdminPath(pathname)) {
     return intlResponse;
   }
 
@@ -87,7 +92,7 @@ export async function middleware(request: NextRequest) {
   const dashboardUrl = new URL(locale === "en" ? "/dashboard" : `/${locale}/dashboard`, request.url);
 
   // Not authenticated → redirect to login
-  if (!user && (isDashboardPath(pathname) || isOnboardingPath(pathname))) {
+  if (!user && (isDashboardPath(pathname) || isOnboardingPath(pathname) || isAdminPath(pathname))) {
     return NextResponse.redirect(loginUrl);
   }
 

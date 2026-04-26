@@ -10,6 +10,8 @@ interface TagInputProps {
   maxTags?: number;
   helperText?: string;
   disabled?: boolean;
+  suggestions?: string[];
+  onSuggestionAdd?: (tag: string) => void;
 }
 
 export function TagInput({
@@ -20,6 +22,8 @@ export function TagInput({
   maxTags,
   helperText,
   disabled = false,
+  suggestions,
+  onSuggestionAdd,
 }: TagInputProps) {
   const [input, setInput] = useState("");
 
@@ -87,6 +91,27 @@ export function TagInput({
       </div>
       {helperText && (
         <p className="text-xs text-on-surface-variant">{helperText}</p>
+      )}
+      {suggestions && suggestions.length > 0 && !atMax && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
+            NOC:
+          </span>
+          {suggestions
+            .filter((s) => !value.includes(s))
+            .slice(0, 8)
+            .map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onSuggestionAdd?.(s)}
+                className="flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors"
+              >
+                <span className="text-[10px] leading-none">+</span>
+                {s}
+              </button>
+            ))}
+        </div>
       )}
     </div>
   );
