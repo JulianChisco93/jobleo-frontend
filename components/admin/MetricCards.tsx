@@ -20,7 +20,7 @@ interface MetricCardsProps {
 interface CardProps {
   icon: string;
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   sub?: React.ReactNode;
   accent?: "green" | "red" | "navy" | "default";
 }
