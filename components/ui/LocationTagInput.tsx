@@ -16,6 +16,7 @@ interface LocationTagInputProps {
   disabled?: boolean;
   maxTags?: number;
   upgradeMessage?: string;
+  suggestionRequiredText?: string;
 }
 
 const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
@@ -46,6 +47,7 @@ export function LocationTagInput({
   disabled = false,
   maxTags,
   upgradeMessage,
+  suggestionRequiredText = "Please select a location from the dropdown list",
 }: LocationTagInputProps) {
   const atMax = maxTags !== undefined && value.length >= maxTags;
   const [input, setInput] = useState("");
@@ -53,6 +55,7 @@ export function LocationTagInput({
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [open, setOpen] = useState(false);
+  const [suggestionError, setSuggestionError] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -102,9 +105,15 @@ export function LocationTagInput({
     }, 300);
   }, [input]);
 
-  function addTag(tag: string) {
+  function addTag(tag: string, fromSuggestion = false) {
     const trimmed = tag.trim();
     if (!trimmed) return;
+    // Block free-form text when Geoapify is configured — must pick from dropdown
+    if (!fromSuggestion && GEOAPIFY_KEY) {
+      setSuggestionError(true);
+      return;
+    }
+    setSuggestionError(false);
     if (value.includes(trimmed)) return;
     onChange([...value, trimmed]);
     setInput("");
@@ -132,9 +141,9 @@ export function LocationTagInput({
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
         if (activeIndex >= 0) {
-          addTag(suggestions[activeIndex].value);
+          addTag(suggestions[activeIndex].value, true);
         } else {
-          addTag(input);
+          addTag(input, false);
         }
         return;
       }
@@ -146,7 +155,7 @@ export function LocationTagInput({
     } else {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
-        addTag(input);
+        addTag(input, false);
       }
     }
 
@@ -182,7 +191,7 @@ export function LocationTagInput({
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => { setInput(e.target.value); setSuggestionError(false); }}
               onKeyDown={handleKeyDown}
               onFocus={() => suggestions.length > 0 && setOpen(true)}
               placeholder={value.length === 0 ? placeholder : ""}
@@ -206,7 +215,7 @@ export function LocationTagInput({
                   type="button"
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    addTag(s.value);
+                    addTag(s.value, true);
                   }}
                   onMouseEnter={() => setActiveIndex(i)}
                   className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-colors ${
@@ -234,7 +243,18 @@ export function LocationTagInput({
           {upgradeMessage}
         </div>
       )}
-      {helperText && !atMax && (
+      {suggestionError && (
+        <p className="text-xs text-error flex items-center gap-1">
+          <span
+            className="material-symbols-outlined text-[14px]"
+            style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}
+          >
+            error
+          </span>
+          {suggestionRequiredText}
+        </p>
+      )}
+      {helperText && !atMax && !suggestionError && (
         <p className="text-xs text-on-surface-variant">{helperText}</p>
       )}
     </div>

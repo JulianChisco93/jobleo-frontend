@@ -381,6 +381,7 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
         onChange={setLocations}
         placeholder={t("locationsPlaceholder")}
         helperText={t("locationsTip")}
+        suggestionRequiredText={t("locationSuggestionRequired")}
       />
 
       {/* Include / Exclude keywords */}

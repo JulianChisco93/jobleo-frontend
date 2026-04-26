@@ -79,8 +79,7 @@ export default function DashboardPage() {
     ""
   );
   const atMax = profiles.length >= limits.max_profiles;
-  const showWhatsAppBanner =
-    (me?.plan === "pro" || me?.plan === "premium") && !me?.whatsapp_number;
+  const showWhatsAppBanner = !!me && !me?.whatsapp_number;
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">

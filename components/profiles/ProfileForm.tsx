@@ -72,6 +72,12 @@ const FREQUENCY_OPTIONS = [
   { value: 1440, labelKey: "freq1440" },
 ];
 
+const FREE_FREQUENCY_OPTIONS = [
+  { value: 240, labelKey: "freq240" },
+  { value: 480, labelKey: "freq480" },
+  { value: 1440, labelKey: "freq1440" },
+];
+
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => {
   const h = i.toString().padStart(2, "0");
   return `${h}:00`;
@@ -114,7 +120,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
       locations: defaultValues?.locations || [] as string[],
       include_terms: defaultValues?.include_terms || [],
       exclude_terms: defaultValues?.exclude_terms || [],
-      frequency_minutes: defaultValues?.frequency_minutes || (plan === "free" ? 1440 : 60),
+      frequency_minutes: defaultValues?.frequency_minutes || (plan === "free" ? 240 : 60),
       is_active: defaultValues?.is_active ?? true,
       business_hours_only: defaultValues?.business_hours_only || false,
       business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
@@ -222,6 +228,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
               helperText={t("locationsTip")}
               maxTags={maxLocations}
               upgradeMessage={t("locationLimitReached")}
+              suggestionRequiredText={t("locationSuggestionRequired")}
             />
             {locationsError && (
               <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
@@ -255,23 +262,16 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
           {/* Frequency */}
           <div className="flex flex-col gap-2">
             <label className={labelCls}>{t("frequencyLabel")}</label>
-            {plan === "free" ? (
-              <div className="flex items-center gap-2 px-4 py-3 bg-surface-container-low rounded-xl text-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                {t("freePlanFrequencyLocked")}
-              </div>
-            ) : (
-              <select
-                {...register("frequency_minutes", { valueAsNumber: true })}
-                className={inputCls}
-              >
-                {FREQUENCY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {t(opt.labelKey as any)}
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              {...register("frequency_minutes", { valueAsNumber: true })}
+              className={inputCls}
+            >
+              {(plan === "free" ? FREE_FREQUENCY_OPTIONS : FREQUENCY_OPTIONS).map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {t(opt.labelKey as any)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Active toggle — label ↔ toggle, sin pt-6 hack */}
