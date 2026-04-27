@@ -39,6 +39,12 @@ function TipBanner({ title, body }: { title: string; body: string }) {
   );
 }
 
+const SENSITIVITY_OPTIONS = [
+  { value: "broad" as const, labelKey: "alertSensitivityBroad" },
+  { value: "balanced" as const, labelKey: "alertSensitivityBalanced" },
+  { value: "strict" as const, labelKey: "alertSensitivityStrict" },
+];
+
 const schema = z.object({
   name: z.string().min(1),
   profession: z.string().min(1),
@@ -52,6 +58,7 @@ const schema = z.object({
   business_hours_start: z.string().optional(),
   business_hours_end: z.string().optional(),
   business_days_only: z.boolean(),
+  alert_sensitivity: z.enum(["broad", "balanced", "strict"]),
 });
 
 export type ProfileFormData = z.infer<typeof schema>;
@@ -126,11 +133,13 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
       business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
       business_hours_end: toHourStr(defaultValues?.business_hours_end) || "18:00",
       business_days_only: defaultValues?.business_days_only || false,
+      alert_sensitivity: defaultValues?.alert_sensitivity || "broad",
     },
   });
 
   const businessHoursOnly = watch("business_hours_only");
   const isActive = watch("is_active");
+  const alertSensitivity = watch("alert_sensitivity");
 
   const jobTitles = watch("job_titles" as any) as string[] || [];
   const locations = watch("locations" as any) as string[] || [];
@@ -272,6 +281,27 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Alert Sensitivity */}
+          <div className="flex flex-col gap-2">
+            <label className={labelCls}>{t("alertSensitivityLabel")}</label>
+            <div className="flex rounded-xl overflow-hidden border border-outline-variant/30">
+              {SENSITIVITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setValue("alert_sensitivity", opt.value)}
+                  className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
+                    alertSensitivity === opt.value
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
+                  }`}
+                >
+                  {t(opt.labelKey as any)}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Active toggle — label ↔ toggle, sin pt-6 hack */}

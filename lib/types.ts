@@ -27,6 +27,8 @@ export interface CV {
   created_at: string;
 }
 
+export type AlertSensitivity = "broad" | "balanced" | "strict";
+
 export interface SearchProfile {
   id: string;
   name: string;
@@ -41,6 +43,7 @@ export interface SearchProfile {
   business_hours_end?: string;
   business_days_only: boolean;
   is_active: boolean;
+  alert_sensitivity: AlertSensitivity;
   created_at: string;
   updated_at: string;
 }
@@ -100,6 +103,7 @@ export interface CreateSearchProfilePayload {
   business_hours_start: number; // int 0-23
   business_hours_end: number;   // int 0-23
   business_days_only: boolean;
+  alert_sensitivity: AlertSensitivity;
 }
 
 export interface CreateCVPayload {

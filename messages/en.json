@@ -330,7 +330,11 @@
     "analyzing": "Analyzing...",
     "aiAnalysis": "AI ANALYSIS",
     "analyzeError": "Failed to analyze configuration. Please try again.",
-    "analyzeClose": "Close"
+    "analyzeClose": "Close",
+    "alertSensitivityLabel": "ALERT SENSITIVITY",
+    "alertSensitivityBroad": "Broad",
+    "alertSensitivityBalanced": "Balanced",
+    "alertSensitivityStrict": "Strict"
   },
   "jobs": {
     "pageTitle": "Job History",

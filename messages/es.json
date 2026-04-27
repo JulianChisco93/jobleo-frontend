@@ -330,7 +330,11 @@
     "analyzing": "Analizando...",
     "aiAnalysis": "ANÁLISIS IA",
     "analyzeError": "Error al analizar la configuración. Por favor intenta de nuevo.",
-    "analyzeClose": "Cerrar"
+    "analyzeClose": "Cerrar",
+    "alertSensitivityLabel": "SENSIBILIDAD DE ALERTAS",
+    "alertSensitivityBroad": "Amplio",
+    "alertSensitivityBalanced": "Equilibrado",
+    "alertSensitivityStrict": "Estricto"
   },
   "jobs": {
     "pageTitle": "Historial de Empleos",
