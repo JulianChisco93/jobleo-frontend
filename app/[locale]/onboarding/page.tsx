@@ -593,6 +593,7 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
           business_hours_start: 9,
           business_hours_end: 18,
           business_days_only: false,
+          alert_sensitivity: "broad",
         });
         // Save job titles for a future plan upgrade
         if (jobTitles.length > 0) {
@@ -640,6 +641,7 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
+      alert_sensitivity: "broad" as const,
     };
     sessionStorage.setItem("onboarding_pending_profile", JSON.stringify(pendingProfile));
 
