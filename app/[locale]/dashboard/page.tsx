@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getSearchProfiles, getJobs, getMe } from "@/lib/api";
+import { getSearchProfiles, getJobs, getMe, getCV } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -60,9 +60,14 @@ export default function DashboardPage() {
     });
   }, []);
 
-  const { data: profiles = [] } = useQuery({
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ["profiles"],
     queryFn: getSearchProfiles,
+  });
+
+  const { data: cv, isLoading: cvLoading } = useQuery({
+    queryKey: ["cv"],
+    queryFn: getCV,
   });
 
   const { data: jobs = [] } = useQuery({
@@ -81,8 +86,65 @@ export default function DashboardPage() {
   const atMax = profiles.length >= limits.max_profiles;
   const showWhatsAppBanner = !!me && !me?.whatsapp_number;
 
+  const showOnboardingBlock =
+    !profilesLoading && !cvLoading && profiles.length === 0;
+  const hasCv = !!cv;
+
   return (
     <div className="flex flex-col flex-1 overflow-auto">
+      {showOnboardingBlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface/80 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-8 shadow-[var(--shadow-card)] max-w-md w-full flex flex-col items-center gap-6">
+            {hasCv ? (
+              <>
+                <div className="w-16 h-16 bg-secondary-container rounded-full flex items-center justify-center">
+                  <span
+                    className="material-symbols-outlined text-3xl text-secondary"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    description
+                  </span>
+                </div>
+                <div className="text-center">
+                  <h2 className="font-display font-bold text-xl text-on-surface mb-2">
+                    {t("cvReadyTitle")}
+                  </h2>
+                  <p className="text-sm text-on-surface-variant">
+                    {t("cvReadyMessage")}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center">
+                  <span
+                    className="material-symbols-outlined text-3xl text-on-primary-container"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    manage_accounts
+                  </span>
+                </div>
+                <div className="text-center">
+                  <h2 className="font-display font-bold text-xl text-on-surface mb-2">
+                    {t("incompleteOnboardingTitle")}
+                  </h2>
+                  <p className="text-sm text-on-surface-variant">
+                    {t("incompleteOnboardingMessage")}
+                  </p>
+                </div>
+              </>
+            )}
+            <Link
+              href={`${prefix}/dashboard/profiles/new`}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              {hasCv ? t("cvReadyCta") : t("incompleteOnboardingCta")}
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       <DashboardTopBar title={t("title")} userName={userName} />
 
       <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">

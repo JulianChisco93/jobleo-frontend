@@ -71,6 +71,13 @@ interface ProfileFormProps {
   limits?: PlanLimits;
 }
 
+const COUNTRY_OPTIONS = [
+  "Canada", "United States", "United Kingdom", "Australia",
+  "Mexico", "Spain", "Argentina", "Colombia", "Chile",
+  "Germany", "France", "Brazil", "India", "Portugal",
+  "Venezuela", "Peru", "Ecuador", "Uruguay", "Other",
+] as const;
+
 const FREQUENCY_OPTIONS = [
   { value: 60, labelKey: "freq60" },
   { value: 120, labelKey: "freq120" },
@@ -92,6 +99,16 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => {
 
 const inputCls = "px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm outline-none transition-all w-full";
 const labelCls = "text-xs font-bold text-on-surface-variant uppercase tracking-wider";
+
+function detectCountry(locations: string[]): string {
+  const canadianTerms = [
+    "canada", "ontario", "quebec", "british columbia", "alberta",
+    "manitoba", "saskatchewan", "nova scotia", "new brunswick",
+  ];
+  return locations.some((loc) =>
+    canadianTerms.some((term) => loc.toLowerCase().includes(term))
+  ) ? "Canada" : "";
+}
 
 // The API may return business_hours_start/end as integers (0-23) or strings.
 // Normalize to "HH:00" format so the select and Zod (z.string) work correctly.
@@ -147,6 +164,17 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
   const excludeTerms = watch("exclude_terms" as any) as string[] || [];
   const [locationsError, setLocationsError] = useState(false);
   const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
+  const [country, setCountry] = useState<string>(() =>
+    detectCountry(defaultValues?.locations ?? [])
+  );
+
+  function handleCountryChange(newCountry: string) {
+    setCountry(newCountry);
+    if (newCountry !== "Canada") {
+      setValue("profession", "");
+      setNocSuggestions([]);
+    }
+  }
 
   async function wrappedSubmit(data: ProfileFormData) {
     if (locations.length === 0) {
@@ -173,21 +201,47 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
         {/* LEFT — ¿Qué busco? */}
         <div className="flex flex-col gap-6">
 
-          {/* Name + Profession */}
-          <div className="grid grid-cols-2 gap-6">
+          {/* Name + Country + Profession */}
+          <div className="grid grid-cols-3 gap-6">
             <div className="flex flex-col gap-2">
               <label className={labelCls}>{t("profileNameLabel")}</label>
               <input {...register("name")} className={inputCls} />
               {errors.name && <span className="text-xs text-error">{t("profileNameLabel")} required</span>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className={labelCls}>{t("professionLabel")}</label>
-              <NocCombobox
-                value={watch("profession")}
-                onChange={(val) => setValue("profession", val)}
-                onSelect={(data) => setNocSuggestions(data?.examples ?? [])}
+              <label className={labelCls}>{t("countryLabel")}</label>
+              <select
+                value={country}
+                onChange={(e) => handleCountryChange(e.target.value)}
                 disabled={isSubmitting}
-              />
+                className={inputCls}
+              >
+                <option value="">{t("countrySelectDefault")}</option>
+                {COUNTRY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className={labelCls}>{t("professionLabel")}</label>
+              {country === "Canada" ? (
+                <NocCombobox
+                  value={watch("profession")}
+                  onChange={(val) => setValue("profession", val)}
+                  onSelect={(data) => setNocSuggestions(data?.examples ?? [])}
+                  disabled={isSubmitting}
+                />
+              ) : (
+                <input
+                  {...register("profession")}
+                  placeholder={t("professionPlaceholder")}
+                  disabled={isSubmitting}
+                  className={inputCls}
+                />
+              )}
+              {errors.profession && (
+                <span className="text-xs text-error">Required</span>
+              )}
             </div>
           </div>
 

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter as useI18nRouter, usePathname as useI18nPathname } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMe, updateMe } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Toggle } from "@/components/ui/Toggle";
-import { LangToggle } from "@/components/ui/LangToggle";
 import { CheckoutButton } from "@/components/billing/CheckoutButton";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { createClient } from "@/lib/supabase/client";
@@ -50,6 +50,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const router = useRouter();
+  const locale = useLocale();
+  const i18nRouter = useI18nRouter();
+  const i18nPathname = useI18nPathname();
+
+  function switchLocale(next: string) {
+    i18nRouter.replace(i18nPathname, { locale: next });
+  }
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
   const [businessHours, setBusinessHours] = useState(false);
@@ -275,12 +282,62 @@ export default function SettingsPage() {
 
           {/* Notifications */}
           <Section title={t("notificationsSection")}>
-            <Toggle checked={businessHours} onChange={setBusinessHours} label={t("businessHoursGlobal")} />
+            {me?.plan === "free" || !me?.plan ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Toggle checked={true} onChange={() => {}} disabled label="" />
+                  <span className="text-sm font-semibold text-on-surface flex-1">
+                    {t("businessHoursGlobal")}
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant bg-surface-container-high px-2.5 py-1 rounded-full">
+                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                    {t("businessHoursLockedBadge")}
+                  </span>
+                </div>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  {t("businessHoursLockedHint")}
+                </p>
+              </div>
+            ) : (
+              <Toggle checked={businessHours} onChange={setBusinessHours} label={t("businessHoursGlobal")} />
+            )}
           </Section>
 
           {/* Language */}
           <Section title={t("languageSection")}>
-            <LangToggle />
+            <div className="flex flex-col gap-2">
+              {[
+                { loc: "en", label: t("english"), flag: "🇨🇦" },
+                { loc: "es", label: t("spanish"), flag: "🇪🇸" },
+              ].map(({ loc, label, flag }) => {
+                const isActive = locale === loc;
+                return (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => switchLocale(loc)}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all text-left cursor-pointer ${
+                      isActive
+                        ? "border-primary bg-primary-fixed/40"
+                        : "border-outline-variant/30 bg-surface-container-low hover:border-outline-variant hover:bg-surface-container"
+                    }`}
+                  >
+                    <span className="text-lg leading-none">{flag}</span>
+                    <span className={`flex-1 text-sm font-semibold ${isActive ? "text-on-surface" : "text-on-surface-variant"}`}>
+                      {label}
+                    </span>
+                    {isActive && (
+                      <span
+                        className="material-symbols-outlined text-[20px] text-primary"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        check_circle
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </Section>
 
           {/* Save */}
