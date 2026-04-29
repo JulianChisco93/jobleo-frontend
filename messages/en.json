@@ -141,7 +141,8 @@
     "forgotPasswordFailed": "Failed to send reset email. Please try again.",
     "sendResetEmail": "Send Reset Email",
     "sending": "Sending...",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "emailMarketingConsent": "I'd like to receive weekly job digests, tips, and updates from Jobleo. You can unsubscribe at any time."
   },
   "meta": {
     "defaultTitle": "Jobleo — Your Next Job, Delivered to WhatsApp",

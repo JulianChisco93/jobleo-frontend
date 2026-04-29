@@ -141,7 +141,8 @@
     "forgotPasswordFailed": "Error al enviar el correo. Inténtalo de nuevo.",
     "sendResetEmail": "Enviar Correo de Restablecimiento",
     "sending": "Enviando...",
-    "backToLogin": "Volver al inicio de sesión"
+    "backToLogin": "Volver al inicio de sesión",
+    "emailMarketingConsent": "Me gustaría recibir resúmenes semanales de empleos, consejos y novedades de Jobleo. Puedes cancelar la suscripción en cualquier momento."
   },
   "about": {
     "missionTag": "MISIÓN",

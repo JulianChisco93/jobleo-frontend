@@ -33,6 +33,7 @@ export interface SearchProfile {
   id: string;
   name: string;
   profession: string;
+  country?: string;
   job_titles: string[];
   locations: string[];
   include_terms: string[];
@@ -93,6 +94,7 @@ export interface ConfigAnalysis {
 export interface CreateSearchProfilePayload {
   name: string;
   profession: string;
+  country?: string;
   job_titles: string[];        // max 5, puede ser []
   locations: string[];         // mínimo 1 elemento
   include_terms: string[];     // puede ser []

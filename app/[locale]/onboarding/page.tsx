@@ -28,6 +28,7 @@ interface OnboardingData {
   cvText: string;
   // Step 2
   profession: string;
+  country: string;
   jobTitles: string[];
   locations: string[];
   includeTerms: string[];
@@ -43,6 +44,7 @@ const DEFAULT_ONBOARDING_DATA: OnboardingData = {
   cvTab: "upload",
   cvText: "",
   profession: "",
+  country: "",
   jobTitles: [],
   locations: [],
   includeTerms: [],
@@ -326,7 +328,7 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
   const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
 
   function collectData(profession: string): Partial<OnboardingData> {
-    return { profession, jobTitles, locations, includeTerms, excludeTerms };
+    return { profession, country, jobTitles, locations, includeTerms, excludeTerms };
   }
 
   function handleCountryChange(newCountry: string) {
@@ -620,6 +622,7 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
         const profile = await createSearchProfile({
           name: `${profession} Search`,
           profession,
+          country: initialData.country || undefined,
           job_titles: [],
           locations: locations.slice(0, 2),
           include_terms: includeTerms,
@@ -665,6 +668,7 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
     const pendingProfile = {
       name: `${profession} Search`,
       profession,
+      country: initialData.country || undefined,
       job_titles: jobTitles.slice(0, limits.maxJobTitles),
       locations:
         limits.maxLocations === Infinity

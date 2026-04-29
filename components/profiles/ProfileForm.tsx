@@ -48,6 +48,7 @@ const SENSITIVITY_OPTIONS = [
 const schema = z.object({
   name: z.string().min(1),
   profession: z.string().min(1),
+  country: z.string().optional(),
   job_titles: z.array(z.string()),
   locations: z.array(z.string()),
   include_terms: z.array(z.string()),
@@ -140,6 +141,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
     defaultValues: {
       name: defaultValues?.name || "",
       profession: defaultValues?.profession || "",
+      country: defaultValues?.country || detectCountry(defaultValues?.locations ?? []),
       job_titles: defaultValues?.job_titles || [],
       locations: defaultValues?.locations || [] as string[],
       include_terms: defaultValues?.include_terms || [],
@@ -164,12 +166,10 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
   const excludeTerms = watch("exclude_terms" as any) as string[] || [];
   const [locationsError, setLocationsError] = useState(false);
   const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
-  const [country, setCountry] = useState<string>(() =>
-    detectCountry(defaultValues?.locations ?? [])
-  );
+  const country = watch("country") ?? "";
 
   function handleCountryChange(newCountry: string) {
-    setCountry(newCountry);
+    setValue("country", newCountry);
     if (newCountry !== "Canada") {
       setValue("profession", "");
       setNocSuggestions([]);

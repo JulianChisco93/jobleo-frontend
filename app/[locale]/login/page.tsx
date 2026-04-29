@@ -27,6 +27,7 @@ const registerSchema = z
       .regex(/[0-9]/, "Must contain at least one number")
       .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
     confirmPassword: z.string(),
+    emailMarketing: z.boolean().default(false),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -130,7 +131,10 @@ function LoginForm() {
         email: data.email,
         password: data.password,
         options: {
-          data: { display_name: data.name },
+          data: {
+            display_name: data.name,
+            email_marketing_consent: data.emailMarketing,
+          },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -472,6 +476,18 @@ function LoginForm() {
                     <span className="text-xs text-error mt-1 block">{registerForm.formState.errors.confirmPassword.message}</span>
                   )}
                 </div>
+
+                {/* Email marketing consent */}
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...registerForm.register("emailMarketing")}
+                    className="mt-0.5 h-4 w-4 rounded border-outline-variant bg-surface-container-low accent-primary cursor-pointer flex-shrink-0"
+                  />
+                  <span className="text-xs text-on-surface-variant leading-relaxed">
+                    {t("emailMarketingConsent")}
+                  </span>
+                </label>
 
                 <button
                   type="submit"
