@@ -88,9 +88,6 @@ export default function DashboardPage() {
         for (const alert of page) {
           if (alert.sent_at && new Date(alert.sent_at) >= monday) {
             count++;
-          } else if (alert.sent_at) {
-            // Alert is before this week — assuming DESC order, stop paginating
-            return count;
           }
         }
 
