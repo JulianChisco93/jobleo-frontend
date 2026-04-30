@@ -86,7 +86,7 @@ export default function DashboardPage() {
         if (page.length === 0) break;
 
         for (const alert of page) {
-          if (alert.sent_at && new Date(alert.sent_at) >= monday) {
+          if (alert.sent_at && new Date(alert.sent_at.replace(" ", "T")) >= monday) {
             count++;
           }
         }
