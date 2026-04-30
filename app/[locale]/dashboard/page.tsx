@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getSearchProfiles, getJobs, getMe, getCV, getSearchProfileLogs } from "@/lib/api";
+import { getSearchProfiles, getJobAlerts, getMe, getCV, getSearchProfileLogs } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { formatLastSearched } from "@/lib/utils";
+import { formatTimeUntil, formatLastSearched } from "@/lib/utils";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
@@ -70,9 +70,9 @@ export default function DashboardPage() {
     queryFn: getCV,
   });
 
-  const { data: jobs = [] } = useQuery({
-    queryKey: ["jobs"],
-    queryFn: () => getJobs({ limit: 10000 }),
+  const { data: jobAlerts = [] } = useQuery({
+    queryKey: ["job-alerts-week"],
+    queryFn: () => getJobAlerts({ limit: 50 }),
   });
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
@@ -81,18 +81,31 @@ export default function DashboardPage() {
   const activeProfiles = profiles.filter((p) => p.is_active);
 
   const { data: profileLogs = [] } = useQuery({
-    queryKey: ["profile-logs-latest", profiles.map((p) => p.id).join(",")],
+    queryKey: ["profile-logs-next", activeProfiles.map((p) => p.id).join(",")],
     queryFn: () =>
-      Promise.all(profiles.map((p) => getSearchProfileLogs(p.id))).then((r) =>
+      Promise.all(activeProfiles.map((p) => getSearchProfileLogs(p.id))).then((r) =>
         r.flat()
       ),
-    enabled: profiles.length > 0,
+    enabled: activeProfiles.length > 0,
   });
 
-  const now = new Date().toISOString();
-  const lastSearched = profileLogs
-    .filter((log) => log.ran_at && log.ran_at < now)
-    .reduce((acc, log) => (log.ran_at > acc ? log.ran_at : acc), "");
+  // Jobs sent this week (Monday 00:00 to now)
+  const monday = new Date();
+  monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
+  monday.setHours(0, 0, 0, 0);
+  const jobsThisWeek = jobAlerts.filter(
+    (a) => a.sent_at && new Date(a.sent_at) >= monday
+  ).length;
+
+  // Earliest future scheduled run across all active profiles
+  const nowMs = Date.now();
+  const nextSearchTs = profileLogs
+    .filter((log) => log.ran_at && new Date(log.ran_at).getTime() > nowMs)
+    .reduce<number | null>((acc, log) => {
+      const ts = new Date(log.ran_at).getTime();
+      return acc === null || ts < acc ? ts : acc;
+    }, null);
+  const nextSearch = nextSearchTs ? new Date(nextSearchTs).toISOString() : "";
   const atMax = profiles.length >= limits.max_profiles;
   const showWhatsAppBanner = !!me && !me?.whatsapp_number;
 
@@ -181,7 +194,7 @@ export default function DashboardPage() {
             <div className="flex gap-2 md:gap-4 w-full md:w-auto">
               <StatCard
                 title={t("activeJobsTitle")}
-                value={jobs.length}
+                value={jobsThisWeek}
                 accent="text-primary"
               />
               <StatCard
@@ -191,7 +204,7 @@ export default function DashboardPage() {
               />
               <StatCard
                 title={t("lastSearchedTitle")}
-                value={formatLastSearched(lastSearched)}
+                value={formatTimeUntil(nextSearch)}
                 accent="text-tertiary"
               />
             </div>
