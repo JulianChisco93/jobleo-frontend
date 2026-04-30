@@ -27,7 +27,7 @@ const registerSchema = z
       .regex(/[0-9]/, "Must contain at least one number")
       .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
     confirmPassword: z.string(),
-    emailMarketing: z.boolean().default(false),
+    emailMarketing: z.boolean(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -90,7 +90,7 @@ function LoginForm() {
   const [forgotLoading, setForgotLoading] = useState(false);
 
   const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
-  const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
+  const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema), defaultValues: { emailMarketing: false } });
 
   function handleTabChange(newTab: "login" | "register") {
     setTab(newTab);
