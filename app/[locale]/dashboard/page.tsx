@@ -70,9 +70,37 @@ export default function DashboardPage() {
     queryFn: getCV,
   });
 
-  const { data: jobAlerts = [] } = useQuery({
-    queryKey: ["job-alerts-week"],
-    queryFn: () => getJobAlerts({ limit: 50 }),
+  const { data: jobsThisWeek = 0 } = useQuery({
+    queryKey: ["jobs-this-week"],
+    queryFn: async () => {
+      const monday = new Date();
+      monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
+      monday.setHours(0, 0, 0, 0);
+
+      const PAGE_SIZE = 50;
+      let count = 0;
+      let offset = 0;
+
+      while (true) {
+        const page = await getJobAlerts({ limit: PAGE_SIZE, offset });
+        if (page.length === 0) break;
+
+        for (const alert of page) {
+          if (alert.sent_at && new Date(alert.sent_at) >= monday) {
+            count++;
+          } else if (alert.sent_at) {
+            // Alert is before this week — assuming DESC order, stop paginating
+            return count;
+          }
+        }
+
+        if (page.length < PAGE_SIZE) break;
+        offset += PAGE_SIZE;
+      }
+
+      return count;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
@@ -88,14 +116,6 @@ export default function DashboardPage() {
       ),
     enabled: activeProfiles.length > 0,
   });
-
-  // Jobs sent this week (Monday 00:00 to now)
-  const monday = new Date();
-  monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
-  monday.setHours(0, 0, 0, 0);
-  const jobsThisWeek = jobAlerts.filter(
-    (a) => a.sent_at && new Date(a.sent_at) >= monday
-  ).length;
 
   // Earliest future scheduled run across all active profiles
   const nowMs = Date.now();
