@@ -5,6 +5,7 @@
 export function formatLastSearched(dateStr: string): string {
   if (!dateStr) return "—";
   const diff = Date.now() - new Date(dateStr).getTime();
+  if (diff <= 0) return "—";
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins} min`;
   const hrs = Math.floor(mins / 60);

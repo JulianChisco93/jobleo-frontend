@@ -72,7 +72,7 @@ export default function DashboardPage() {
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["jobs"],
-    queryFn: () => getJobs(),
+    queryFn: () => getJobs({ limit: 10000 }),
   });
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
@@ -89,10 +89,10 @@ export default function DashboardPage() {
     enabled: profiles.length > 0,
   });
 
-  const lastSearched = profileLogs.reduce(
-    (acc, log) => ((log.ran_at || "") > acc ? log.ran_at : acc),
-    ""
-  );
+  const now = new Date().toISOString();
+  const lastSearched = profileLogs
+    .filter((log) => log.ran_at && log.ran_at < now)
+    .reduce((acc, log) => (log.ran_at > acc ? log.ran_at : acc), "");
   const atMax = profiles.length >= limits.max_profiles;
   const showWhatsAppBanner = !!me && !me?.whatsapp_number;
 
