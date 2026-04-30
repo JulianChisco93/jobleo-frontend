@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { getSearchProfiles, getJobs, getMe, getCV } from "@/lib/api";
+import { getSearchProfiles, getJobs, getMe, getCV, getSearchProfileLogs } from "@/lib/api";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -72,15 +72,25 @@ export default function DashboardPage() {
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["jobs"],
-    queryFn: () => getJobs({ limit: 50 }),
+    queryFn: () => getJobs(),
   });
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
   const { limits } = usePlanLimits();
 
   const activeProfiles = profiles.filter((p) => p.is_active);
-  const lastSearched = profiles.reduce(
-    (acc, p) => (p.updated_at > acc ? p.updated_at : acc),
+
+  const { data: profileLogs = [] } = useQuery({
+    queryKey: ["profile-logs-latest", profiles.map((p) => p.id).join(",")],
+    queryFn: () =>
+      Promise.all(profiles.map((p) => getSearchProfileLogs(p.id))).then((r) =>
+        r.flat()
+      ),
+    enabled: profiles.length > 0,
+  });
+
+  const lastSearched = profileLogs.reduce(
+    (acc, log) => ((log.ran_at || "") > acc ? log.ran_at : acc),
     ""
   );
   const atMax = profiles.length >= limits.max_profiles;
