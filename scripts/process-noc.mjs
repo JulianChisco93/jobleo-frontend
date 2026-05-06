@@ -78,7 +78,7 @@ const COL_DESC  = header.findIndex(h => h.includes("Element Description English"
 
 console.log(`Columns → code:${COL_CODE} title:${COL_TITLE} type:${COL_TYPE} desc:${COL_DESC}`);
 
-const EXAMPLE_TYPES = new Set(["Illustrative example(s)", "All examples"]);
+const EXAMPLE_TYPES = new Set(["All examples"]);
 
 // Group by code
 const map = new Map();
@@ -96,22 +96,24 @@ for (const row of dataRows) {
   if (!code || !title || !desc) continue;
 
   if (!map.has(code)) {
-    map.set(code, { code, title, examplesSet: new Set() });
+    // examplesMap: lowercase key → original-cased value (case-insensitive dedup, preserve casing)
+    map.set(code, { code, title, examplesMap: new Map() });
   }
 
-  // desc can be comma-separated list of examples in a single cell
-  const parts = desc.split(",").map(p => p.trim()).filter(Boolean);
-  for (const part of parts) {
-    map.get(code).examplesSet.add(part.toLowerCase());
+  // Each CSV row is one individual example title — preserve original casing
+  const example = desc.trim();
+  const key = example.toLowerCase();
+  if (example && !map.get(code).examplesMap.has(key)) {
+    map.get(code).examplesMap.set(key, example);
   }
 }
 
-// Convert to array, sort by title, drop the Set
+// Convert to array, sort by title, drop the Map
 const result = Array.from(map.values())
-  .map(({ code, title, examplesSet }) => ({
+  .map(({ code, title, examplesMap }) => ({
     code,
     title,
-    examples: Array.from(examplesSet).sort(),
+    examples: Array.from(examplesMap.values()).sort((a, b) => a.localeCompare(b)),
   }))
   .filter(entry => entry.examples.length > 0)
   .sort((a, b) => a.title.localeCompare(b.title));

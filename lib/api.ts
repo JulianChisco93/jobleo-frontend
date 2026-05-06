@@ -153,8 +153,11 @@ export const getJobAlerts = (params: Pick<JobsQuery, "limit" | "offset" | "searc
 export const generateJobExplanation = (jobAlertId: number) =>
   request<JobAlert>(`/api/v1/jobs/${jobAlertId}/explanation`, { method: "POST" });
 
-export const analyzeSearchConfig = (configId: string) =>
-  request<ConfigAnalysis>(`/api/v1/searches/${configId}/analyze`, { method: "POST" });
+export const analyzeSearchConfig = (configId: string, profile?: Pick<SearchProfile, "profession" | "country" | "job_titles" | "locations" | "include_terms" | "exclude_terms" | "alert_sensitivity">) =>
+  request<ConfigAnalysis>(`/api/v1/searches/${configId}/analyze`, {
+    method: "POST",
+    body: JSON.stringify(profile ?? {}),
+  });
 
 // ─── Billing ──────────────────────────────────────────────────────────────────
 
