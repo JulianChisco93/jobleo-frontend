@@ -8,7 +8,6 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationTagInput } from "@/components/ui/LocationTagInput";
-import { NocCombobox } from "@/components/ui/NocCombobox";
 import { LangToggle } from "@/components/ui/LangToggle";
 import {
   uploadCVFile,
@@ -316,7 +315,7 @@ interface Step2Props {
 
 function Step2({ initialData, onNext, onBack }: Step2Props) {
   const t = useTranslations("onboarding");
-  const { register, handleSubmit, getValues, setValue, watch, formState: { errors } } = useForm<SearchFormData>({
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: { profession: initialData.profession },
   });
@@ -324,8 +323,7 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
   const [locations, setLocations] = useState<string[]>(initialData.locations);
   const [includeTerms, setIncludeTerms] = useState<string[]>(initialData.includeTerms);
   const [excludeTerms, setExcludeTerms] = useState<string[]>(initialData.excludeTerms);
-  const [country, setCountry] = useState<string>("");
-  const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
+  const [country, setCountry] = useState<string>(initialData.country);
 
   function collectData(profession: string): Partial<OnboardingData> {
     return { profession, country, jobTitles, locations, includeTerms, excludeTerms };
@@ -333,10 +331,6 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
 
   function handleCountryChange(newCountry: string) {
     setCountry(newCountry);
-    if (newCountry !== "Canada") {
-      setValue("profession", "");
-      setNocSuggestions([]);
-    }
   }
 
   function onSubmit(data: SearchFormData) {
@@ -382,19 +376,11 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
         <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
           {t("professionLabel")}
         </label>
-        {country === "Canada" ? (
-          <NocCombobox
-            value={watch("profession")}
-            onChange={(val) => setValue("profession", val)}
-            onSelect={(data) => setNocSuggestions(data?.examples ?? [])}
-          />
-        ) : (
-          <input
-            {...register("profession")}
-            placeholder={t("professionPlaceholder")}
-            className="px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm transition-all outline-none"
-          />
-        )}
+        <input
+          {...register("profession")}
+          placeholder={t("professionPlaceholder")}
+          className="px-4 py-3 rounded-xl bg-surface-container-low border-transparent focus:border-primary focus:ring-0 text-sm transition-all outline-none"
+        />
         {errors.profession && (
           <span className="text-xs text-error">Required</span>
         )}
@@ -407,10 +393,6 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
         onChange={setJobTitles}
         placeholder={t("jobTitlesPlaceholder")}
         maxTags={3}
-        suggestions={nocSuggestions.filter((s) => !jobTitles.includes(s))}
-        onSuggestionAdd={(tag) => {
-          if (jobTitles.length < 3) setJobTitles([...jobTitles, tag]);
-        }}
       />
 
       {/* Locations */}
