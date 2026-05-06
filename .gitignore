@@ -29,6 +29,7 @@
 .claude/
 .cursor/
 .playwright-mcp/
+.agents/
 
 # debug
 npm-debug.log*
