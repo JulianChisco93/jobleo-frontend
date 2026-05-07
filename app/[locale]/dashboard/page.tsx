@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { formatTimeUntil, formatLastSearched } from "@/lib/utils";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
+import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
 const PROFILE_ACCENTS = [
@@ -190,10 +191,25 @@ export default function DashboardPage() {
       <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
         {/* WhatsApp missing banner */}
         {showWhatsAppBanner && (
-          <Link href={`${prefix}/dashboard/settings`} className="flex items-center gap-3 mb-6 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl text-sm font-medium hover:bg-secondary-container/80 transition-colors">
-            <span className="material-symbols-outlined text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>whatsapp</span>
-            <span className="flex-1">{t("whatsappMissingBanner")}</span>
-            <span className="text-xs font-bold uppercase tracking-wider opacity-70">{t("whatsappMissingCta")}</span>
+          <Link
+            href={`${prefix}/dashboard/settings`}
+            className="group flex items-center gap-4 mb-6 px-5 py-4 bg-surface-container-lowest rounded-xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-ambient)] transition-all"
+          >
+            <div className="w-9 h-9 rounded-xl bg-secondary-container flex items-center justify-center flex-shrink-0">
+              <span
+                className="material-symbols-outlined text-[20px] text-on-secondary-container"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                chat_bubble
+              </span>
+            </div>
+            <p className="flex-1 text-sm font-medium text-on-surface">
+              {t("whatsappMissingBanner")}
+            </p>
+            <span className="flex items-center gap-1 text-xs font-bold text-secondary group-hover:gap-2 transition-all shrink-0">
+              {t("whatsappMissingCta")}
+              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </span>
           </Link>
         )}
 
@@ -335,6 +351,8 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        <UpgradeBanner plan={limits.plan} />
       </main>
     </div>
   );

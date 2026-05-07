@@ -292,7 +292,12 @@
     "incompleteOnboardingCta": "Create Profile",
     "cvReadyTitle": "Your CV is ready!",
     "cvReadyMessage": "Just one step left — create your search profile to start receiving job alerts.",
-    "cvReadyCta": "Create Profile"
+    "cvReadyCta": "Create Profile",
+    "upgradeTitle": "Ready for more?",
+    "upgradeFreeNote": "You're on the Free plan — 1 profile limit.",
+    "upgradeProCtaLabel": "Upgrade to Pro",
+    "upgradePremiumCtaLabel": "Get Premium",
+    "upgradeProOnlyTitle": "Unlock everything with Premium"
   },
   "profiles": {
     "pageTitle": "My Profiles",

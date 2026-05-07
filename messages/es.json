@@ -292,7 +292,12 @@
     "incompleteOnboardingCta": "Crear Perfil",
     "cvReadyTitle": "¡Tu CV está listo!",
     "cvReadyMessage": "Solo falta crear tu perfil de búsqueda para empezar a recibir alertas.",
-    "cvReadyCta": "Crear Perfil"
+    "cvReadyCta": "Crear Perfil",
+    "upgradeTitle": "¿Listo para más?",
+    "upgradeFreeNote": "Estás en el plan gratuito — límite de 1 perfil.",
+    "upgradeProCtaLabel": "Actualizar a Pro",
+    "upgradePremiumCtaLabel": "Obtener Premium",
+    "upgradeProOnlyTitle": "Desbloquea todo con Premium"
   },
   "profiles": {
     "pageTitle": "Mis Perfiles",
