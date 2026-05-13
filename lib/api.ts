@@ -65,9 +65,10 @@ export const updateMe = (data: Partial<Pick<User, "whatsapp_number" | "timezone"
 
 // ─── CV ──────────────────────────────────────────────────────────────────────
 
-export const getCV = () => request<CV | null>("/api/v1/cv/");
+export const getCV = (searchConfigId: string) =>
+  request<CV | null>(`/api/v1/cv/?search_config_id=${searchConfigId}`);
 
-export const uploadCVFile = async (file: File): Promise<CV> => {
+export const uploadCVFile = async (file: File, searchConfigId: string): Promise<CV> => {
   const supabase = createClient();
   const {
     data: { session },
@@ -77,7 +78,7 @@ export const uploadCVFile = async (file: File): Promise<CV> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${BASE_URL}/api/v1/cv/upload`, {
+  const res = await fetch(`${BASE_URL}/api/v1/cv/upload?search_config_id=${searchConfigId}`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
@@ -86,14 +87,14 @@ export const uploadCVFile = async (file: File): Promise<CV> => {
   return res.json();
 };
 
-export const uploadCVText = (extracted_text: string, filename: string) =>
-  request<CV>("/api/v1/cv/text", {
+export const uploadCVText = (extracted_text: string, filename: string, searchConfigId: string) =>
+  request<CV>(`/api/v1/cv/text?search_config_id=${searchConfigId}`, {
     method: "POST",
     body: JSON.stringify({ extracted_text, filename }),
   });
 
-export const deleteCV = () =>
-  request<void>("/api/v1/cv/", { method: "DELETE" });
+export const deleteCV = (searchConfigId: string) =>
+  request<void>(`/api/v1/cv/?search_config_id=${searchConfigId}`, { method: "DELETE" });
 
 // ─── Search Profiles ─────────────────────────────────────────────────────────
 

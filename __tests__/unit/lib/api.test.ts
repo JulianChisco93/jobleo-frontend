@@ -70,9 +70,9 @@ describe("updateMe", () => {
 describe("getCV", () => {
   it("returns the current CV", async () => {
     const { getCV } = await apiImport();
-    const cv = await getCV();
+    const cv = await getCV("42");
     expect(cv).not.toBeNull();
-    expect(cv?.id).toBe("cv-1");
+    expect(cv?.id).toBe(1);
     expect(cv?.filename).toBe("resume.pdf");
   });
 
@@ -83,7 +83,7 @@ describe("getCV", () => {
       )
     );
     const { getCV } = await apiImport();
-    const cv = await getCV();
+    const cv = await getCV("42");
     expect(cv).toBeUndefined();
   });
 });
@@ -91,7 +91,7 @@ describe("getCV", () => {
 describe("uploadCVText", () => {
   it("posts extracted text and returns a CV object", async () => {
     const { uploadCVText } = await apiImport();
-    const cv = await uploadCVText("a".repeat(300), "my-cv.txt");
+    const cv = await uploadCVText("a".repeat(300), "my-cv.txt", "42");
     expect(cv.filename).toBe("my-cv.txt");
   });
 });
@@ -99,7 +99,7 @@ describe("uploadCVText", () => {
 describe("deleteCV", () => {
   it("resolves without a return value (204)", async () => {
     const { deleteCV } = await apiImport();
-    const result = await deleteCV();
+    const result = await deleteCV("42");
     expect(result).toBeUndefined();
   });
 
@@ -110,7 +110,7 @@ describe("deleteCV", () => {
       )
     );
     const { deleteCV } = await apiImport();
-    await expect(deleteCV()).rejects.toThrow("Forbidden");
+    await expect(deleteCV("42")).rejects.toThrow("Forbidden");
   });
 });
 

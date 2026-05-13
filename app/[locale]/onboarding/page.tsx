@@ -84,7 +84,7 @@ function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
 // ─── Step 1: CV Upload ───────────────────────────────────────
 interface Step1Props {
   initialData: OnboardingData;
-  onNext: (update: Partial<OnboardingData>) => void;
+  onNext: (update: Partial<OnboardingData>, file: File | null) => void;
 }
 
 function Step1({ initialData, onNext }: Step1Props) {
@@ -93,66 +93,42 @@ function Step1({ initialData, onNext }: Step1Props) {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState(initialData.cvText);
   const [override, setOverride] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const alreadyUploaded = initialData.cvUploaded && !!initialData.cvFilename;
-  // Show the "already uploaded" state when: CV was uploaded before, user hasn't
-  // selected a new file, and hasn't clicked "upload a different one"
+  // Show the "already selected" state when: file was selected before and user hasn't overridden
   const showUploadedState = alreadyUploaded && !override && !file;
 
-  async function handleContinue() {
-    // Branch 1: already uploaded, no new file/text selected → skip re-upload
+  function handleContinue() {
+    // Branch 1: already selected, no new file/text → just advance
     if (alreadyUploaded && !override && !file && !text.trim()) {
-      onNext({ cvTab });
+      onNext({ cvTab }, null);
       return;
     }
 
-    setLoading(true);
     setError(null);
-    try {
-      if (cvTab === "upload" && file) {
-        await uploadCVFile(file);
-        onNext({
-          cvUploaded: true,
-          cvFilename: file.name,
-          cvTab,
-          cvText: "",
-        });
-      } else if (cvTab === "paste" && text.trim()) {
-        const trimmed = text.trim();
-        if (trimmed.length < 200) {
-          setError(t("cvTooShort"));
-          setLoading(false);
-          return;
-        }
-        if (trimmed.length > 50000) {
-          setError(t("cvTooLong"));
-          setLoading(false);
-          return;
-        }
-        await uploadCVText(trimmed, "resume.txt");
-        onNext({
-          cvUploaded: true,
-          cvFilename: "resume.txt",
-          cvTab,
-          cvText: trimmed,
-        });
-      } else {
-        // Nothing selected but not already uploaded — treat as skip
-        onNext({ cvUploaded: false, cvFilename: "", cvTab, cvText: "" });
-      }
-    } catch (err: any) {
-      const raw = err.message || "";
-      try {
-        const parsed = JSON.parse(raw);
-        setError(parsed.detail || t("uploadError"));
-      } catch {
-        setError(raw || t("uploadError"));
-      }
-    } finally {
-      setLoading(false);
+
+    if (cvTab === "upload" && file) {
+      onNext({
+        cvUploaded: true,
+        cvFilename: file.name,
+        cvTab,
+        cvText: "",
+      }, file);
+    } else if (cvTab === "paste" && text.trim()) {
+      const trimmed = text.trim();
+      if (trimmed.length < 200) { setError(t("cvTooShort")); return; }
+      if (trimmed.length > 50000) { setError(t("cvTooLong")); return; }
+      onNext({
+        cvUploaded: true,
+        cvFilename: "resume.txt",
+        cvTab,
+        cvText: trimmed,
+      }, null);
+    } else {
+      // Nothing selected — treat as skip
+      onNext({ cvUploaded: false, cvFilename: "", cvTab, cvText: "" }, null);
     }
   }
 
@@ -284,17 +260,10 @@ function Step1({ initialData, onNext }: Step1Props) {
         <button
           type="button"
           onClick={handleContinue}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 transition-all"
+          className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-on-primary bg-primary-gradient rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
-          {loading ? (
-            <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              {t("continue")}
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </>
-          )}
+          {t("continue")}
+          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
       </div>
     </div>
@@ -584,9 +553,10 @@ interface Step4Props {
   initialData: OnboardingData;
   onBack: () => void;
   onFinish: (plan: "starter" | "pro" | "premium") => void;
+  cvFile?: File | null;
 }
 
-function Step4({ initialData, onBack, onFinish }: Step4Props) {
+function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
   const t = useTranslations("onboarding");
   const [selected, setSelected] = useState<"starter" | "pro" | "premium">("pro");
   const [loading, setLoading] = useState(false);
@@ -617,9 +587,20 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
           business_days_only: false,
           alert_sensitivity: "broad",
         });
+        const profileId = String(profile.id);
+        // Upload CV to the newly created profile (non-fatal if it fails)
+        try {
+          if (cvFile) {
+            await uploadCVFile(cvFile, profileId);
+          } else if (initialData.cvText) {
+            await uploadCVText(initialData.cvText, "resume.txt", profileId);
+          }
+        } catch {
+          // CV upload failure is non-fatal — user can upload from profile page
+        }
         // Save job titles for a future plan upgrade
         if (jobTitles.length > 0) {
-          sessionStorage.setItem("onboarding_profile_id", String(profile.id));
+          sessionStorage.setItem("onboarding_profile_id", profileId);
           sessionStorage.setItem("onboarding_job_titles", JSON.stringify(jobTitles));
         }
         // Clean up any leftover paid-plan payload from a previous attempt
@@ -667,6 +648,12 @@ function Step4({ initialData, onBack, onFinish }: Step4Props) {
       alert_sensitivity: "broad" as const,
     };
     sessionStorage.setItem("onboarding_pending_profile", JSON.stringify(pendingProfile));
+    // Store CV text for upload after payment (file objects can't survive page navigation)
+    if (initialData.cvText) {
+      sessionStorage.setItem("onboarding_cv_text", initialData.cvText);
+    } else {
+      sessionStorage.removeItem("onboarding_cv_text");
+    }
 
     try {
       const { url } = await createCheckoutSession(selected);
@@ -910,14 +897,18 @@ export default function OnboardingPage() {
     }
   });
 
+  // File objects can't be serialized to sessionStorage, so they live only in memory
+  const [cvFile, setCvFile] = useState<File | null>(null);
+
   function persistData(update: Partial<OnboardingData>) {
     const next = { ...data, ...update };
     setData(next);
     sessionStorage.setItem("onboarding_data", JSON.stringify(next));
   }
 
-  function goToStep(s: 1 | 2 | 3 | 4, update?: Partial<OnboardingData>) {
+  function goToStep(s: 1 | 2 | 3 | 4, update?: Partial<OnboardingData>, file?: File | null) {
     if (update) persistData(update);
+    if (file !== undefined) setCvFile(file);
     sessionStorage.setItem("onboarding_step", String(s));
     setStep(s);
   }
@@ -925,6 +916,7 @@ export default function OnboardingPage() {
   function finish() {
     sessionStorage.removeItem("onboarding_step");
     sessionStorage.removeItem("onboarding_data");
+    sessionStorage.removeItem("onboarding_cv_text");
     router.push("/dashboard");
   }
 
@@ -946,7 +938,7 @@ export default function OnboardingPage() {
           {step === 1 && (
             <Step1
               initialData={data}
-              onNext={(u) => goToStep(2, u)}
+              onNext={(u, f) => goToStep(2, u, f)}
             />
           )}
           {step === 2 && (
@@ -970,6 +962,7 @@ export default function OnboardingPage() {
               onFinish={(plan) => {
                 if (plan === "starter") finish();
               }}
+              cvFile={cvFile}
             />
           )}
         </div>

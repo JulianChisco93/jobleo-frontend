@@ -42,7 +42,7 @@ function buildNocSuggestions(profession: string, existingTitles: string[]): NocS
 }
 
 // ─── CV Section ──────────────────────────────────────────────────────────────
-function CvSection({ cv, queryClient }: { cv: CV | null | undefined; queryClient: QueryClient }) {
+function CvSection({ cv, queryClient, searchConfigId }: { cv: CV | null | undefined; queryClient: QueryClient; searchConfigId: string }) {
   const t = useTranslations("profiles");
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [replacing, setReplacing] = React.useState(false);
@@ -68,14 +68,14 @@ function CvSection({ cv, queryClient }: { cv: CV | null | undefined; queryClient
     try {
       if (tab === "upload") {
         if (!file) return;
-        await uploadCVFile(file);
+        await uploadCVFile(file, searchConfigId);
       } else {
         const trimmed = text.trim();
         if (trimmed.length < 200) { setError(t("cvTooShort")); return; }
         if (trimmed.length > 50000) { setError(t("cvTooLong")); return; }
-        await uploadCVText(trimmed, "resume.txt");
+        await uploadCVText(trimmed, "resume.txt", searchConfigId);
       }
-      await queryClient.invalidateQueries({ queryKey: ["cv"] });
+      await queryClient.invalidateQueries({ queryKey: ["cv", searchConfigId] });
       setSuccess(true);
       setReplacing(false);
       setFile(null);
@@ -121,7 +121,7 @@ function CvSection({ cv, queryClient }: { cv: CV | null | undefined; queryClient
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-semibold text-on-surface truncate">{cv.filename}</span>
               <span className="text-xs text-on-surface-variant">
-                {t("cvUploaded")} {new Date(cv.created_at).toLocaleDateString()}
+                {t("cvUploaded")} {new Date(cv.uploaded_at).toLocaleDateString()}
               </span>
             </div>
             {success && (
@@ -286,8 +286,9 @@ export default function EditProfilePage({
   });
 
   const { data: cv } = useQuery({
-    queryKey: ["cv"],
-    queryFn: getCV,
+    queryKey: ["cv", resolvedParams?.id],
+    queryFn: () => getCV(resolvedParams!.id),
+    enabled: !!resolvedParams?.id,
   });
 
   const { mutateAsync: update } = useMutation({
@@ -524,7 +525,7 @@ export default function EditProfilePage({
         )}
 
         {/* CV Section */}
-        <CvSection cv={cv} queryClient={queryClient} />
+        <CvSection cv={cv} queryClient={queryClient} searchConfigId={resolvedParams.id} />
 
         {saveError && (
           <div className="mx-8 mt-4 flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">

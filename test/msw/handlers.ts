@@ -14,9 +14,11 @@ export const mockUser = {
 };
 
 export const mockCV = {
-  id: "cv-1",
+  id: 1,
+  search_config_id: 42,
   filename: "resume.pdf",
-  created_at: "2024-01-01T00:00:00Z",
+  uploaded_at: "2024-01-01T00:00:00Z",
+  updated_at: "2024-01-01T00:00:00Z",
 };
 
 export const mockProfile = {

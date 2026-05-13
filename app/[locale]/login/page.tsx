@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getCV } from "@/lib/api";
+import { getSearchProfiles } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -108,8 +108,8 @@ function LoginForm() {
       const { error: err } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (err) throw err;
       try {
-        const cv = await getCV();
-        router.push(cv ? "/dashboard" : "/onboarding");
+        const profiles = await getSearchProfiles();
+        router.push(profiles.length > 0 ? "/dashboard" : "/onboarding");
       } catch {
         router.push("/onboarding");
       }

@@ -22,9 +22,11 @@ export interface User {
 }
 
 export interface CV {
-  id: string;
+  id: number;
+  search_config_id: number;
   filename: string;
-  created_at: string;
+  uploaded_at: string;
+  updated_at: string;
 }
 
 export type AlertSensitivity = "broad" | "balanced" | "strict";

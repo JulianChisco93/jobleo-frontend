@@ -37,11 +37,12 @@ export async function GET(request: NextRequest) {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cv/`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/searches/`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
           });
-          const cv = res.ok ? await res.json() : null;
-          return NextResponse.redirect(`${origin}${cv ? "/dashboard" : "/onboarding"}`);
+          const profiles = res.ok ? await res.json() : [];
+          const hasProfiles = Array.isArray(profiles) && profiles.length > 0;
+          return NextResponse.redirect(`${origin}${hasProfiles ? "/dashboard" : "/onboarding"}`);
         } catch {
           return NextResponse.redirect(`${origin}/onboarding`);
         }
