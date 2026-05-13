@@ -276,7 +276,9 @@ export default function EditProfilePage({
   const { limits } = usePlanLimits();
 
   React.useEffect(() => {
-    params.then(setResolvedParams);
+    let active = true;
+    params.then((resolved) => { if (active) setResolvedParams(resolved); });
+    return () => { active = false; };
   }, [params]);
 
   const { data: profile, isLoading } = useQuery({
@@ -285,11 +287,14 @@ export default function EditProfilePage({
     enabled: !!resolvedParams?.id,
   });
 
-  const { data: cv } = useQuery({
+  const { data: cvRaw } = useQuery({
     queryKey: ["cv", resolvedParams?.id],
     queryFn: () => getCV(resolvedParams!.id),
     enabled: !!resolvedParams?.id,
   });
+
+  // Verify the CV actually belongs to this profile (backend returns search_config_id for this purpose)
+  const cv = cvRaw && String(cvRaw.search_config_id) === resolvedParams?.id ? cvRaw : null;
 
   const { mutateAsync: update } = useMutation({
     mutationFn: (data: any) => updateSearchProfile(resolvedParams!.id, data),
