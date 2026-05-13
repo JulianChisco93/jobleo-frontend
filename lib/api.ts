@@ -17,6 +17,9 @@ import type {
   AdminSearchLogsResponse,
   SchedulerStatusResponse,
   ServerLogsResponse,
+  CompanyWatch,
+  CompanyWatchTestResult,
+  CreateCompanyWatchPayload,
 } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.jobleo.app";
@@ -204,3 +207,37 @@ export const getSearchLogs = (limit = 100, userId?: number) => {
 
 export const getSchedulerStatus = () =>
   request<SchedulerStatusResponse>("/api/v1/admin/scheduler");
+
+// ─── Company Watches ─────────────────────────────────────────────────────────
+
+export const getCompanyWatches = () =>
+  request<CompanyWatch[]>("/api/v1/company-watches/");
+
+export const createCompanyWatch = (data: CreateCompanyWatchPayload) =>
+  request<CompanyWatch>("/api/v1/company-watches/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const updateCompanyWatch = (
+  id: number,
+  data: Partial<Pick<CompanyWatch, "company_name" | "job_title_keywords" | "is_active">>
+) =>
+  request<CompanyWatch>(`/api/v1/company-watches/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+
+export const deleteCompanyWatch = (id: number) =>
+  request<void>(`/api/v1/company-watches/${id}`, { method: "DELETE" });
+
+export const checkCompanyWatch = (id: number) =>
+  request<{ message: string }>(`/api/v1/company-watches/${id}/check`, {
+    method: "POST",
+  });
+
+export const testCompanyWatchUrl = (url: string) =>
+  request<CompanyWatchTestResult>("/api/v1/company-watches/test", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });

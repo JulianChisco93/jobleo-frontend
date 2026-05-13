@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { formatTimeUntil, formatLastSearched } from "@/lib/utils";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
+import { CompanyWatchSection } from "@/components/dashboard/CompanyWatchSection";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
 const PROFILE_ACCENTS = [
@@ -351,6 +352,8 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        <CompanyWatchSection plan={limits.plan} />
 
         <UpgradeBanner plan={limits.plan} />
       </main>

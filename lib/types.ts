@@ -193,3 +193,31 @@ export interface ServerLogsResponse {
   total_returned: number;
   log_file: string;
 }
+
+// ─── Company Watches ─────────────────────────────────────────────────────────
+
+export interface CompanyWatch {
+  id: number;
+  company_name: string;
+  url: string;
+  job_title_keywords: string[];
+  frequency_hours: number;
+  ats_type: string | null;
+  known_job_urls: string[];
+  last_checked_at: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface CompanyWatchTestResult {
+  ats_type: string | null;
+  jobs_found: number;
+  jobs: { title: string; job_url: string; location: string; company: string }[];
+  error: string | null;
+}
+
+export interface CreateCompanyWatchPayload {
+  company_name: string;
+  url: string;
+  job_title_keywords?: string[];
+}
