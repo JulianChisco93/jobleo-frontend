@@ -7,7 +7,7 @@ import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { formatTimeUntil, formatLastSearched } from "@/lib/utils";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
@@ -72,35 +72,20 @@ export default function DashboardPage() {
     queryFn: getCV,
   });
 
-  const { data: jobsThisWeek = 0 } = useQuery({
-    queryKey: ["jobs-this-week"],
-    queryFn: async () => {
-      const monday = new Date();
-      monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
-      monday.setHours(0, 0, 0, 0);
-
-      const PAGE_SIZE = 50;
-      let count = 0;
-      let offset = 0;
-
-      while (true) {
-        const page = await getJobAlerts({ limit: PAGE_SIZE, offset });
-        if (page.length === 0) break;
-
-        for (const alert of page) {
-          if (alert.sent_at && new Date(alert.sent_at.replace(" ", "T")) >= monday) {
-            count++;
-          }
-        }
-
-        if (page.length < PAGE_SIZE) break;
-        offset += PAGE_SIZE;
-      }
-
-      return count;
-    },
+  const { data: allAlerts = [] } = useQuery({
+    queryKey: ["job-alerts", ""],
+    queryFn: () => getJobAlerts({ limit: 200 }),
     staleTime: 5 * 60 * 1000,
   });
+
+  const jobsThisWeek = useMemo(() => {
+    const monday = new Date();
+    monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
+    monday.setHours(0, 0, 0, 0);
+    return allAlerts.filter(
+      (a) => a.sent_at && new Date(a.sent_at.replace(" ", "T")) >= monday
+    ).length;
+  }, [allAlerts]);
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
   const { limits } = usePlanLimits();
