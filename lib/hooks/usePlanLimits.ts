@@ -4,9 +4,10 @@ import type { PlanLimits } from "@/lib/types";
 
 const FREE_LIMITS: PlanLimits = {
   plan: "free",
+  plan_horizon: null,
   max_profiles: 1,
   max_job_titles_per_profile: 0,
-  max_locations_per_profile: 2,
+  max_locations_per_profile: 1,
   business_hours_only_enforced: false,
 };
 

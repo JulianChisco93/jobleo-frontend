@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { getAdminServer, getSchedulerStatus, restartServer } from "@/lib/api";
+import { getAdminServer, getSchedulerStatus, restartServer, ApiError } from "@/lib/api";
 import { ServerStatusCard } from "@/components/admin/ServerStatusCard";
 import { SchedulerPanel } from "@/components/admin/SchedulerPanel";
 import { ServerLogs } from "@/components/admin/ServerLogs";
@@ -33,9 +33,14 @@ export default function AdminServerPage() {
 
   useEffect(() => {
     if (serverError) {
-      const msg = serverError instanceof Error ? serverError.message : "Failed to load server status";
-      if (msg.includes("403")) router.push("/dashboard");
-      else addToast(msg, "error");
+      if (serverError instanceof ApiError && serverError.isForbidden) {
+        router.push("/dashboard");
+        return;
+      }
+      addToast(
+        serverError instanceof Error ? serverError.message : "Failed to load server status",
+        "error"
+      );
     }
   }, [serverError, addToast, router]);
 

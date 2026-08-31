@@ -1,16 +1,21 @@
 interface ScoreBadgeProps {
-  score: number;
+  /** Affinity percentage from the API (`score_percentage` / `match_score_percentage`). */
+  percentage: number | null | undefined;
 }
 
-// Score scale is 0-35
-export function ScoreBadge({ score }: ScoreBadgeProps) {
-  const valid = score != null && !isNaN(score) && score > 0;
+/**
+ * Shows the API-computed affinity percentage. The raw matching score is never
+ * displayed, and the percentage is never derived here: the API owns the formula.
+ */
+export function ScoreBadge({ percentage }: ScoreBadgeProps) {
+  const valid =
+    percentage != null && !isNaN(percentage) && percentage > 0;
 
   const className = !valid
     ? "bg-surface-container text-on-surface-variant"
-    : score >= 25
+    : percentage >= 75
     ? "bg-secondary-container text-on-secondary-container"
-    : score >= 15
+    : percentage >= 50
     ? "bg-tertiary-fixed text-on-tertiary-fixed-variant"
     : "bg-error-container text-on-error-container";
 
@@ -18,7 +23,7 @@ export function ScoreBadge({ score }: ScoreBadgeProps) {
     <span
       className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full ${className}`}
     >
-      {valid ? `${score}` : "—"}
+      {valid ? `${Math.round(percentage)}%` : "—"}
     </span>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { getAdminUsers } from "@/lib/api";
+import { getAdminUsers, ApiError } from "@/lib/api";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { useToast } from "@/components/ui/Toast";
 
@@ -18,12 +18,11 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (!error) return;
-    const msg = error instanceof Error ? error.message : "Failed to load users";
-    if (msg.includes("403")) {
+    if (error instanceof ApiError && error.isForbidden) {
       router.push("/dashboard");
-    } else {
-      addToast(msg, "error");
+      return;
     }
+    addToast(error instanceof Error ? error.message : "Failed to load users", "error");
   }, [error, addToast, router]);
 
   return (

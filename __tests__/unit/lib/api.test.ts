@@ -133,7 +133,7 @@ describe("createSearchProfile", () => {
       name: "Design",
       profession: "Designer",
       job_titles: ["UX Designer"],
-      locations: ["Remote"],
+      locations: ["ON:GTA"],
       include_terms: [],
       exclude_terms: [],
       title_exclude_terms: [],
@@ -142,10 +142,197 @@ describe("createSearchProfile", () => {
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
+      alert_sensitivity: "broad" as const,
     };
     const profile = await createSearchProfile(payload);
     expect(profile.id).toBe("profile-new");
     expect(profile.name).toBe("Design");
+  });
+
+  it("surfaces the API message when locations are not valid region codes", async () => {
+    server.use(
+      http.post(`${BASE_URL}/api/v1/searches/`, () =>
+        HttpResponse.json(
+          {
+            detail: [
+              {
+                loc: ["body", "locations"],
+                msg: "Value error, Ubicación(es) inválida(s): Toronto. Usa GET /searches/regions.",
+                type: "value_error",
+              },
+            ],
+          },
+          { status: 422 }
+        )
+      )
+    );
+    const { createSearchProfile, ApiError } = await apiImport();
+    const payload = {
+      name: "Design",
+      profession: "Designer",
+      job_titles: [],
+      locations: ["Toronto"],
+      include_terms: [],
+      exclude_terms: [],
+      title_exclude_terms: [],
+      frequency_minutes: 60,
+      business_hours_only: false,
+      business_hours_start: 9,
+      business_hours_end: 18,
+      business_days_only: false,
+      alert_sensitivity: "broad" as const,
+    };
+    // The "Value error, " prefix is stripped so the message can be shown as-is
+    await expect(createSearchProfile(payload)).rejects.toThrow(
+      "Ubicación(es) inválida(s): Toronto. Usa GET /searches/regions."
+    );
+    await expect(createSearchProfile(payload)).rejects.toBeInstanceOf(ApiError);
+  });
+});
+
+// ─── Regions ──────────────────────────────────────────────────────────────────
+
+describe("getRegions", () => {
+  it("returns the province → region → city catalog", async () => {
+    const { getRegions } = await apiImport();
+    const catalog = await getRegions();
+    expect(catalog.ON.name).toBe("Ontario");
+    expect(catalog.ON.regions.map((r) => r.code)).toEqual(["ON:GTA", "ON:NIAGARA"]);
+    expect(catalog.ON.regions[0].cities).toContain("Toronto, ON");
+  });
+});
+
+// ─── Plan limits ──────────────────────────────────────────────────────────────
+
+describe("getLimits", () => {
+  it("returns the plan limits including the pass horizon", async () => {
+    const { getLimits } = await apiImport();
+    const limits = await getLimits();
+    expect(limits.plan).toBe("paid");
+    expect(limits.plan_horizon).toBe("1m");
+    expect(limits.max_locations_per_profile).toBe(2);
+  });
+});
+
+describe("getHorizonLimits", () => {
+  it("returns the allowances of every pass so copy is not hardcoded", async () => {
+    const { getHorizonLimits } = await apiImport();
+    const catalog = await getHorizonLimits();
+    expect(Object.keys(catalog)).toEqual(["7d", "15d", "1m", "3m"]);
+    expect(catalog["7d"].max_locations_per_profile).toBe(1);
+    expect(catalog["3m"].max_profiles).toBe(2);
+  });
+});
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+
+describe("createCheckoutSession", () => {
+  it("sends the pass duration as the horizon query param", async () => {
+    let capturedUrl = "";
+    server.use(
+      http.post(`${BASE_URL}/api/v1/billing/checkout`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ url: "https://checkout.stripe.com/s", upgraded: false });
+      })
+    );
+    const { createCheckoutSession } = await apiImport();
+    const { url } = await createCheckoutSession("3m");
+    expect(capturedUrl).toContain("horizon=3m");
+    expect(capturedUrl).not.toContain("plan=");
+    expect(url).toBe("https://checkout.stripe.com/s");
+  });
+
+  it("exposes the status code on failure so callers can detect auth errors", async () => {
+    server.use(
+      http.post(`${BASE_URL}/api/v1/billing/checkout`, () =>
+        new HttpResponse("Not authenticated", { status: 401 })
+      )
+    );
+    const { createCheckoutSession, ApiError } = await apiImport();
+    let caught: unknown;
+    try {
+      await createCheckoutSession("1m");
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(ApiError);
+    expect((caught as InstanceType<typeof ApiError>).status).toBe(401);
+    expect((caught as InstanceType<typeof ApiError>).isAuthError).toBe(true);
+  });
+});
+
+describe("ApiError status handling", () => {
+  const profilePayload = {
+    name: "Test",
+    profession: "Developer",
+    job_titles: ["Dev"],
+    locations: ["ON"],
+    include_terms: [],
+    exclude_terms: [],
+    title_exclude_terms: [],
+    frequency_minutes: 60,
+    business_hours_only: false,
+    business_hours_start: 9,
+    business_hours_end: 18,
+    business_days_only: false,
+    alert_sensitivity: "broad" as const,
+  };
+
+  it("treats a plan limit 403 as forbidden, never as a lost session", async () => {
+    server.use(
+      http.post(`${BASE_URL}/api/v1/searches/`, () =>
+        HttpResponse.json(
+          { detail: "Tu plan Free permite máximo 1 locación(es)." },
+          { status: 403 }
+        )
+      )
+    );
+    const { createSearchProfile, ApiError } = await apiImport();
+    let caught: unknown;
+    try {
+      await createSearchProfile({ ...profilePayload, locations: ["ON", "ON:GTA"] });
+    } catch (err) {
+      caught = err;
+    }
+    const error = caught as InstanceType<typeof ApiError>;
+    expect(caught).toBeInstanceOf(ApiError);
+    expect(error.status).toBe(403);
+    expect(error.isForbidden).toBe(true);
+    expect(error.isAuthError).toBe(false);
+    // The plain-string detail must survive so the user reads the real reason.
+    expect(error.message).toBe("Tu plan Free permite máximo 1 locación(es).");
+  });
+
+  it("flattens a 422 validation list into a readable message", async () => {
+    server.use(
+      http.post(`${BASE_URL}/api/v1/searches/`, () =>
+        HttpResponse.json(
+          {
+            detail: [
+              {
+                loc: ["body", "locations"],
+                msg: "Value error, Ubicación(es) inválida(s): Toronto. Usa GET /searches/regions.",
+                type: "value_error",
+              },
+            ],
+          },
+          { status: 422 }
+        )
+      )
+    );
+    const { createSearchProfile, ApiError } = await apiImport();
+    let caught: unknown;
+    try {
+      await createSearchProfile({ ...profilePayload, locations: ["Toronto"] });
+    } catch (err) {
+      caught = err;
+    }
+    const error = caught as InstanceType<typeof ApiError>;
+    expect(error.status).toBe(422);
+    expect(error.isForbidden).toBe(false);
+    expect(error.message).toBe(
+      "Ubicación(es) inválida(s): Toronto. Usa GET /searches/regions."
+    );
   });
 });
 

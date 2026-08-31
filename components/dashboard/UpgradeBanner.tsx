@@ -2,58 +2,41 @@
 
 import { useTranslations } from "next-intl";
 import { CheckoutButton } from "@/components/billing/CheckoutButton";
-import type { Plan } from "@/lib/types";
+import { HorizonLimits } from "@/components/billing/HorizonLimits";
+import { HORIZON_OPTIONS, RECOMMENDED_HORIZON, daysUntil } from "@/lib/plans";
+import { hasPaidAccess, type Plan } from "@/lib/types";
 
-function FeatureItem({
-  text,
-  iconClass,
-  textClass,
-}: {
-  text: string;
-  iconClass: string;
-  textClass: string;
-}) {
-  return (
-    <li className="flex items-center gap-2.5">
-      <span
-        className={`material-symbols-outlined text-[16px] flex-shrink-0 ${iconClass}`}
-        style={{ fontVariationSettings: "'FILL' 1" }}
-      >
-        check_circle
-      </span>
-      <span className={`text-sm ${textClass}`}>{text}</span>
-    </li>
-  );
+/** Show the renewal prompt once a pass is this close to expiring. */
+const RENEWAL_WINDOW_DAYS = 5;
+
+interface Props {
+  plan: Plan;
+  planEndsAt?: string | null;
 }
 
-export function UpgradeBanner({ plan }: { plan: Plan }) {
+export function UpgradeBanner({ plan, planEndsAt }: Props) {
   const t = useTranslations("dashboard");
   const tp = useTranslations("pricing");
 
-  if (plan === "premium") return null;
+  const daysLeft = daysUntil(planEndsAt);
 
-  const proFeatures = [tp("proFeature1"), tp("proFeature2"), tp("proFeature4")];
-  const premiumFeatures = [tp("premiumFeature1"), tp("premiumFeature2"), tp("premiumFeature4")];
-  const [proAmount] = tp("proPrice").split(" / ");
-  const [premiumAmount] = tp("premiumPrice").split(" / ");
-
-  if (plan === "pro") {
+  // Paid users only see this banner when their pass is about to lapse.
+  if (hasPaidAccess(plan)) {
+    if (daysLeft === null || daysLeft > RENEWAL_WINDOW_DAYS) return null;
     return (
       <section className="mt-10 bg-secondary-container rounded-2xl px-6 md:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
         <div className="flex-1 min-w-0">
           <span className="text-[10px] font-bold tracking-widest text-on-secondary-container/50 uppercase block mb-1.5">
-            {tp("premiumBadge")}
+            {t("passExpiringBadge")}
           </span>
           <p className="font-display font-bold text-lg text-on-secondary-container mb-1">
-            {t("upgradeProOnlyTitle")}
+            {daysLeft === 0 ? t("passExpiresToday") : t("passExpiresInDays", { days: daysLeft })}
           </p>
-          <p className="text-sm text-on-secondary-container/70">
-            {premiumFeatures.join(" · ")}
-          </p>
+          <p className="text-sm text-on-secondary-container/70">{t("passRenewHint")}</p>
         </div>
         <CheckoutButton
-          plan="premium"
-          label={t("upgradePremiumCtaLabel")}
+          horizon={RECOMMENDED_HORIZON}
+          label={t("renewPassCtaLabel")}
           className="flex-shrink-0 px-8 py-3 text-sm font-bold bg-secondary text-on-secondary rounded-xl hover:bg-secondary/90 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary"
         />
       </section>
@@ -67,55 +50,54 @@ export function UpgradeBanner({ plan }: { plan: Plan }) {
         <span className="text-xs text-on-surface-variant font-medium">{t("upgradeFreeNote")}</span>
       </div>
 
-      <div className="grid md:grid-cols-2">
-        {/* Pro */}
-        <div className="bg-surface-container-lowest px-6 md:px-8 pt-5 pb-6 flex flex-col gap-5">
-          <div>
-            <span className="text-[10px] font-bold tracking-widest text-primary/60 uppercase block mb-2">
-              {tp("proBadge")}
-            </span>
-            <div className="flex items-baseline gap-1.5 mb-1">
-              <span className="font-display font-black text-3xl text-primary">{proAmount}</span>
-              <span className="text-sm text-on-surface-variant font-medium">/ mo</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-surface-container-high">
+        {HORIZON_OPTIONS.map((option) => {
+          const recommended = option.horizon === RECOMMENDED_HORIZON;
+          return (
+            <div
+              key={option.horizon}
+              className={`px-5 pt-5 pb-6 flex flex-col gap-4 ${
+                recommended ? "bg-primary-fixed/50" : "bg-surface-container-lowest"
+              }`}
+            >
+              <div>
+                <span
+                  className={`text-[10px] font-bold tracking-widest uppercase block mb-2 ${
+                    recommended ? "text-primary" : "invisible"
+                  }`}
+                >
+                  {tp("mostPopular")}
+                </span>
+                <div className="flex items-baseline gap-1.5 mb-1">
+                  <span className="font-display font-black text-3xl text-on-surface">
+                    ${option.price}
+                  </span>
+                  <span className="text-xs text-on-surface-variant font-semibold">
+                    {tp(`horizon${option.messageKey}Name`)}
+                  </span>
+                </div>
+                <HorizonLimits
+                  horizon={option.horizon}
+                  className="text-xs text-on-surface-variant leading-relaxed"
+                />
+              </div>
+              <CheckoutButton
+                horizon={option.horizon}
+                label={tp("passCta")}
+                className={`mt-auto w-full py-2.5 text-sm font-bold rounded-xl transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary ${
+                  recommended
+                    ? "bg-primary text-on-primary hover:brightness-110"
+                    : "text-primary border border-primary-container hover:bg-primary-fixed"
+                }`}
+              />
             </div>
-            <p className="text-xs text-on-surface-variant">{tp("proTagline")}</p>
-          </div>
-          <ul className="flex flex-col gap-2 flex-1">
-            {proFeatures.map((f) => (
-              <FeatureItem key={f} text={f} iconClass="text-primary" textClass="text-on-surface-variant" />
-            ))}
-          </ul>
-          <CheckoutButton
-            plan="pro"
-            label={t("upgradeProCtaLabel")}
-            className="w-full py-3 text-sm font-bold bg-primary text-on-primary rounded-xl hover:brightness-110 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
-          />
-        </div>
-
-        {/* Premium — visually heavier: full green bleed, larger price */}
-        <div className="bg-secondary-container px-6 md:px-8 pt-5 pb-6 flex flex-col gap-5">
-          <div>
-            <span className="text-[10px] font-bold tracking-widest text-on-secondary-container/50 uppercase block mb-2">
-              {tp("premiumBadge")}
-            </span>
-            <div className="flex items-baseline gap-1.5 mb-1">
-              <span className="font-display font-black text-4xl text-on-secondary-container">{premiumAmount}</span>
-              <span className="text-sm text-on-secondary-container/60 font-medium">/ mo</span>
-            </div>
-            <p className="text-xs text-on-secondary-container/70">{tp("premiumTagline")}</p>
-          </div>
-          <ul className="flex flex-col gap-2 flex-1">
-            {premiumFeatures.map((f) => (
-              <FeatureItem key={f} text={f} iconClass="text-secondary" textClass="text-on-secondary-container" />
-            ))}
-          </ul>
-          <CheckoutButton
-            plan="premium"
-            label={t("upgradePremiumCtaLabel")}
-            className="w-full py-3 text-sm font-bold bg-secondary text-on-secondary rounded-xl hover:bg-secondary/90 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary"
-          />
-        </div>
+          );
+        })}
       </div>
+
+      <p className="px-6 md:px-8 py-4 text-xs text-on-surface-variant">
+        {tp("noAutoRenewNote")}
+      </p>
     </section>
   );
 }

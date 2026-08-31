@@ -6,11 +6,12 @@ import { getSearchProfiles, getJobAlerts, getMe, getSearchProfileLogs } from "@/
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { formatTimeUntil, formatLastSearched } from "@/lib/utils";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
+import { useDisplayName } from "@/lib/hooks/useDisplayName";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
+import { PassExpiredNotice } from "@/components/dashboard/PassExpiredNotice";
 import { CompanyWatchSection } from "@/components/dashboard/CompanyWatchSection";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
@@ -47,20 +48,7 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const prefix = locale === "en" ? "" : `/${locale}`;
-  const [userName, setUserName] = useState<string>("");
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUserName(
-          user.user_metadata?.display_name ||
-            user.email?.split("@")[0] ||
-            "User"
-        );
-      }
-    });
-  }, []);
+  const userName = useDisplayName();
 
   const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ["profiles"],
@@ -145,6 +133,8 @@ export default function DashboardPage() {
       <DashboardTopBar title={t("title")} userName={userName} />
 
       <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
+        <PassExpiredNotice profiles={profiles} />
+
         {/* WhatsApp missing banner */}
         {showWhatsAppBanner && (
           <Link
@@ -310,7 +300,7 @@ export default function DashboardPage() {
 
         <CompanyWatchSection plan={limits.plan} />
 
-        <UpgradeBanner plan={limits.plan} />
+        <UpgradeBanner plan={limits.plan} planEndsAt={me?.plan_ends_at} />
       </main>
     </div>
   );

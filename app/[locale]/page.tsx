@@ -110,13 +110,16 @@ function LandingContent() {
               <div className="space-y-3">
                 <div className="bg-surface-container p-3 rounded-lg rounded-tl-none max-w-[85%]">
                   <p className="text-sm text-on-surface">
-                    Hey! We found a <span className="font-bold">98% match</span> for you: <span className="font-bold">{t("mockupTitle")}</span>
+                    {t.rich("mockupIntro", {
+                      b: (chunks) => <span className="font-bold">{chunks}</span>,
+                    })}{" "}
+                    <span className="font-bold">{t("mockupTitle")}</span>
                   </p>
                 </div>
                 {/* Job card */}
                 <div className="bg-primary text-on-primary p-4 rounded-xl">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-primary/70">New Match Found</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-primary/70">{t("mockupNewMatch")}</span>
                     <span className="bg-secondary-container text-on-secondary-container text-[10px] px-2 py-0.5 rounded-full font-bold">98%</span>
                   </div>
                   <h4 className="font-display font-bold text-base mb-0.5">{t("mockupTitle")}</h4>

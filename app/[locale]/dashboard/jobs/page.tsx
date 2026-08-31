@@ -7,7 +7,7 @@ import { getJobAlerts, getSearchProfiles, generateJobExplanation } from "@/lib/a
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
-import type { JobAlert } from "@/lib/types";
+import { hasPaidAccess, type JobAlert } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 
 const PAGE_SIZE = 20;
@@ -98,16 +98,19 @@ function JobDetailModal({ job, onClose }: { job: JobAlert; onClose: () => void }
             </div>
           </div>
 
-          {/* Match score */}
+          {/* Affinity */}
           <div className="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
             <div className="flex flex-col gap-2 flex-1">
               <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                {t("matchScore")}
+                {t("affinity")}
               </span>
               <div className="flex items-center gap-3">
-                <ScoreBadge score={job.match_score} />
+                <ScoreBadge percentage={job.match_score_percentage} />
                 <div className="progress-track flex-1">
-                  <div className="progress-fill" style={{ width: `${(job.match_score / 35) * 100}%` }} />
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${Math.min(job.match_score_percentage ?? 0, 100)}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -191,8 +194,8 @@ export default function JobHistoryPage() {
 
   const { limits } = usePlanLimits();
 
-  // Free plan: filter to last 7 days. Pro/Premium: show full history (backend handles access).
-  const recent = limits.plan === "free"
+  // Free plan: filter to last 7 days. Paid plans: show full history (backend handles access).
+  const recent = !hasPaidAccess(limits.plan)
     ? jobs.filter((j) => {
         if (!j.sent_at) return true;
         const d = new Date(j.sent_at.replace(" ", "T"));
@@ -204,7 +207,7 @@ export default function JobHistoryPage() {
   // Sort
   function getSortValue(j: JobAlert, field: SortableField): string | number {
     if (field === "sent_at") return j.sent_at ?? "";
-    if (field === "score") return j.match_score ?? 0;
+    if (field === "score") return j.match_score_percentage ?? 0;
     if (field === "title") return j.job.title ?? "";
     if (field === "location") return j.job.location ?? "";
     return "";
@@ -304,7 +307,7 @@ export default function JobHistoryPage() {
                   <p className="text-xs text-on-surface-variant mt-0.5">{job.job.company}</p>
                 </div>
                 <p className="text-sm text-on-surface-variant">{job.job.location}</p>
-                <ScoreBadge score={job.match_score} />
+                <ScoreBadge percentage={job.match_score_percentage} />
                 <p className="text-xs text-on-surface-variant">{formatDate(job.sent_at)}</p>
                 <button
                   onClick={() => setSelectedJob(job)}

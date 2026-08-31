@@ -3,16 +3,31 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { updateUserPlan, deleteAdminUser } from "@/lib/api";
-import type { AdminUser, Plan } from "@/lib/types";
+import { updateUserPlan, deleteAdminUser, ApiError } from "@/lib/api";
+import type { AdminUser, Plan, PlanHorizon } from "@/lib/types";
+import { HORIZON_OPTIONS, getHorizonOption } from "@/lib/plans";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 
 const PLAN_BADGE: Record<Plan, string> = {
   free: "bg-surface-container text-on-surface-variant",
+  paid: "bg-primary text-on-primary",
   pro: "bg-primary text-on-primary",
   premium: "bg-secondary text-on-secondary",
 };
+
+const HORIZON_LABEL: Record<PlanHorizon, string> = {
+  "7d": "Paid — 7 days",
+  "15d": "Paid — 15 days",
+  "1m": "Paid — 1 month",
+  "3m": "Paid — 3 months",
+};
+
+/** The select encodes the pass duration as `paid:<horizon>`. */
+function planSelectValue(user: AdminUser): string {
+  if (user.plan !== "paid") return user.plan;
+  return user.plan_horizon ? `paid:${user.plan_horizon}` : "paid";
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -30,16 +45,28 @@ export function UsersTable({ users }: UsersTableProps) {
   const [loadingPlan, setLoadingPlan] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | null>(null);
 
-  async function handlePlanChange(user: AdminUser, plan: Plan) {
+  async function handlePlanChange(user: AdminUser, selectValue: string) {
+    const [plan, horizon] = selectValue.split(":") as [Plan, PlanHorizon | undefined];
     setLoadingPlan(user.id);
     try {
-      await updateUserPlan(user.id, plan);
+      // `horizon` sets plan_horizon and `days` sets plan_ends_at, independently:
+      // sending only one leaves the pass with a mismatched expiry date.
+      await updateUserPlan(
+        user.id,
+        plan,
+        horizon ? { horizon, days: getHorizonOption(horizon).days } : {}
+      );
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      addToast(`Plan updated to ${plan} for ${user.email}`, "success");
+      addToast(
+        `Plan updated to ${horizon ? HORIZON_LABEL[horizon] : plan} for ${user.email}`,
+        "success"
+      );
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to update plan";
-      if (msg.includes("403")) router.push("/dashboard");
-      else addToast(msg, "error");
+      if (err instanceof ApiError && err.isForbidden) {
+        router.push("/dashboard");
+        return;
+      }
+      addToast(err instanceof Error ? err.message : "Failed to update plan", "error");
     } finally {
       setLoadingPlan(null);
     }
@@ -53,9 +80,11 @@ export function UsersTable({ users }: UsersTableProps) {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       addToast(`Deleted ${user.email}`, "success");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to delete user";
-      if (msg.includes("403")) router.push("/dashboard");
-      else addToast(msg, "error");
+      if (err instanceof ApiError && err.isForbidden) {
+        router.push("/dashboard");
+        return;
+      }
+      addToast(err instanceof Error ? err.message : "Failed to delete user", "error");
     } finally {
       setLoadingDelete(null);
     }
@@ -90,6 +119,9 @@ export function UsersTable({ users }: UsersTableProps) {
                         </span>
                       )}
                     </div>
+                    {user.display_name && (
+                      <span className="text-xs text-on-surface-variant">{user.display_name}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-bold font-display px-2 py-1 rounded-full capitalize ${PLAN_BADGE[user.plan]}`}>
@@ -128,14 +160,25 @@ export function UsersTable({ users }: UsersTableProps) {
                     <div className="flex items-center gap-2 justify-end">
                       {/* Plan select */}
                       <select
-                        value={user.plan}
+                        value={planSelectValue(user)}
                         disabled={loadingPlan === user.id}
-                        onChange={(e) => handlePlanChange(user, e.target.value as Plan)}
+                        onChange={(e) => handlePlanChange(user, e.target.value)}
                         className="text-xs font-semibold font-display bg-surface-container border border-outline-variant/50 rounded-lg px-2 py-1.5 text-on-surface disabled:opacity-50 cursor-pointer hover:bg-surface-container-high transition-colors"
                       >
                         <option value="free">Free</option>
-                        <option value="pro">Pro</option>
-                        <option value="premium">Premium</option>
+                        {HORIZON_OPTIONS.map((option) => (
+                          <option key={option.horizon} value={`paid:${option.horizon}`}>
+                            {HORIZON_LABEL[option.horizon]}
+                          </option>
+                        ))}
+                        {/* Legacy plans can be kept but not newly assigned */}
+                        {user.plan === "paid" && !user.plan_horizon && (
+                          <option value="paid">Paid</option>
+                        )}
+                        {user.plan === "pro" && <option value="pro">Pro (legacy)</option>}
+                        {user.plan === "premium" && (
+                          <option value="premium">Premium (legacy)</option>
+                        )}
                       </select>
 
                       {/* Delete button */}

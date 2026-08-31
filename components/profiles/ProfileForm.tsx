@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { TagInput } from "@/components/ui/TagInput";
-import { LocationTagInput } from "@/components/ui/LocationTagInput";
+import { RegionSelector, hasLegacyLocations, useRegionsCatalog } from "@/components/ui/RegionSelector";
 import { Toggle } from "@/components/ui/Toggle";
 import { NocCombobox } from "@/components/ui/NocCombobox";
-import type { SearchProfile, PlanLimits } from "@/lib/types";
+import { hasPaidAccess, type SearchProfile, type PlanLimits } from "@/lib/types";
 
 function TipBanner({ title, body }: { title: string; body: string }) {
   const [open, setOpen] = useState(false);
@@ -106,8 +106,10 @@ function detectCountry(locations: string[]): string {
     "canada", "ontario", "quebec", "british columbia", "alberta",
     "manitoba", "saskatchewan", "nova scotia", "new brunswick",
   ];
-  return locations.some((loc) =>
-    canadianTerms.some((term) => loc.toLowerCase().includes(term))
+  // The region catalog only covers Canada, so any catalog code implies it.
+  const isRegionCode = (loc: string) => /^[A-Z]{2}(:[A-Z_]+)?$/.test(loc);
+  return locations.some(
+    (loc) => isRegionCode(loc) || canadianTerms.some((term) => loc.toLowerCase().includes(term))
   ) ? "Canada" : "";
 }
 
@@ -126,8 +128,9 @@ function toHourStr(val: unknown): string {
 export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }: ProfileFormProps) {
   const t = useTranslations("profiles");
   const plan = limits?.plan ?? "free";
+  const paid = hasPaidAccess(plan);
   const maxJobTitles = limits?.max_job_titles_per_profile ?? 0;
-  const maxLocations = limits?.max_locations_per_profile ?? 2;
+  const maxLocations = limits?.max_locations_per_profile ?? 1;
   const businessHoursEnforced = limits?.business_hours_only_enforced ?? false;
 
   const {
@@ -146,7 +149,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
       locations: defaultValues?.locations || [] as string[],
       include_terms: defaultValues?.include_terms || [],
       exclude_terms: defaultValues?.exclude_terms || [],
-      frequency_minutes: defaultValues?.frequency_minutes || (plan === "free" ? 240 : 60),
+      frequency_minutes: defaultValues?.frequency_minutes || (paid ? 60 : 240),
       is_active: defaultValues?.is_active ?? true,
       business_hours_only: defaultValues?.business_hours_only || false,
       business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
@@ -164,7 +167,8 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
   const locations = watch("locations" as any) as string[] || [];
   const includeTerms = watch("include_terms" as any) as string[] || [];
   const excludeTerms = watch("exclude_terms" as any) as string[] || [];
-  const [locationsError, setLocationsError] = useState(false);
+  const [locationsError, setLocationsError] = useState<"empty" | "legacy" | null>(null);
+  const { data: regionsCatalog } = useRegionsCatalog();
   const [nocSuggestions, setNocSuggestions] = useState<string[]>([]);
   const country = watch("country") ?? "";
 
@@ -178,10 +182,15 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
 
   async function wrappedSubmit(data: ProfileFormData) {
     if (locations.length === 0) {
-      setLocationsError(true);
+      setLocationsError("empty");
       return;
     }
-    setLocationsError(false);
+    // The API rejects free text, so stop here instead of round-tripping to a 422
+    if (hasLegacyLocations(locations, regionsCatalog)) {
+      setLocationsError("legacy");
+      return;
+    }
+    setLocationsError(null);
     await onSubmit(data);
   }
 
@@ -283,18 +292,18 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
 
           {/* Locations */}
           <div>
-            <LocationTagInput
+            <RegionSelector
               label={t("locationsLabel")}
               value={locations}
-              onChange={(v) => { setValue("locations" as any, v); setLocationsError(false); }}
-              placeholder={t("addLocation")}
-              helperText={t("locationsTip")}
-              maxTags={maxLocations}
-              upgradeMessage={t("locationLimitReached")}
-              suggestionRequiredText={t("locationSuggestionRequired")}
+              onChange={(v) => { setValue("locations" as any, v); setLocationsError(null); }}
+              maxSelections={maxLocations}
+              limitMessage={t("locationLimitReached")}
+              disabled={isSubmitting}
             />
             {locationsError && (
-              <span className="text-xs text-error mt-1 block">{t("locationsRequired")}</span>
+              <span className="text-xs text-error mt-1 block">
+                {locationsError === "legacy" ? t("locationsLegacyBlock") : t("locationsRequired")}
+              </span>
             )}
             <div className="mt-2">
               <TipBanner title={t("locationsTipTitle")} body={t("locationsTipBody")} />
@@ -329,7 +338,7 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
               {...register("frequency_minutes", { valueAsNumber: true })}
               className={inputCls}
             >
-              {(plan === "free" ? FREE_FREQUENCY_OPTIONS : FREQUENCY_OPTIONS).map((opt) => (
+              {(paid ? FREQUENCY_OPTIONS : FREE_FREQUENCY_OPTIONS).map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {t(opt.labelKey as any)}
                 </option>
@@ -368,17 +377,17 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
           </div>
 
           {/* Tonal separator */}
-          {plan !== "free" && <div className="h-px bg-surface-container-high" />}
+          {paid && <div className="h-px bg-surface-container-high" />}
 
-          {/* Business Hours — hidden for free, informational for pro, editable for premium */}
-          {plan === "pro" && (
+          {/* Business hours — hidden for free, informational when the plan enforces them, editable otherwise */}
+          {paid && businessHoursEnforced && (
             <div className="flex items-start gap-2 px-3 py-2.5 bg-primary-fixed/30 rounded-xl text-xs text-primary">
               <span className="material-symbols-outlined text-[15px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
               <span>{t("businessHoursEnforced")}</span>
             </div>
           )}
 
-          {plan === "premium" && (
+          {paid && !businessHoursEnforced && (
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-on-surface">

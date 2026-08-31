@@ -39,12 +39,48 @@ export const mockProfile = {
   updated_at: "2024-01-02T00:00:00Z",
 };
 
+export const mockRegions = {
+  ON: {
+    code: "ON",
+    name: "Ontario",
+    regions: [
+      {
+        code: "ON:GTA",
+        name: "Greater Toronto Area (GTA)",
+        cities: ["Toronto, ON", "Mississauga, ON"],
+      },
+      {
+        code: "ON:NIAGARA",
+        name: "Niagara Region",
+        cities: ["Niagara Falls, ON", "St. Catharines, ON"],
+      },
+    ],
+  },
+};
+
+export const mockLimits = {
+  plan: "paid",
+  plan_horizon: "1m",
+  max_profiles: 2,
+  max_job_titles_per_profile: 5,
+  max_locations_per_profile: 2,
+  business_hours_only_enforced: false,
+};
+
+export const mockHorizonLimits = {
+  "7d": { max_profiles: 1, max_locations_per_profile: 1, max_job_titles_per_profile: 5 },
+  "15d": { max_profiles: 1, max_locations_per_profile: 1, max_job_titles_per_profile: 5 },
+  "1m": { max_profiles: 2, max_locations_per_profile: 2, max_job_titles_per_profile: 5 },
+  "3m": { max_profiles: 2, max_locations_per_profile: 2, max_job_titles_per_profile: 5 },
+};
+
 export const mockJob = {
   id: "job-1",
   title: "Senior Software Engineer",
   company: "Tech Corp",
   location: "New York",
-  match_score: 85,
+  match_score: 21.1,
+  match_score_percentage: 77,
   job_url: "https://example.com/job/1",
   description: "A great opportunity for a senior engineer.",
   job_type: "Full-time",
@@ -95,6 +131,19 @@ export const handlers = [
     return HttpResponse.json({ ...mockProfile, id: "profile-new", ...body });
   }),
 
+  // Declared before `/searches/:id` so these fixed paths win the match
+  http.get(`${BASE_URL}/api/v1/searches/regions`, () =>
+    HttpResponse.json(mockRegions)
+  ),
+
+  http.get(`${BASE_URL}/api/v1/searches/limits/horizons`, () =>
+    HttpResponse.json(mockHorizonLimits)
+  ),
+
+  http.get(`${BASE_URL}/api/v1/searches/limits`, () =>
+    HttpResponse.json(mockLimits)
+  ),
+
   http.get(`${BASE_URL}/api/v1/searches/:id`, ({ params }) =>
     HttpResponse.json({ ...mockProfile, id: params.id as string })
   ),
@@ -130,5 +179,18 @@ export const handlers = [
 
   http.get(`${BASE_URL}/api/v1/jobs/:id`, ({ params }) =>
     HttpResponse.json({ ...mockJob, id: params.id as string })
+  ),
+
+  // Billing
+  http.post(`${BASE_URL}/api/v1/billing/checkout`, ({ request }) => {
+    const horizon = new URL(request.url).searchParams.get("horizon");
+    return HttpResponse.json({
+      url: `https://checkout.stripe.com/session-${horizon}`,
+      upgraded: false,
+    });
+  }),
+
+  http.post(`${BASE_URL}/api/v1/billing/portal`, () =>
+    HttpResponse.json({ url: "https://billing.stripe.com/portal" })
   ),
 ];

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { formatLastSearched, E164_REGEX } from "@/lib/utils";
+import { daysUntil, hasLapsed } from "@/lib/plans";
 
 // ─── formatLastSearched ───────────────────────────────────────────────────────
 
@@ -69,6 +70,54 @@ describe("formatLastSearched", () => {
   it("handles large past dates (30 days ago)", () => {
     const date = new Date(NOW - 30 * 24 * 60 * 60 * 1000).toISOString();
     expect(formatLastSearched(date)).toBe("30d");
+  });
+
+  it("reads timezone-less API datetimes as UTC", () => {
+    expect(formatLastSearched("2024-06-15T11:00:00")).toBe("1h");
+    expect(formatLastSearched("2024-06-15 11:00:00")).toBe("1h");
+  });
+
+  it('returns "—" for unparseable dates', () => {
+    expect(formatLastSearched("not-a-date")).toBe("—");
+  });
+});
+
+// ─── pass expiry helpers ──────────────────────────────────────────────────────
+
+describe("daysUntil / hasLapsed", () => {
+  const NOW = new Date("2024-06-15T12:00:00Z").getTime();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("counts whole days left on a pass", () => {
+    expect(daysUntil("2024-06-20T12:00:00Z")).toBe(5);
+  });
+
+  it("clamps a lapsed pass to 0 days instead of going negative", () => {
+    expect(daysUntil("2024-06-10T12:00:00Z")).toBe(0);
+  });
+
+  it("returns null without an expiry date", () => {
+    expect(daysUntil(null)).toBeNull();
+    expect(daysUntil(undefined)).toBeNull();
+  });
+
+  it("detects a lapsed pass only once the date is past", () => {
+    expect(hasLapsed("2024-06-10T12:00:00Z")).toBe(true);
+    expect(hasLapsed("2024-06-20T12:00:00Z")).toBe(false);
+    expect(hasLapsed(null)).toBe(false);
+  });
+
+  it("reads timezone-less expiry dates as UTC", () => {
+    expect(hasLapsed("2024-06-15T11:00:00")).toBe(true);
+    expect(hasLapsed("2024-06-15T13:00:00")).toBe(false);
   });
 });
 

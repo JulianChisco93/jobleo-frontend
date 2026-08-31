@@ -1,13 +1,42 @@
-export type Plan = "free" | "pro" | "premium";
+/** `"paid"` is the current single paid tier. `"pro"`/`"premium"` are legacy monthly subscribers. */
+export type Plan = "free" | "pro" | "premium" | "paid";
+
+/** Duration of a prepaid pass. Only set when `plan === "paid"`. */
+export type PlanHorizon = "7d" | "15d" | "1m" | "3m";
+
+/** Legacy plans and the current paid tier all grant paid access. */
+export function hasPaidAccess(plan: Plan | undefined | null): boolean {
+  return plan === "paid" || plan === "pro" || plan === "premium";
+}
+
+/** Allowances a pass grants, as served by `/searches/limits/horizons`. */
+export interface HorizonLimits {
+  max_profiles: number;
+  max_locations_per_profile: number;
+  max_job_titles_per_profile: number;
+}
+
+export type HorizonLimitsCatalog = Record<PlanHorizon, HorizonLimits>;
 
 export interface PlanLimits {
   plan: Plan;
+  plan_horizon: PlanHorizon | null;
   max_profiles: number;
   max_job_titles_per_profile: number;
   max_locations_per_profile: number;
   business_hours_only_enforced: boolean;
 }
-export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "incomplete";
+/**
+ * `trial` is our own free trial for a fresh signup; `trialing` is Stripe's.
+ * Only `past_due` signals a real problem — `trial` and `canceled` are normal.
+ */
+export type SubscriptionStatus =
+  | "active"
+  | "trial"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "incomplete";
 
 export interface User {
   id: string;
@@ -17,6 +46,9 @@ export interface User {
   timezone?: string;
   created_at: string;
   plan?: Plan;
+  plan_horizon?: PlanHorizon | null;
+  plan_ends_at?: string | null;
+  trial_ends_at?: string | null;
   subscription_status?: SubscriptionStatus;
   is_admin?: boolean;
 }
@@ -31,12 +63,32 @@ export interface CV {
 
 export type AlertSensitivity = "broad" | "balanced" | "strict";
 
+// ─── Regions ──────────────────────────────────────────────────────────────────
+
+export interface Region {
+  /** `"<PROVINCE>:<REGION>"`, e.g. `"ON:NIAGARA"` — searches every city in the region. */
+  code: string;
+  name: string;
+  cities: string[];
+}
+
+export interface Province {
+  /** Province code, e.g. `"ON"` — searches the whole province as a single term. */
+  code: string;
+  name: string;
+  regions: Region[];
+}
+
+/** Keyed by province code. */
+export type RegionsCatalog = Record<string, Province>;
+
 export interface SearchProfile {
   id: string;
   name: string;
   profession: string;
   country?: string;
   job_titles: string[];
+  /** Region codes. Profiles created before the region catalog may still hold free text. */
   locations: string[];
   include_terms: string[];
   exclude_terms: string[];
@@ -66,7 +118,10 @@ export interface Job {
   job_url: string;
   site?: string;
   is_remote?: boolean;
+  /** Internal matching score. Not shown to users; use `score_percentage`. */
   score: number;
+  /** Affinity percentage computed by the API. Capped at 99. */
+  score_percentage?: number | null;
   matched_keywords?: string[];
   date_posted?: string;
   date_scraped?: string;
@@ -74,7 +129,10 @@ export interface Job {
 
 export interface JobAlert {
   id: number;
+  /** Internal matching score. Not shown to users; use `match_score_percentage`. */
   match_score: number;
+  /** Affinity percentage computed by the API. Capped at 99. */
+  match_score_percentage?: number | null;
   sent_at: string;
   search_config_id?: string;
   ai_explanation?: string | null;
@@ -98,7 +156,7 @@ export interface CreateSearchProfilePayload {
   profession: string;
   country?: string;
   job_titles: string[];        // max 5, puede ser []
-  locations: string[];         // mínimo 1 elemento
+  locations: string[];         // mínimo 1 código de región; la API rechaza texto libre
   include_terms: string[];     // puede ser []
   exclude_terms: string[];     // puede ser []
   title_exclude_terms: string[]; // puede ser []
@@ -144,7 +202,10 @@ export interface AdminServerStatus {
 export interface AdminUser {
   id: number;
   email: string;
+  display_name?: string | null;
   plan: Plan;
+  plan_horizon?: PlanHorizon | null;
+  plan_ends_at?: string | null;
   is_active: boolean;
   is_admin: boolean;
   subscription_status: string;

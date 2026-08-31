@@ -7,16 +7,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { TagInput } from "@/components/ui/TagInput";
-import { LocationTagInput } from "@/components/ui/LocationTagInput";
+import { RegionSelector } from "@/components/ui/RegionSelector";
 import { LangToggle } from "@/components/ui/LangToggle";
 import {
   uploadCVFile,
   uploadCVText,
   createSearchProfile,
   getSearchProfiles,
+  getLimits,
   updateMe,
   createCheckoutSession,
 } from "@/lib/api";
+import { HORIZON_OPTIONS, RECOMMENDED_HORIZON } from "@/lib/plans";
+import { HorizonLimits } from "@/components/billing/HorizonLimits";
+import type { CreateSearchProfilePayload, PlanHorizon } from "@/lib/types";
 
 // ─── Shared state ────────────────────────────────────────────
 interface OnboardingData {
@@ -59,11 +63,11 @@ const COUNTRY_OPTIONS = [
   "Venezuela", "Peru", "Ecuador", "Uruguay", "Other",
 ] as const;
 
-const PLAN_LIMITS = {
-  starter: { maxJobTitles: 0, maxLocations: 2 },
-  pro: { maxJobTitles: 3, maxLocations: 5 },
-  premium: { maxJobTitles: 5, maxLocations: Infinity },
-} as const;
+/**
+ * Upper bound for the region picker during onboarding, before a pass is bought.
+ * The real cap comes from `/searches/limits` and is applied when the profile is created.
+ */
+const MAX_ONBOARDING_REGIONS = 5;
 
 // ─── Step progress bar ──────────────────────────────────────
 function StepBar({ step }: { step: 1 | 2 | 3 | 4 }) {
@@ -365,13 +369,11 @@ function Step2({ initialData, onNext, onBack }: Step2Props) {
       />
 
       {/* Locations */}
-      <LocationTagInput
+      <RegionSelector
         label={t("locationsLabel")}
         value={locations}
         onChange={setLocations}
-        placeholder={t("locationsPlaceholder")}
-        helperText={t("locationsTip")}
-        suggestionRequiredText={t("locationSuggestionRequired")}
+        maxSelections={MAX_ONBOARDING_REGIONS}
       />
 
       {/* Include / Exclude keywords */}
@@ -548,107 +550,97 @@ function Step3({ initialData, onNext, onBack }: Step3Props) {
   );
 }
 
-// ─── Step 4: Plan Selection ───────────────────────────────────
+// ─── Step 4: Pass selection ───────────────────────────────────
+type Step4Choice = "free" | PlanHorizon;
+
 interface Step4Props {
   initialData: OnboardingData;
   onBack: () => void;
-  onFinish: (plan: "starter" | "pro" | "premium") => void;
+  onFinish: () => void;
   cvFile?: File | null;
 }
 
 function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
   const t = useTranslations("onboarding");
-  const [selected, setSelected] = useState<"starter" | "pro" | "premium">("pro");
+  const tp = useTranslations("pricing");
+  const [selected, setSelected] = useState<Step4Choice>(RECOMMENDED_HORIZON);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleFinish() {
-    const { profession, jobTitles, locations, includeTerms, excludeTerms } = initialData;
-
-    setLoading(true);
-    setError(null);
-
-    if (selected === "starter") {
-      // Create the profile now with free-plan limits
-      try {
-        const profile = await createSearchProfile({
-          name: `${profession} Search`,
-          profession,
-          country: initialData.country || undefined,
-          job_titles: [],
-          locations: locations.slice(0, 2),
-          include_terms: includeTerms,
-          exclude_terms: excludeTerms,
-          title_exclude_terms: [],
-          frequency_minutes: 60,
-          business_hours_only: false,
-          business_hours_start: 9,
-          business_hours_end: 18,
-          business_days_only: false,
-          alert_sensitivity: "broad",
-        });
-        const profileId = String(profile.id);
-        // Upload CV to the newly created profile (non-fatal if it fails)
-        try {
-          if (cvFile) {
-            await uploadCVFile(cvFile, profileId);
-          } else if (initialData.cvText) {
-            await uploadCVText(initialData.cvText, "resume.txt", profileId);
-          }
-        } catch {
-          // CV upload failure is non-fatal — user can upload from profile page
-        }
-        // Save job titles for a future plan upgrade
-        if (jobTitles.length > 0) {
-          sessionStorage.setItem("onboarding_profile_id", profileId);
-          sessionStorage.setItem("onboarding_job_titles", JSON.stringify(jobTitles));
-        }
-        // Clean up any leftover paid-plan payload from a previous attempt
-        sessionStorage.removeItem("onboarding_pending_profile");
-        onFinish("starter");
-      } catch (err: any) {
-        const msg: string = err.message || "";
-        // If the user somehow already has a profile, reuse it
-        if (msg.includes("máximo") || msg.includes("maximum") || msg.includes("plan") || msg.includes("perfil")) {
-          try {
-            const existing = await getSearchProfiles();
-            if (existing.length > 0) {
-              sessionStorage.removeItem("onboarding_pending_profile");
-              onFinish("starter");
-              return;
-            }
-          } catch {}
-        }
-        setError(msg || "Failed to create profile");
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    // pro / premium: save full payload, redirect to Stripe
-    const limits = PLAN_LIMITS[selected];
-    const pendingProfile = {
+  function buildPayload(maxJobTitles: number, maxRegions: number): CreateSearchProfilePayload {
+    const { profession, country, jobTitles, locations, includeTerms, excludeTerms } = initialData;
+    return {
       name: `${profession} Search`,
       profession,
-      country: initialData.country || undefined,
-      job_titles: jobTitles.slice(0, limits.maxJobTitles),
-      locations:
-        limits.maxLocations === Infinity
-          ? locations
-          : locations.slice(0, limits.maxLocations),
+      country: country || undefined,
+      job_titles: jobTitles.slice(0, maxJobTitles),
+      locations: locations.slice(0, maxRegions),
       include_terms: includeTerms,
       exclude_terms: excludeTerms,
-      title_exclude_terms: [] as string[],
+      title_exclude_terms: [],
       frequency_minutes: 60,
       business_hours_only: false,
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
-      alert_sensitivity: "broad" as const,
+      alert_sensitivity: "broad",
     };
-    sessionStorage.setItem("onboarding_pending_profile", JSON.stringify(pendingProfile));
-    // Store CV text for upload after payment (file objects can't survive page navigation)
+  }
+
+  async function finishOnFreePlan() {
+    const { jobTitles } = initialData;
+    try {
+      const limits = await getLimits();
+      const profile = await createSearchProfile(
+        buildPayload(limits.max_job_titles_per_profile, limits.max_locations_per_profile)
+      );
+      const profileId = String(profile.id);
+      // Upload CV to the newly created profile (non-fatal if it fails)
+      try {
+        if (cvFile) {
+          await uploadCVFile(cvFile, profileId);
+        } else if (initialData.cvText) {
+          await uploadCVText(initialData.cvText, "resume.txt", profileId);
+        }
+      } catch {
+        // CV upload failure is non-fatal — user can upload from profile page
+      }
+      // Keep the titles that didn't fit so they can be applied after buying a pass
+      if (jobTitles.length > limits.max_job_titles_per_profile) {
+        sessionStorage.setItem("onboarding_profile_id", profileId);
+        sessionStorage.setItem("onboarding_job_titles", JSON.stringify(jobTitles));
+      }
+      sessionStorage.removeItem("onboarding_pending_profile");
+      onFinish();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      // If the user somehow already has a profile, reuse it
+      if (msg.includes("máximo") || msg.includes("maximum") || msg.includes("plan") || msg.includes("perfil")) {
+        try {
+          const existing = await getSearchProfiles();
+          if (existing.length > 0) {
+            sessionStorage.removeItem("onboarding_pending_profile");
+            onFinish();
+            return;
+          }
+        } catch {
+          // Fall through to the error message below
+        }
+      }
+      setError(msg || t("createProfileError"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function startCheckout(horizon: PlanHorizon) {
+    // The pass isn't active yet, so store the full selection and let the success
+    // page trim it to whatever the purchased horizon actually allows.
+    sessionStorage.setItem(
+      "onboarding_pending_profile",
+      JSON.stringify(buildPayload(Infinity, Infinity))
+    );
+    // File objects can't survive page navigation, so only the pasted text is kept
     if (initialData.cvText) {
       sessionStorage.setItem("onboarding_cv_text", initialData.cvText);
     } else {
@@ -656,42 +648,30 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
     }
 
     try {
-      const { url } = await createCheckoutSession(selected);
+      const { url } = await createCheckoutSession(horizon);
+      if (!url) throw new Error(t("checkoutError"));
       window.location.href = url;
-    } catch (err: any) {
+    } catch (err: unknown) {
       sessionStorage.removeItem("onboarding_pending_profile");
-      setError(err.message || "Failed to start checkout");
+      setError(err instanceof Error ? err.message : t("checkoutError"));
       setLoading(false);
     }
   }
 
-  const starterFeatures = [
-    t("planStarterFeature1"),
-    t("planStarterFeature2"),
-    t("planStarterFeature3"),
-    t("planStarterFeature4"),
-  ];
-  const proFeatures = [
-    t("planProFeature1"),
-    t("planProFeature2"),
-    t("planProFeature3"),
-    t("planProFeature4"),
-    t("planProFeature5"),
-  ];
-  const premiumFeatures = [
-    t("planPremiumFeature1"),
-    t("planPremiumFeature2"),
-    t("planPremiumFeature3"),
-    t("planPremiumFeature4"),
-    t("planPremiumFeature5"),
+  async function handleFinish() {
+    setLoading(true);
+    setError(null);
+    if (selected === "free") await finishOnFreePlan();
+    else await startCheckout(selected);
+  }
+
+  const freeFeatures = [
+    t("planFreeFeature1"),
+    t("planFreeFeature2"),
+    t("planFreeFeature3"),
   ];
 
-  const ctaLabel =
-    selected === "premium"
-      ? t("planPremiumCta")
-      : selected === "pro"
-      ? t("planProCta")
-      : t("planStarterCta");
+  const ctaLabel = selected === "free" ? t("planFreeCta") : t("planPassCta");
 
   return (
     <div className="flex flex-col gap-7">
@@ -706,137 +686,91 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
         <p className="text-sm text-on-surface-variant mt-1">{t("step4Subtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Starter Card */}
-        <button
-          type="button"
-          onClick={() => setSelected("starter")}
-          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
-            selected === "starter"
-              ? "border-secondary bg-secondary-container shadow-lg"
-              : "border-outline-variant bg-surface-container-lowest"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
-              selected === "starter"
-                ? "bg-secondary/20 text-on-secondary-container"
-                : "bg-surface-container-high text-on-surface-variant"
-            }`}>
-              {t("planStarterBadge")}
-            </span>
-            <h3 className="text-base font-display font-bold text-on-surface mt-2">
-              {t("planStarterName")}
-            </h3>
-            <p className="text-xl font-display font-bold text-on-surface">
-              {t("planStarterPrice")}
-            </p>
-            <p className="text-xs text-on-surface-variant">{t("planStarterTagline")}</p>
-          </div>
-          <ul className="flex flex-col gap-2">
-            {starterFeatures.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-xs text-on-surface-variant">
-                <span className="material-symbols-outlined text-[14px] text-secondary flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  check_circle
-                </span>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </button>
-
-        {/* Pro Card */}
-        <button
-          type="button"
-          onClick={() => setSelected("pro")}
-          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
-            selected === "pro"
-              ? "border-primary bg-primary shadow-lg"
-              : "border-outline-variant bg-surface-container-lowest"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
-              selected === "pro"
-                ? "bg-on-primary/20 text-on-primary"
-                : "bg-secondary-container text-on-secondary-container"
-            }`}>
-              {t("planProBadge")}
-            </span>
-            <h3 className={`text-base font-display font-bold mt-2 ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
-              {t("planProName")}
-            </h3>
-            <p className={`text-xl font-display font-bold ${selected === "pro" ? "text-on-primary" : "text-on-surface"}`}>
-              {t("planProPrice")}
-            </p>
-            <p className={`text-xs ${selected === "pro" ? "text-on-primary/80" : "text-on-surface-variant"}`}>
-              {t("planProTagline")}
-            </p>
-          </div>
-          <ul className="flex flex-col gap-2">
-            {proFeatures.map((f) => (
-              <li key={f} className={`flex items-center gap-2 text-xs ${selected === "pro" ? "text-on-primary/90" : "text-on-surface-variant"}`}>
-                <span
-                  className="material-symbols-outlined text-[14px] flex-shrink-0"
-                  style={{
-                    color: selected === "pro" ? "#4ae183" : undefined,
-                    fontVariationSettings: "'FILL' 1",
-                  }}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {HORIZON_OPTIONS.map((option) => {
+          const active = selected === option.horizon;
+          const recommended = option.horizon === RECOMMENDED_HORIZON;
+          return (
+            <button
+              key={option.horizon}
+              type="button"
+              onClick={() => setSelected(option.horizon)}
+              className={`flex flex-col gap-3 p-4 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                active
+                  ? "border-primary bg-primary shadow-lg"
+                  : "border-outline-variant bg-surface-container-lowest"
+              }`}
+            >
+              <span
+                className={`text-[10px] font-bold tracking-widest px-2 py-0.5 self-start rounded-full uppercase ${
+                  recommended
+                    ? active
+                      ? "bg-on-primary/20 text-on-primary"
+                      : "bg-secondary-container text-on-secondary-container"
+                    : "opacity-0"
+                }`}
+              >
+                {tp("mostPopular")}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <h3
+                  className={`text-sm font-display font-bold ${
+                    active ? "text-on-primary" : "text-on-surface"
+                  }`}
                 >
-                  check_circle
-                </span>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </button>
-
-        {/* Premium Card */}
-        <button
-          type="button"
-          onClick={() => setSelected("premium")}
-          className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
-            selected === "premium"
-              ? "border-secondary bg-secondary shadow-lg"
-              : "border-outline-variant bg-surface-container-lowest"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className={`text-xs font-bold tracking-widest px-2.5 py-1 self-start rounded-full uppercase ${
-              selected === "premium"
-                ? "bg-on-secondary/20 text-on-secondary"
-                : "bg-primary-container text-on-primary-container"
-            }`}>
-              {t("planPremiumBadge")}
-            </span>
-            <h3 className={`text-base font-display font-bold mt-2 ${selected === "premium" ? "text-on-secondary" : "text-on-surface"}`}>
-              {t("planPremiumName")}
-            </h3>
-            <p className={`text-xl font-display font-bold ${selected === "premium" ? "text-on-secondary" : "text-on-surface"}`}>
-              {t("planPremiumPrice")}
-            </p>
-            <p className={`text-xs ${selected === "premium" ? "text-on-secondary/80" : "text-on-surface-variant"}`}>
-              {t("planPremiumTagline")}
-            </p>
-          </div>
-          <ul className="flex flex-col gap-2">
-            {premiumFeatures.map((f) => (
-              <li key={f} className={`flex items-center gap-2 text-xs ${selected === "premium" ? "text-on-secondary/90" : "text-on-surface-variant"}`}>
-                <span
-                  className="material-symbols-outlined text-[14px] flex-shrink-0"
-                  style={{
-                    color: selected === "premium" ? "#ffd966" : undefined,
-                    fontVariationSettings: "'FILL' 1",
-                  }}
+                  {tp(`horizon${option.messageKey}Name`)}
+                </h3>
+                <p
+                  className={`text-2xl font-display font-black ${
+                    active ? "text-on-primary" : "text-on-surface"
+                  }`}
                 >
-                  check_circle
-                </span>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </button>
+                  ${option.price}
+                </p>
+                <p
+                  className={`text-[11px] ${
+                    active ? "text-on-primary/70" : "text-on-surface-variant"
+                  }`}
+                >
+                  {tp("oneTimePayment")}
+                </p>
+              </div>
+              <HorizonLimits
+                horizon={option.horizon}
+                className={`text-xs leading-relaxed ${
+                  active ? "text-on-primary/90" : "text-on-surface-variant"
+                }`}
+              />
+            </button>
+          );
+        })}
+
       </div>
+
+      <p className="text-xs text-on-surface-variant text-center -mt-2">
+        {tp("noAutoRenewNote")}
+      </p>
+
+      {/* Free option */}
+      <button
+        type="button"
+        onClick={() => setSelected("free")}
+        className={`flex flex-col gap-2 p-4 rounded-xl border-2 text-left transition-colors ${
+          selected === "free"
+            ? "border-secondary bg-secondary-container"
+            : "border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full uppercase bg-surface-container-high text-on-surface-variant">
+            {t("planFreeBadge")}
+          </span>
+          <span className="text-sm font-display font-bold text-on-surface">
+            {t("planFreeName")}
+          </span>
+        </div>
+        <p className="text-xs text-on-surface-variant">{freeFeatures.join(" · ")}</p>
+      </button>
 
       {error && (
         <div className="flex items-center gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-sm">
@@ -959,9 +893,7 @@ export default function OnboardingPage() {
             <Step4
               initialData={data}
               onBack={() => goToStep(3)}
-              onFinish={(plan) => {
-                if (plan === "starter") finish();
-              }}
+              onFinish={finish}
               cvFile={cvFile}
             />
           )}

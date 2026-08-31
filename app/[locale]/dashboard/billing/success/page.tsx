@@ -6,57 +6,82 @@ import { useRouter } from "next/navigation";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Link } from "@/i18n/navigation";
-import { getMe, updateSearchProfile, createSearchProfile } from "@/lib/api";
+import {
+  getMe,
+  getLimits,
+  updateSearchProfile,
+  createSearchProfile,
+  uploadCVText,
+} from "@/lib/api";
+import { HORIZON_OPTIONS, daysUntil } from "@/lib/plans";
+import type { CreateSearchProfilePayload } from "@/lib/types";
 
 export default function BillingSuccessPage() {
   const t = useTranslations("billing");
+  const tp = useTranslations("pricing");
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
 
-  const isPremium = me?.plan === "premium";
-  const title = isPremium ? t("successTitlePremium") : t("successTitlePro");
-  const planLabel = isPremium ? t("planActivatedPremium") : t("planActivatedPro");
-  const badgeColor = isPremium
-    ? "bg-secondary text-on-secondary"
-    : "bg-primary text-on-primary";
-  const badgeBg = isPremium ? "bg-secondary/10" : "bg-primary/10";
+  const knownHorizon = HORIZON_OPTIONS.find((o) => o.horizon === me?.plan_horizon);
+  const horizonLabel = knownHorizon ? tp(`horizon${knownHorizon.messageKey}Name`) : null;
+  const daysLeft = daysUntil(me?.plan_ends_at);
 
   useEffect(() => {
-    // Invalidate the user query so plan info refreshes immediately
+    // Invalidate cached plan info so the new pass shows up immediately
     queryClient.invalidateQueries({ queryKey: ["me"] });
+    queryClient.invalidateQueries({ queryKey: ["plan-limits"] });
 
-    // Create the search profile saved during onboarding for pro/premium plans
+    // Create the search profile saved during onboarding, trimmed to what the pass allows
     const pendingProfileRaw = sessionStorage.getItem("onboarding_pending_profile");
     if (pendingProfileRaw) {
-      try {
-        const payload = JSON.parse(pendingProfileRaw);
-        createSearchProfile(payload)
-          .then(() => queryClient.invalidateQueries({ queryKey: ["search-profiles"] }))
-          .catch(() => {})
-          .finally(() => sessionStorage.removeItem("onboarding_pending_profile"));
-      } catch {
-        sessionStorage.removeItem("onboarding_pending_profile");
-      }
+      (async () => {
+        try {
+          const payload: CreateSearchProfilePayload = JSON.parse(pendingProfileRaw);
+          const limits = await getLimits();
+          const profile = await createSearchProfile({
+            ...payload,
+            job_titles: payload.job_titles.slice(0, limits.max_job_titles_per_profile),
+            locations: payload.locations.slice(0, limits.max_locations_per_profile),
+          });
+          // Only pasted text survives the Stripe redirect; uploaded files cannot
+          const cvText = sessionStorage.getItem("onboarding_cv_text");
+          if (cvText) {
+            try {
+              await uploadCVText(cvText, "resume.txt", String(profile.id));
+            } catch {
+              // Non-fatal — the user can upload the CV from the profile page
+            }
+            sessionStorage.removeItem("onboarding_cv_text");
+          }
+          queryClient.invalidateQueries({ queryKey: ["search-profiles"] });
+        } catch {
+          // Non-fatal — the user can create the profile from the dashboard
+        } finally {
+          sessionStorage.removeItem("onboarding_pending_profile");
+        }
+      })();
     }
 
-    // Apply job titles saved during onboarding (starter plan users who later upgraded)
+    // Apply job titles saved during onboarding (free users who later bought a pass)
     const pendingProfileId = sessionStorage.getItem("onboarding_profile_id");
     const pendingJobTitles = sessionStorage.getItem("onboarding_job_titles");
     if (pendingProfileId && pendingJobTitles) {
-      try {
-        const jobTitles: string[] = JSON.parse(pendingJobTitles);
-        updateSearchProfile(pendingProfileId, { job_titles: jobTitles })
-          .then(() => queryClient.invalidateQueries({ queryKey: ["search-profiles"] }))
-          .catch(() => {})
-          .finally(() => {
-            sessionStorage.removeItem("onboarding_profile_id");
-            sessionStorage.removeItem("onboarding_job_titles");
+      (async () => {
+        try {
+          const jobTitles: string[] = JSON.parse(pendingJobTitles);
+          const limits = await getLimits();
+          await updateSearchProfile(pendingProfileId, {
+            job_titles: jobTitles.slice(0, limits.max_job_titles_per_profile),
           });
-      } catch {
-        sessionStorage.removeItem("onboarding_profile_id");
-        sessionStorage.removeItem("onboarding_job_titles");
-      }
+          queryClient.invalidateQueries({ queryKey: ["search-profiles"] });
+        } catch {
+          // Non-fatal — the user can edit the profile manually
+        } finally {
+          sessionStorage.removeItem("onboarding_profile_id");
+          sessionStorage.removeItem("onboarding_job_titles");
+        }
+      })();
     }
 
     const timer = setTimeout(() => router.push("/dashboard"), 5000);
@@ -65,7 +90,7 @@ export default function BillingSuccessPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
-      <DashboardTopBar title={title} />
+      <DashboardTopBar title={t("successTitle")} />
 
       <main className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="max-w-md w-full text-center">
@@ -80,23 +105,21 @@ export default function BillingSuccessPage() {
           </div>
 
           <h1 className="text-3xl font-display font-extrabold text-on-surface mb-3">
-            {title}
+            {t("successTitle")}
           </h1>
-          <p className="text-on-surface-variant mb-2">
-            {t("successDesc")}
-          </p>
-          <p className="text-xs text-on-surface-variant mb-8">
-            {t("successRedirect")}
-          </p>
+          <p className="text-on-surface-variant mb-2">{t("successDesc")}</p>
+          <p className="text-xs text-on-surface-variant mb-8">{t("successRedirect")}</p>
 
-          {/* Plan badge */}
-          <div className={`inline-flex items-center gap-2 px-4 py-2 ${badgeBg} rounded-full mb-8`}>
-            <span className={`text-[10px] font-bold px-2 py-0.5 ${badgeColor} rounded-full uppercase tracking-widest`}>
-              {isPremium ? "Premium" : "Pro"}
+          {/* Pass badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-8">
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-primary text-on-primary rounded-full uppercase tracking-widest">
+              {horizonLabel ?? t("passActivated")}
             </span>
-            <span className="text-sm font-semibold text-on-surface">
-              {planLabel}
-            </span>
+            {daysLeft !== null && (
+              <span className="text-sm font-semibold text-on-surface">
+                {t("passDaysRemaining", { days: daysLeft })}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col gap-3">

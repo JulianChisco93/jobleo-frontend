@@ -10,6 +10,9 @@ import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
 import { Toggle } from "@/components/ui/Toggle";
 import { CheckoutButton } from "@/components/billing/CheckoutButton";
 import { PortalButton } from "@/components/billing/PortalButton";
+import { HORIZON_OPTIONS, daysUntil } from "@/lib/plans";
+import { hasPaidAccess } from "@/lib/types";
+import { useDisplayName } from "@/lib/hooks/useDisplayName";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -49,6 +52,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
+  const tp = useTranslations("pricing");
   const router = useRouter();
   const locale = useLocale();
   const i18nRouter = useI18nRouter();
@@ -64,6 +68,7 @@ export default function SettingsPage() {
   const [newPhone, setNewPhone] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [phoneSaveError, setPhoneSaveError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -74,18 +79,28 @@ export default function SettingsPage() {
   }, []);
 
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
+  const displayName = useDisplayName();
   const { mutateAsync: update } = useMutation({
     mutationFn: updateMe,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["me"] }),
   });
 
+  const paidAccess = hasPaidAccess(me?.plan);
+  // Legacy monthly subscribers keep their recurring Stripe subscription
+  const isLegacyPlan = me?.plan === "pro" || me?.plan === "premium";
+  const passDaysLeft = daysUntil(me?.plan_ends_at);
+  const knownHorizon = HORIZON_OPTIONS.find((o) => o.horizon === me?.plan_horizon);
+  const horizonLabel = knownHorizon ? tp(`horizon${knownHorizon.messageKey}Name`) : null;
+
   const { register, handleSubmit, reset } = useForm<SettingsFormData>({
-    defaultValues: { display_name: me?.display_name || "", timezone: me?.timezone || "America/Toronto (UTC-5)" },
+    defaultValues: { display_name: displayName, timezone: me?.timezone || "America/Toronto (UTC-5)" },
   });
 
+  // Prefilling with the resolved name lets accounts whose name still lives in
+  // Supabase persist it to the API the first time they save.
   useEffect(() => {
-    if (me) reset({ display_name: me.display_name || "", timezone: me.timezone || "America/Toronto (UTC-5)" });
-  }, [me, reset]);
+    if (me) reset({ display_name: displayName, timezone: me.timezone || "America/Toronto (UTC-5)" });
+  }, [me, displayName, reset]);
 
   async function onSubmit(data: SettingsFormData) {
     await update({ display_name: data.display_name, timezone: data.timezone });
@@ -115,7 +130,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
-      <DashboardTopBar title={t("pageTitle")} userName={me?.display_name} />
+      <DashboardTopBar title={t("pageTitle")} userName={displayName} />
 
       <main className="max-w-3xl mx-auto w-full px-6 py-10">
         <div className="mb-8">
@@ -215,74 +230,98 @@ export default function SettingsPage() {
 
           {/* Subscription */}
           <Section title={t("subscriptionSection")}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  {t("currentPlanLabel")}
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-on-surface capitalize">
-                    {me?.plan ?? "free"}
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                    {t("currentPlanLabel")}
                   </p>
-                  {me?.plan === "pro" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-primary text-on-primary rounded-full uppercase tracking-widest">
-                      Pro
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-on-surface">
+                      {isLegacyPlan
+                        ? me?.plan === "pro" ? "Pro" : "Premium"
+                        : paidAccess
+                        ? t("planPaidName")
+                        : t("planFreeName")}
+                    </p>
+                    {paidAccess && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-primary text-on-primary rounded-full uppercase tracking-widest">
+                        {isLegacyPlan ? t("legacyBadge") : t("activeBadge")}
+                      </span>
+                    )}
+                    {horizonLabel && (
+                      <span className="text-xs font-semibold text-on-surface-variant">
+                        {horizonLabel}
+                      </span>
+                    )}
+                  </div>
+                  {passDaysLeft !== null && (
+                    <p
+                      className={`text-xs mt-1 font-medium ${
+                        passDaysLeft <= 5 ? "text-error" : "text-on-surface-variant"
+                      }`}
+                    >
+                      {passDaysLeft === 0
+                        ? t("passExpiresToday")
+                        : t("passExpiresInDays", { days: passDaysLeft })}
+                    </p>
                   )}
-                  {me?.plan === "premium" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-secondary text-on-secondary rounded-full uppercase tracking-widest">
-                      Premium
-                    </span>
+                  {/* "trial" and "canceled" are expected states, not failures — a
+                      failed charge on a legacy subscription is the only problem. */}
+                  {me?.subscription_status === "past_due" && (
+                    <p className="text-xs text-error mt-1">{t("paymentPastDue")}</p>
                   )}
                 </div>
-                {me?.subscription_status && me.subscription_status !== "active" && (
-                  <p className="text-xs text-error mt-1 capitalize">
-                    {t("subscriptionStatus")}: {me.subscription_status.replace("_", " ")}
-                  </p>
-                )}
-              </div>
 
-              <div className="flex flex-col items-end gap-2">
-                {me?.plan === "free" && (
-                  <>
-                    <CheckoutButton
-                      plan="pro"
-                      label={t("upgradeToPro")}
-                      className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
-                    />
-                    <CheckoutButton
-                      plan="premium"
-                      label={t("upgradeToPremium")}
-                      className="px-4 py-2 text-sm font-bold text-secondary border border-secondary-container rounded-xl hover:bg-secondary-container/50 transition-colors disabled:opacity-60"
-                    />
-                  </>
-                )}
-                {me?.plan === "pro" && (
-                  <>
-                    <CheckoutButton
-                      plan="premium"
-                      label={t("upgradeToPremium")}
-                      className="px-4 py-2 text-sm font-bold text-on-primary bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
-                    />
-                    <PortalButton
-                      label={t("manageSubscription")}
-                      className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
-                    />
-                  </>
-                )}
-                {me?.plan === "premium" && (
+                {/* Legacy monthly subscribers manage or cancel through Stripe */}
+                {isLegacyPlan && (
                   <PortalButton
                     label={t("manageSubscription")}
-                    className="px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
+                    className="flex-shrink-0 px-4 py-2 text-sm font-bold text-primary border border-primary-container rounded-xl hover:bg-primary-fixed transition-colors"
                   />
                 )}
               </div>
+
+              {!isLegacyPlan && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                    {paidAccess ? t("extendPassLabel") : t("buyPassLabel")}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {HORIZON_OPTIONS.map((option) => (
+                      <div
+                        key={option.horizon}
+                        className="flex flex-col gap-2 p-3 rounded-xl bg-surface-container-low"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-lg font-display font-black text-on-surface">
+                            ${option.price}
+                          </span>
+                          <span className="text-[11px] font-semibold text-on-surface-variant">
+                            {tp(`horizon${option.messageKey}Name`)}
+                          </span>
+                        </div>
+                        <CheckoutButton
+                          horizon={option.horizon}
+                          label={paidAccess ? tp("extendCta") : tp("passCta")}
+                          onError={setCheckoutError}
+                          className="w-full py-2 text-xs font-bold text-on-primary bg-primary rounded-lg hover:brightness-110 transition-all disabled:opacity-60"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-on-surface-variant">{tp("noAutoRenewNote")}</p>
+                  {checkoutError && (
+                    <p className="text-xs text-error font-medium">{checkoutError}</p>
+                  )}
+                </div>
+              )}
             </div>
           </Section>
 
           {/* Notifications */}
           <Section title={t("notificationsSection")}>
-            {me?.plan === "free" || !me?.plan ? (
+            {!paidAccess ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <Toggle checked={true} onChange={() => {}} disabled label="" />

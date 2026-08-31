@@ -9,6 +9,9 @@ import type {
   ConfigAnalysis,
   CreateSearchProfilePayload,
   PlanLimits,
+  PlanHorizon,
+  HorizonLimitsCatalog,
+  RegionsCatalog,
   Plan,
   AdminMetrics,
   AdminServerStatus,
@@ -23,6 +26,50 @@ import type {
 } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.jobleo.app";
+
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+
+  /** Only 401 means the session is gone. */
+  get isAuthError(): boolean {
+    return this.status === 401;
+  }
+
+  /**
+   * 403 covers plan limits ("Tu plan Free permite máximo 1 locación(es).") and
+   * admin-only endpoints, so it must never send the user back to login.
+   */
+  get isForbidden(): boolean {
+    return this.status === 403;
+  }
+}
+
+/** FastAPI reports validation errors as `{ detail: [{ msg }] }` and aborts as `{ detail: "..." }`. */
+function extractErrorMessage(body: string, status: number): string {
+  if (!body) return `Request failed: ${status}`;
+  try {
+    const parsed = JSON.parse(body);
+    const detail = parsed?.detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((d: { msg?: string }) => d?.msg)
+        .filter((m): m is string => typeof m === "string" && m.length > 0)
+        // Pydantic prefixes value errors with "Value error, "
+        .map((m) => m.replace(/^Value error,\s*/, ""));
+      if (messages.length > 0) return messages.join(" ");
+    }
+  } catch {
+    // Not JSON — fall through to the raw body
+  }
+  return body;
+}
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const supabase = createClient();
@@ -47,7 +94,7 @@ async function request<T>(
   });
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err || `Request failed: ${res.status}`);
+    throw new ApiError(res.status, extractErrorMessage(err, res.status));
   }
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -100,6 +147,13 @@ export const deleteCV = (searchConfigId: string) =>
 
 export const getLimits = () =>
   request<PlanLimits>("/api/v1/searches/limits");
+
+/** Allowances for all four passes, so a purchase can be described before buying. */
+export const getHorizonLimits = () =>
+  request<HorizonLimitsCatalog>("/api/v1/searches/limits/horizons");
+
+export const getRegions = () =>
+  request<RegionsCatalog>("/api/v1/searches/regions");
 
 export const getSearchProfiles = () =>
   request<SearchProfile[]>("/api/v1/searches/");
@@ -165,8 +219,11 @@ export const analyzeSearchConfig = (configId: string, profile?: Pick<SearchProfi
 
 // ─── Billing ──────────────────────────────────────────────────────────────────
 
-export const createCheckoutSession = (plan: "pro" | "premium") =>
-  request<{ url: string }>(`/api/v1/billing/checkout?plan=${plan}`, { method: "POST" });
+export const createCheckoutSession = (horizon: PlanHorizon) =>
+  request<{ url: string | null; upgraded: boolean }>(
+    `/api/v1/billing/checkout?horizon=${horizon}`,
+    { method: "POST" }
+  );
 
 export const createPortalSession = () =>
   request<{ url: string }>("/api/v1/billing/portal", { method: "POST" });
@@ -191,8 +248,18 @@ export const getServerLogs = (lines = 200, filter?: string) => {
 export const getAdminUsers = () =>
   request<AdminUsersResponse>("/api/v1/admin/users");
 
-export const updateUserPlan = (id: number, plan: Plan) =>
-  request<AdminUser>(`/api/v1/admin/users/${id}/plan?plan=${plan}`, { method: "PATCH" });
+export const updateUserPlan = (
+  id: number,
+  plan: Plan,
+  options: { horizon?: PlanHorizon; days?: number } = {}
+) => {
+  const qs = new URLSearchParams({ plan });
+  if (options.horizon) qs.set("horizon", options.horizon);
+  if (options.days !== undefined) qs.set("days", String(options.days));
+  return request<AdminUser>(`/api/v1/admin/users/${id}/plan?${qs.toString()}`, {
+    method: "PATCH",
+  });
+};
 
 export const deleteAdminUser = (id: number) =>
   request<{ deleted: boolean; user_id: number; email: string }>(

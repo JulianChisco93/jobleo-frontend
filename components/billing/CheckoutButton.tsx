@@ -1,12 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { createCheckoutSession } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { ApiError, createCheckoutSession, getSearchProfiles } from "@/lib/api";
+import { getHorizonOption } from "@/lib/plans";
+import { HORIZON_LIMITS_QUERY } from "@/lib/hooks/useHorizonLimits";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import type { PlanHorizon } from "@/lib/types";
 
 interface Props {
   label: string;
-  plan: "pro" | "premium";
+  horizon: PlanHorizon;
   className?: string;
+  /** When provided, the caller renders the error instead of the inline fallback. */
+  onError?: (message: string) => void;
+}
+
+interface Downgrade {
+  profiles: number;
+  regions: number;
+  allowedProfiles: number;
+  allowedRegions: number;
 }
 
 function Spinner() {
@@ -17,35 +32,121 @@ function Spinner() {
   );
 }
 
-export function CheckoutButton({ label, plan, className }: Props) {
+export function CheckoutButton({ label, horizon, className, onError }: Props) {
+  const t = useTranslations("billing");
+  const tp = useTranslations("pricing");
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [downgrade, setDowngrade] = useState<Downgrade | null>(null);
 
-  async function handleClick() {
-    setLoading(true);
+  const option = getHorizonOption(horizon);
+
+  function reportError(message: string) {
+    if (onError) onError(message);
+    else setError(message);
+  }
+
+  /**
+   * Buying a shorter pass keeps the remaining time but drops the allowances to
+   * the new horizon, and the API does not trim what is already saved. Warn
+   * before charging so the drop is not a surprise.
+   */
+  async function findDowngrade(): Promise<Downgrade | null> {
     try {
-      const { url } = await createCheckoutSession(plan);
-      window.location.href = url;
+      const [profiles, horizonLimits] = await Promise.all([
+        queryClient.fetchQuery({
+          queryKey: ["profiles"],
+          queryFn: getSearchProfiles,
+          staleTime: 60 * 1000,
+        }),
+        queryClient.fetchQuery(HORIZON_LIMITS_QUERY),
+      ]);
+      const allowed = horizonLimits[horizon];
+      if (!allowed) return null;
+      const regions = Math.max(0, ...profiles.map((p) => p.locations.length));
+      if (
+        profiles.length > allowed.max_profiles ||
+        regions > allowed.max_locations_per_profile
+      ) {
+        return {
+          profiles: profiles.length,
+          regions,
+          allowedProfiles: allowed.max_profiles,
+          allowedRegions: allowed.max_locations_per_profile,
+        };
+      }
+      return null;
     } catch {
-      // Not authenticated or API unavailable → send to login
-      window.location.href = "/login";
+      // Signed-out visitors cannot be checked; checkout handles the redirect.
+      return null;
+    }
+  }
+
+  async function startCheckout() {
+    setLoading(true);
+    setError(null);
+    try {
+      const { url } = await createCheckoutSession(horizon);
+      if (!url) {
+        reportError(t("checkoutNoUrl"));
+        return;
+      }
+      window.location.href = url;
+    } catch (err) {
+      if (err instanceof ApiError && err.isAuthError) {
+        window.location.href = "/login";
+        return;
+      }
+      reportError(err instanceof Error ? err.message : t("checkoutFailed"));
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleClick() {
+    setLoading(true);
+    const found = await findDowngrade();
+    setLoading(false);
+    if (found) {
+      setDowngrade(found);
+      return;
+    }
+    await startCheckout();
+  }
+
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className={className}
-    >
-      {loading ? (
-        <span className="flex items-center justify-center gap-2">
-          <Spinner />
-        </span>
-      ) : (
-        label
+    <>
+      <button onClick={handleClick} disabled={loading} className={className}>
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <Spinner />
+          </span>
+        ) : (
+          label
+        )}
+      </button>
+      {error && !onError && (
+        <p className="text-xs text-error font-medium">{error}</p>
       )}
-    </button>
+      <ConfirmDialog
+        isOpen={downgrade !== null}
+        title={t("downgradeTitle")}
+        message={t("downgradeMessage", {
+          horizon: tp(`horizon${option.messageKey}Name`),
+          profiles: downgrade?.allowedProfiles ?? 0,
+          regions: downgrade?.allowedRegions ?? 0,
+          currentProfiles: downgrade?.profiles ?? 0,
+          currentRegions: downgrade?.regions ?? 0,
+        })}
+        confirmLabel={t("downgradeConfirm")}
+        cancelLabel={t("downgradeCancel")}
+        onCancel={() => setDowngrade(null)}
+        onConfirm={() => {
+          setDowngrade(null);
+          void startCheckout();
+        }}
+      />
+    </>
   );
 }

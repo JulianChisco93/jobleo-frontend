@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getSearchProfiles } from "@/lib/api";
 import { usePlanLimits } from "@/lib/hooks/usePlanLimits";
 import { DashboardTopBar } from "@/components/layout/DashboardTopBar";
+import { PassExpiredNotice } from "@/components/dashboard/PassExpiredNotice";
+import { regionLabel, useRegionsCatalog } from "@/components/ui/RegionSelector";
 import Link from "next/link";
 
 const PROFILE_ICONS = ["terminal", "work", "code"];
@@ -21,6 +23,7 @@ export default function ProfilesPage() {
   });
 
   const { limits } = usePlanLimits();
+  const { data: regionsCatalog } = useRegionsCatalog();
   const atMax = profiles.length >= limits.max_profiles;
 
   return (
@@ -28,6 +31,8 @@ export default function ProfilesPage() {
       <DashboardTopBar title={t("pageTitle")} />
 
       <main className="max-w-6xl mx-auto w-full px-6 py-10">
+        <PassExpiredNotice profiles={profiles} />
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-display font-bold text-on-surface">{t("pageTitle")}</h2>
@@ -114,7 +119,7 @@ export default function ProfilesPage() {
                   {profile.locations.slice(0, 2).map((loc) => (
                     <span key={loc} className="text-[10px] text-on-surface-variant font-medium flex items-center gap-0.5">
                       <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      {loc}
+                      {regionLabel(loc, regionsCatalog)}
                     </span>
                   ))}
                 </div>

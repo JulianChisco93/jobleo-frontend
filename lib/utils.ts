@@ -1,11 +1,20 @@
 /**
+ * Timestamp for an API datetime. The API sends UTC, but some fields omit the
+ * timezone marker, and those would otherwise be read as local time.
+ */
+export function parseApiDate(dateStr: string): number {
+  const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/.test(dateStr);
+  return new Date(hasZone ? dateStr : `${dateStr.replace(" ", "T")}Z`).getTime();
+}
+
+/**
  * Formats a date string into a human-readable "time ago" string.
- * Returns "—" for empty/falsy input.
+ * Returns "—" for empty/falsy input or a future date.
  */
 export function formatLastSearched(dateStr: string): string {
   if (!dateStr) return "—";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  if (diff <= 0) return "—";
+  const diff = Date.now() - parseApiDate(dateStr);
+  if (diff < 0 || Number.isNaN(diff)) return "—";
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins} min`;
   const hrs = Math.floor(mins / 60);
@@ -19,8 +28,8 @@ export function formatLastSearched(dateStr: string): string {
  */
 export function formatTimeUntil(dateStr: string): string {
   if (!dateStr) return "—";
-  const diff = new Date(dateStr).getTime() - Date.now();
-  if (diff <= 0) return "—";
+  const diff = parseApiDate(dateStr) - Date.now();
+  if (diff <= 0 || Number.isNaN(diff)) return "—";
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "now";
   if (mins < 60) return `${mins}m`;

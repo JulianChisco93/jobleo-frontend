@@ -1,0 +1,462 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  /* Design tokens — source of truth: globals.css */
+  :root {
+    --primary:           #003874;
+    --primary-container: #1a4f95;
+    --primary-fixed:     #d6e3ff;
+    --primary-fixed-dim: #aac7ff;
+    --on-primary:        #ffffff;
+    --on-primary-cont:   #a3c3ff;
+
+    --surface:           #f8f9fa;
+    --surface-low:       #f3f4f5;
+    --surface-lowest:    #ffffff;
+    --on-surface:        #191c1d;
+    --on-surface-var:    #424751;
+    --outline-variant:   #c3c6d2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--on-surface);
+    max-width: 800px;
+    margin: 0 auto;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    padding: 50px 56px;
+    min-height: 1060px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* ── Header ─────────────────────────────────────── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 24px;
+  }
+
+  .logo-block { display: flex; flex-direction: column; gap: 5px; }
+
+  .logo {
+    font-family: 'Manrope', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: var(--on-surface);
+    line-height: 1;
+  }
+  .logo span { color: var(--primary); }
+
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    color: var(--on-surface-var);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 11px;
+    color: var(--on-surface-var);
+    line-height: 1.85;
+  }
+  .header-right a { color: var(--primary); text-decoration: none; font-weight: 500; }
+
+  /* ── Hero ────────────────────────────────────────── */
+  .hero-block {
+    background: var(--primary-fixed);
+    border-radius: 12px;
+    padding: 28px 32px 24px;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+
+  .hero-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.38;
+    color: var(--primary);
+    margin-bottom: 12px;
+    max-width: 600px;
+  }
+
+  .hero-desc {
+    font-size: 13px;
+    line-height: 1.78;
+    color: var(--on-surface-var);
+    max-width: 580px;
+    margin-bottom: 22px;
+  }
+
+  .fact-strip {
+    display: flex;
+    gap: 36px;
+    padding-top: 18px;
+  }
+
+  .fact-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .fact-label {
+    font-size: 10px;
+    color: var(--on-surface-var);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Two-col ─────────────────────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 13px;
+  }
+
+  /* Steps — spacing only, no lines (DESIGN.md) */
+  .steps { display: flex; flex-direction: column; gap: 6px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  .step:nth-child(odd) { background: var(--surface-low); }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    color: var(--primary);
+    background: var(--primary-fixed);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .step-text { font-size: 12px; line-height: 1.65; color: var(--on-surface-var); }
+  .step-text strong { font-weight: 600; color: var(--on-surface); }
+
+  /* Audience */
+  .audience-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .aud-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 12px;
+    background: var(--surface-low);
+    border-radius: 8px;
+  }
+
+  .aud-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .aud-text { font-size: 11.5px; color: var(--on-surface-var); line-height: 1.5; }
+
+  /* Tech tags */
+  .built-with { margin-top: 18px; }
+  .tech-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    background: var(--primary-fixed);
+    color: var(--primary);
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+
+  /* ── Traction ────────────────────────────────────── */
+  .proof-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .proof-item {
+    background: var(--surface-low);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .proof-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 8.5px;
+    font-weight: 500;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .proof-quote {
+    font-size: 11.5px;
+    color: var(--on-surface-var);
+    line-height: 1.65;
+    font-style: italic;
+  }
+
+  /* ── Ask block — gradient CTA per DESIGN.md ─────── */
+  .ask-block {
+    background: linear-gradient(135deg, #003874 0%, #1a4f95 100%);
+    border-radius: 12px;
+    padding: 22px 30px;
+  }
+
+  .ask-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-primary);
+    margin-bottom: 14px;
+  }
+
+  .ask-items { display: flex; flex-direction: column; gap: 9px; }
+
+  .ask-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    font-size: 12px;
+    color: var(--on-primary-cont);
+    line-height: 1.58;
+  }
+
+  .ask-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    padding: 2px 6px;
+    color: var(--primary-fixed-dim);
+    margin-top: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Footer ──────────────────────────────────────── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 16px;
+    margin-top: auto;
+  }
+
+  .footer-name {
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--on-surface);
+  }
+
+  .footer-role { font-size: 11px; color: var(--on-surface-var); margin-top: 2px; }
+
+  .footer-contact { font-size: 11px; color: var(--on-surface-var); text-align: right; line-height: 1.85; }
+  .footer-contact a { color: var(--primary); text-decoration: none; font-weight: 500; }
+
+  /* ── Print button ────────────────────────────────── */
+  .print-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 18px rgba(0, 56, 116, 0.28);
+  }
+  .print-btn:hover { background: var(--primary-container); }
+
+  @media print {
+    .print-btn { display: none; }
+    body { max-width: 100%; }
+    .page { padding: 36px 44px; }
+  }
+</style>
+
+<div class="page">
+
+  <div class="header">
+    <div class="logo-block">
+      <div class="logo">jobleo</span></div>
+      <div class="tagline">AI-Powered Job Alerts for Newcomers</div>
+    </div>
+    <div class="header-right">
+      jobleo.app<br>
+      <a href="mailto:julian.chisco0834@myunfc.ca">julian.chisco0834@myunfc.ca</a><br>
+      M.Sc. Data Analytics — UNFC
+    </div>
+  </div>
+
+  <div class="hero-block">
+    <div class="hero-label">The problem we solve</div>
+    <div class="hero-title">International students miss relevant job opportunities because the Canadian job market moves faster than they can keep up.</div>
+    <div class="hero-desc">Newcomers face language barriers, unfamiliar platforms, and an overwhelming volume of postings. Jobleo sends personalized job alerts directly to your WhatsApp, matched to your CV, in real time.</div>
+    <div class="fact-strip">
+      <div class="fact-item">
+        <div class="fact-value">58</div>
+        <div class="fact-label">Registered users</div>
+      </div>
+      <div class="fact-item">
+        <div class="fact-value">100%</div>
+        <div class="fact-label">Organic growth</div>
+      </div>
+      <div class="fact-item">
+        <div class="fact-value">Canada</div>
+        <div class="fact-label">Newcomer-focused market</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="section-label">How it works</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-text"><strong>Upload your CV.</strong> The platform analyzes your skills, experience and job preferences.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-text"><strong>We scrape daily.</strong> Fresh listings from Indeed, LinkedIn, Glassdoor, and more, every hour 24/7.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-text"><strong>AI ranks the matches.</strong> Each listing is scored against your profile for relevance and fit.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-text"><strong>You get a WhatsApp alert.</strong> Top matches delivered instantly, no app download needed.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Who benefits</div>
+      <div class="audience-grid">
+        <div class="aud-item"><div class="aud-dot"></div><div class="aud-text">International students entering the Canadian workforce</div></div>
+        <div class="aud-item"><div class="aud-dot"></div><div class="aud-text">Recent graduates seeking their first Canadian role</div></div>
+        <div class="aud-item"><div class="aud-dot"></div><div class="aud-text">Newcomers without time to monitor multiple platforms</div></div>
+        <div class="aud-item"><div class="aud-dot"></div><div class="aud-text">Students with limited Canadian job-search experience</div></div>
+      </div>
+      <div class="built-with">
+        <div class="section-label">Built with</div>
+        <div class="tech-row">
+          <div class="tag">Python / FastAPI</div>
+          <div class="tag">Next.js</div>
+          <div class="tag">WhatsApp API</div>
+          <div class="tag">PostgreSQL</div>
+          <div class="tag">AI matching</div>
+          <div class="tag">Stripe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Traction &amp; validation</div>
+    <div class="proof-row">
+      <div class="proof-item">
+        <span class="proof-tag">Origin</span>
+        <div class="proof-quote">Started as a personal tool to manage my own job search as a newcomer; quickly discovered others needed it just as much.</div>
+      </div>
+      <div class="proof-item">
+        <span class="proof-tag">Growth</span>
+        <div class="proof-quote">58 users joined organically through newcomer community groups, with referrals happening without any prompting — a strong signal of genuine demand.</div>
+      </div>
+      <div class="proof-item">
+        <span class="proof-tag">Readiness</span>
+        <div class="proof-quote">Built for scale: Stripe subscriptions, DigitalOcean cloud, WhatsApp notifications. Zero app installation required from users.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ask-block">
+    <div class="ask-title">How UNF Career Services can help</div>
+    <div class="ask-items">
+      <div class="ask-item">
+        <div class="ask-num">01</div>
+        Feature Jobleo at an upcoming Opportunity Fair, giving students direct access to an AI-powered job search tool built by one of their own.
+      </div>
+      <div class="ask-item">
+        <div class="ask-num">02</div>
+        Connect with any funding, incubation, or entrepreneurship programs the university may offer for student-led ventures at early stage.
+      </div>
+      <div class="ask-item">
+        <div class="ask-num">03</div>
+        Advise on how to reach the broader international student community at UNFC through existing career services channels.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <div class="footer-name">Julian Chisco</div>
+      <div class="footer-role">M.Sc. Data Analytics — University of Niagara Falls Canada</div>
+    </div>
+    <div class="footer-contact">
+      <a href="https://jobleo.app">jobleo.app</a><br>
+      <a href="mailto:julian.chisco0834@myunfc.ca">julian.chisco0834@myunfc.ca</a>
+    </div>
+  </div>
+
+</div>
+
+<button class="print-btn" onclick="window.print()">&#8595; Save as PDF</button>

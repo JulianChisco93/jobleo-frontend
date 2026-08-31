@@ -10,6 +10,7 @@ import {
   deleteCompanyWatch,
   checkCompanyWatch,
   testCompanyWatchUrl,
+  ApiError,
 } from "@/lib/api";
 import type { CompanyWatch, CompanyWatchTestResult, Plan } from "@/lib/types";
 import { TagInput } from "@/components/ui/TagInput";
@@ -18,7 +19,8 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { formatLastSearched } from "@/lib/utils";
 
-const WATCH_LIMITS: Record<Plan, number> = { free: 1, pro: 3, premium: 5 };
+/** Paid uses the same allowance for every horizon, unlike profiles and regions. */
+const WATCH_LIMITS: Record<Plan, number> = { free: 1, paid: 5, pro: 3, premium: 5 };
 
 const ATS_CONFIG: Record<
   string,
@@ -184,11 +186,11 @@ export function CompanyWatchSection({ plan, className = "" }: Props) {
       await queryClient.invalidateQueries({ queryKey: ["company-watches"] });
       closeForm();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("403")) {
+      // The API reports a plan limit as 403; our own copy is localized.
+      if (err instanceof ApiError && err.isForbidden) {
         addToast(t("upgradeNotice"), "error");
       } else {
-        addToast(msg || t("saveError"), "error");
+        addToast(err instanceof Error ? err.message : t("saveError"), "error");
       }
     } finally {
       setSaving(false);

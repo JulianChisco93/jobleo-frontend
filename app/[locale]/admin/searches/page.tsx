@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { getSearchLogs } from "@/lib/api";
+import { getSearchLogs, ApiError } from "@/lib/api";
 import { SearchLogsTable } from "@/components/admin/SearchLogsTable";
 import { useToast } from "@/components/ui/Toast";
 
@@ -18,12 +18,11 @@ export default function AdminSearchesPage() {
 
   useEffect(() => {
     if (!error) return;
-    const msg = error instanceof Error ? error.message : "Failed to load search logs";
-    if (msg.includes("403")) {
+    if (error instanceof ApiError && error.isForbidden) {
       router.push("/dashboard");
-    } else {
-      addToast(msg, "error");
+      return;
     }
+    addToast(error instanceof Error ? error.message : "Failed to load search logs", "error");
   }, [error, addToast, router]);
 
   return (
