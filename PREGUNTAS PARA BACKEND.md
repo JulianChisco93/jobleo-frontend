@@ -6,6 +6,52 @@ fuera de este documento para no pedir lo mismo dos veces. Abajo va solo lo que s
 
 ---
 
+## 0. BLOQUEANTE: nadie puede pagar — `No such customer` en el checkout
+
+Al comprar cualquier pase, `POST /api/v1/billing/checkout` responde con:
+
+```
+Error creando sesión de pago: No such customer: 'cus_UICyGqjvSW0qDS'
+```
+
+Ese texto no existe en el frontend, es el `detail` que devuelven ustedes, y el mensaje es de Stripe,
+no de su código: ese `customer` no existe en la cuenta ni en el modo al que apunta la API key con la
+que están firmando ahora mismo. El ID sí está guardado en su base, así que el cliente se creó en
+algún momento con otras credenciales. Las tres causas posibles, en orden de probabilidad:
+
+1. **Cambio de modo test ↔ live.** Los `cus_...` son por modo: un cliente creado con `sk_test_...` no
+   existe con `sk_live_...` ni al revés. Es lo que suele pasar al pasar a producción.
+2. **Cambio de cuenta de Stripe** (claves de otra cuenta u otra organización).
+3. **El cliente se borró** desde el dashboard de Stripe y el ID quedó huérfano en la base.
+
+Se confirma en un minuto: busquen `cus_UICyGqjvSW0qDS` en el dashboard de Stripe y alternen el
+interruptor de modo test/live. Si aparece en test y la API corre en live (o al revés), es la causa 1.
+
+**Por qué es urgente:** si fue un cambio de modo o de cuenta, esto no afecta a un usuario, afecta a
+**todos los que ya tengan `stripe_customer_id` guardado**, es decir a todas las cuentas creadas antes
+del cambio. Ninguna puede pagar. Y `POST /billing/portal` falla por el mismo camino, así que "Gestionar
+suscripción" también está roto para esas cuentas.
+
+Lo que pedimos:
+
+- **Ahora:** limpiar (`NULL`) el `stripe_customer_id` de las cuentas cuyo cliente no exista en el modo
+  actual, para que el próximo checkout cree uno nuevo. Con reusar el ID por email en la cuenta correcta
+  también sirve.
+- **Para que no vuelva a pasar:** capturar el `InvalidRequestError` de Stripe cuando el mensaje es
+  `No such customer`, crear el cliente de nuevo, guardar el ID nuevo y seguir con la sesión, en vez de
+  propagar el error. Aplica igual en `/billing/checkout` y en `/billing/portal`. Stripe recomienda
+  justamente esto para ID que quedan obsoletos.
+
+Una nota sobre el formato del error: ese `detail` llegaba tal cual a la pantalla del usuario, con el
+`cus_...` incluido. Ya lo cambiamos: solo mostramos el `detail` en 403 y 422, que según su documento
+son los que traen mensajes escritos para el usuario; cualquier otro estado muestra un texto genérico y
+el detalle queda en la consola. Así que no cuenten con que el `detail` de un 500 lo lea el usuario.
+
+- ¿Confirman en qué modo (test o live) está corriendo la API en producción? Lo preguntamos porque el
+  frontend no tiene clave de Stripe y no podemos verificarlo desde aquí.
+
+---
+
 ## Lo que aplicamos con sus respuestas
 
 - **Límites de regiones (1/1/2/2):** corregidos en el texto de precios, del banner del dashboard y

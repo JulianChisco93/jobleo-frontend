@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { ApiError, createCheckoutSession, getSearchProfiles } from "@/lib/api";
-import { getHorizonOption } from "@/lib/plans";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "@/i18n/navigation";
+import { getHorizonOption, setPendingHorizon } from "@/lib/plans";
 import { HORIZON_LIMITS_QUERY } from "@/lib/hooks/useHorizonLimits";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { PlanHorizon } from "@/lib/types";
@@ -35,6 +37,7 @@ function Spinner() {
 export function CheckoutButton({ label, horizon, className, onError }: Props) {
   const t = useTranslations("billing");
   const tp = useTranslations("pricing");
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +101,14 @@ export function CheckoutButton({ label, horizon, className, onError }: Props) {
         window.location.href = "/login";
         return;
       }
+      // The API writes details for the user only on 403 (plan limits) and 422
+      // (validation). Anything else is a server trace — it can carry a Stripe
+      // id or stack — so it goes to the log and the user reads the generic copy.
+      if (err instanceof ApiError && !err.isForbidden && err.status !== 422) {
+        console.error("checkout failed", err.status, err.message);
+        reportError(t("checkoutFailed"));
+        return;
+      }
       reportError(err instanceof Error ? err.message : t("checkoutFailed"));
     } finally {
       setLoading(false);
@@ -106,6 +117,17 @@ export function CheckoutButton({ label, horizon, className, onError }: Props) {
 
   async function handleClick() {
     setLoading(true);
+    // The pricing page is public but checkout needs a token, so a visitor
+    // without an account goes to signup with the pass remembered for step 4
+    // rather than getting the API's "Not authenticated" back.
+    const {
+      data: { session },
+    } = await createClient().auth.getSession();
+    if (!session) {
+      setPendingHorizon(horizon);
+      router.push("/login?tab=register");
+      return;
+    }
     const found = await findDowngrade();
     setLoading(false);
     if (found) {

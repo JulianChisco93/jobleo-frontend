@@ -18,7 +18,12 @@ import {
   updateMe,
   createCheckoutSession,
 } from "@/lib/api";
-import { HORIZON_OPTIONS, RECOMMENDED_HORIZON } from "@/lib/plans";
+import {
+  HORIZON_OPTIONS,
+  RECOMMENDED_HORIZON,
+  readPendingHorizon,
+  clearPendingHorizon,
+} from "@/lib/plans";
 import { HorizonLimits } from "@/components/billing/HorizonLimits";
 import type { CreateSearchProfilePayload, PlanHorizon } from "@/lib/types";
 
@@ -563,7 +568,10 @@ interface Step4Props {
 function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
   const t = useTranslations("onboarding");
   const tp = useTranslations("pricing");
-  const [selected, setSelected] = useState<Step4Choice>(RECOMMENDED_HORIZON);
+  // Honours the pass picked on the pricing page before the account existed.
+  const [selected, setSelected] = useState<Step4Choice>(
+    () => readPendingHorizon() ?? RECOMMENDED_HORIZON
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -661,6 +669,7 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
   async function handleFinish() {
     setLoading(true);
     setError(null);
+    clearPendingHorizon();
     if (selected === "free") await finishOnFreePlan();
     else await startCheckout(selected);
   }
