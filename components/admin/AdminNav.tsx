@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
   { label: "Overview", href: "/admin", icon: "dashboard", exact: true },
@@ -18,12 +17,16 @@ interface AdminNavProps {
 
 export function AdminNav({ userEmail }: AdminNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
 
   async function handleSignOut() {
     const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // The local session is dropped either way; what matters is leaving.
+    }
+    // Full page load so the middleware re-runs without the auth cookies.
+    window.location.assign("/login");
   }
 
   return (

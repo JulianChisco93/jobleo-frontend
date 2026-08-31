@@ -24,6 +24,7 @@ import {
   readPendingHorizon,
   clearPendingHorizon,
 } from "@/lib/plans";
+import { savePendingCvFile, clearPendingCvFile } from "@/lib/pendingCv";
 import { HorizonLimits } from "@/components/billing/HorizonLimits";
 import type { CreateSearchProfilePayload, PlanHorizon } from "@/lib/types";
 
@@ -440,7 +441,7 @@ function Step3({ initialData, onNext, onBack }: Step3Props) {
       if (phone.trim()) {
         await updateMe({ whatsapp_number: fullNumber });
       }
-    } catch (err: any) {
+    } catch (err) {
       // WhatsApp is optional — show the error but proceed anyway
       console.error("Failed to save WhatsApp number:", err);
     } finally {
@@ -648,12 +649,16 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
       "onboarding_pending_profile",
       JSON.stringify(buildPayload(Infinity, Infinity))
     );
-    // File objects can't survive page navigation, so only the pasted text is kept
+    // The CV can only be uploaded once the profile exists, which happens after
+    // paying, so it has to outlive the trip to Stripe: pasted text as-is, and an
+    // uploaded file as bytes the success page can turn back into a File.
     if (initialData.cvText) {
       sessionStorage.setItem("onboarding_cv_text", initialData.cvText);
     } else {
       sessionStorage.removeItem("onboarding_cv_text");
     }
+    if (cvFile) await savePendingCvFile(cvFile);
+    else clearPendingCvFile();
 
     try {
       const { url } = await createCheckoutSession(horizon);
@@ -661,6 +666,7 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
       window.location.href = url;
     } catch (err: unknown) {
       sessionStorage.removeItem("onboarding_pending_profile");
+      clearPendingCvFile();
       setError(err instanceof Error ? err.message : t("checkoutError"));
       setLoading(false);
     }

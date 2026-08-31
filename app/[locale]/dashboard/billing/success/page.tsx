@@ -12,7 +12,9 @@ import {
   updateSearchProfile,
   createSearchProfile,
   uploadCVText,
+  uploadCVFile,
 } from "@/lib/api";
+import { takePendingCvFile } from "@/lib/pendingCv";
 import { HORIZON_OPTIONS, daysUntil } from "@/lib/plans";
 import type { CreateSearchProfilePayload } from "@/lib/types";
 
@@ -44,16 +46,17 @@ export default function BillingSuccessPage() {
             job_titles: payload.job_titles.slice(0, limits.max_job_titles_per_profile),
             locations: payload.locations.slice(0, limits.max_locations_per_profile),
           });
-          // Only pasted text survives the Stripe redirect; uploaded files cannot
+          // The CV was parked before leaving for Stripe, since uploading it needs
+          // a profile that only exists now.
           const cvText = sessionStorage.getItem("onboarding_cv_text");
-          if (cvText) {
-            try {
-              await uploadCVText(cvText, "resume.txt", String(profile.id));
-            } catch {
-              // Non-fatal — the user can upload the CV from the profile page
-            }
-            sessionStorage.removeItem("onboarding_cv_text");
+          const cvFile = takePendingCvFile();
+          try {
+            if (cvFile) await uploadCVFile(cvFile, String(profile.id));
+            else if (cvText) await uploadCVText(cvText, "resume.txt", String(profile.id));
+          } catch {
+            // Non-fatal — the user can upload the CV from the profile page
           }
+          sessionStorage.removeItem("onboarding_cv_text");
           queryClient.invalidateQueries({ queryKey: ["search-profiles"] });
         } catch {
           // Non-fatal — the user can create the profile from the dashboard

@@ -465,7 +465,9 @@
     "myProfiles": "My Profiles",
     "jobHistory": "Job History",
     "settings": "Settings",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "newProfile": "New Profile",
+    "logout": "Log Out"
   },
   "legal": {
     "legalTag": "LEGAL",

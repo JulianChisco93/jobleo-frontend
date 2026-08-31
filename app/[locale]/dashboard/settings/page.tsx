@@ -14,7 +14,6 @@ import { HORIZON_OPTIONS, daysUntil } from "@/lib/plans";
 import { hasPaidAccess } from "@/lib/types";
 import { useDisplayName } from "@/lib/hooks/useDisplayName";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const TIMEZONES = [
   "America/New_York (UTC-5)",
@@ -53,7 +52,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const tp = useTranslations("pricing");
-  const router = useRouter();
   const locale = useLocale();
   const i18nRouter = useI18nRouter();
   const i18nPathname = useI18nPathname();
@@ -124,8 +122,13 @@ export default function SettingsPage() {
   async function handleDeleteAccount() {
     if (!confirm(t("dangerZoneDesc"))) return;
     const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // The local session is dropped either way; what matters is leaving.
+    }
+    // Full page load so the middleware re-runs without the auth cookies.
+    window.location.assign(locale === "en" ? "/" : `/${locale}`);
   }
 
   return (

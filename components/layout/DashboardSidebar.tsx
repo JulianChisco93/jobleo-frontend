@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useMobileSidebar } from "./MobileSidebarContext";
 
 interface NavItem {
@@ -27,6 +26,8 @@ function SidebarContent({
   handleSignOut: () => void;
   onNavClick?: () => void;
 }) {
+  const t = useTranslations("sidebar");
+
   return (
     <>
       {/* Logo */}
@@ -80,14 +81,14 @@ function SidebarContent({
           className="w-full bg-primary-gradient text-on-primary rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-display font-bold text-sm mb-4 transition-transform active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          New Profile
+          {t("newProfile")}
         </Link>
         <button
           onClick={handleSignOut}
           className="w-full text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container rounded-xl transition-colors"
         >
           <span className="material-symbols-outlined text-[22px]">logout</span>
-          <span className="text-sm font-semibold font-display">Logout</span>
+          <span className="text-sm font-semibold font-display">{t("logout")}</span>
         </button>
       </div>
     </>
@@ -98,7 +99,6 @@ export function DashboardSidebar() {
   const t = useTranslations("sidebar");
   const locale = useLocale();
   const pathname = usePathname();
-  const router = useRouter();
   const { isOpen, close } = useMobileSidebar();
   const prefix = locale === "en" ? "" : `/${locale}`;
 
@@ -111,8 +111,15 @@ export function DashboardSidebar() {
 
   async function handleSignOut() {
     const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // The local session is dropped either way; what matters is leaving.
+    }
+    // A full page load rather than router.push: it makes the middleware re-run
+    // with the auth cookies already gone and discards the cached signed-in tree,
+    // which is what left the user sitting on the dashboard after logging out.
+    window.location.assign(prefix || "/");
   }
 
   return (

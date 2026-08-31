@@ -465,7 +465,9 @@
     "myProfiles": "Mis Perfiles",
     "jobHistory": "Historial",
     "settings": "Configuración",
-    "dashboard": "Panel"
+    "dashboard": "Panel",
+    "newProfile": "Nuevo Perfil",
+    "logout": "Cerrar Sesión"
   },
   "legal": {
     "legalTag": "LEGAL",
