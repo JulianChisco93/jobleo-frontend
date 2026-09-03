@@ -328,7 +328,7 @@ export default function EditProfilePage({
         locations: profile.locations,
         include_terms: profile.include_terms,
         exclude_terms: profile.exclude_terms,
-        alert_sensitivity: profile.alert_sensitivity,
+        min_score_percentage: profile.min_score_percentage,
       });
       setAnalysis(result.analysis);
     } catch (err: unknown) {

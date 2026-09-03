@@ -390,10 +390,8 @@
     "aiTitleLimitFull": "Límite alcanzado",
     "analyzeError": "Error al analizar la configuración. Por favor intenta de nuevo.",
     "analyzeClose": "Cerrar",
-    "alertSensitivityLabel": "SENSIBILIDAD DE ALERTAS",
-    "alertSensitivityBroad": "Amplio",
-    "alertSensitivityBalanced": "Equilibrado",
-    "alertSensitivityStrict": "Estricto"
+    "minAffinityLabel": "AFINIDAD MÍNIMA",
+    "minAffinityHint": "Solo te avisaremos de empleos con esta afinidad o más. Tu historial completo sigue disponible en Historial."
   },
   "jobs": {
     "pageTitle": "Historial de Empleos",

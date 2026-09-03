@@ -185,7 +185,10 @@ export const getSearchProfileLogs = (id: string) =>
 // ─── Jobs ─────────────────────────────────────────────────────────────────────
 
 export interface JobsQuery {
+  /** Raw internal score (~10–46), not a percentage. Prefer min_score_percentage. */
   min_score?: number;
+  /** Affinity percentage as shown on the cards, the same unit the user picks. */
+  min_score_percentage?: number;
   limit?: number;
   offset?: number;
   search_config_id?: string;
@@ -194,6 +197,8 @@ export interface JobsQuery {
 export const getJobs = (params: JobsQuery = {}) => {
   const qs = new URLSearchParams();
   if (params.min_score !== undefined) qs.set("min_score", String(params.min_score));
+  if (params.min_score_percentage !== undefined)
+    qs.set("min_score_percentage", String(params.min_score_percentage));
   if (params.limit !== undefined) qs.set("limit", String(params.limit));
   if (params.offset !== undefined) qs.set("offset", String(params.offset));
   if (params.search_config_id) qs.set("search_config_id", params.search_config_id);
@@ -211,7 +216,7 @@ export const getJobAlerts = (params: Pick<JobsQuery, "limit" | "offset" | "searc
 export const generateJobExplanation = (jobAlertId: number) =>
   request<JobAlert>(`/api/v1/jobs/${jobAlertId}/explanation`, { method: "POST" });
 
-export const analyzeSearchConfig = (configId: string, profile?: Pick<SearchProfile, "profession" | "country" | "job_titles" | "locations" | "include_terms" | "exclude_terms" | "alert_sensitivity">) =>
+export const analyzeSearchConfig = (configId: string, profile?: Pick<SearchProfile, "profession" | "country" | "job_titles" | "locations" | "include_terms" | "exclude_terms" | "min_score_percentage">) =>
   request<ConfigAnalysis>(`/api/v1/searches/${configId}/analyze`, {
     method: "POST",
     body: JSON.stringify(profile ?? {}),

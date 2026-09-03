@@ -142,11 +142,12 @@ describe("createSearchProfile", () => {
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
-      alert_sensitivity: "broad" as const,
+      min_score_percentage: 50,
     };
     const profile = await createSearchProfile(payload);
     expect(profile.id).toBe("profile-new");
     expect(profile.name).toBe("Design");
+    expect(profile.min_score_percentage).toBe(50);
   });
 
   it("surfaces the API message when locations are not valid region codes", async () => {
@@ -180,7 +181,7 @@ describe("createSearchProfile", () => {
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
-      alert_sensitivity: "broad" as const,
+      min_score_percentage: 30,
     };
     // The "Value error, " prefix is stripped so the message can be shown as-is
     await expect(createSearchProfile(payload)).rejects.toThrow(
@@ -275,7 +276,7 @@ describe("ApiError status handling", () => {
     business_hours_start: 9,
     business_hours_end: 18,
     business_days_only: false,
-    alert_sensitivity: "broad" as const,
+    min_score_percentage: 30,
   };
 
   it("treats a plan limit 403 as forbidden, never as a lost session", async () => {
@@ -400,6 +401,22 @@ describe("getJobs", () => {
     const { getJobs } = await apiImport();
     await getJobs({ min_score: 60 });
     expect(capturedUrl).toContain("min_score=60");
+  });
+
+  // min_score filters on the raw internal score; min_score_percentage filters on
+  // the affinity shown to the user, which is the unit the profile setting uses.
+  it("appends min_score_percentage to query string", async () => {
+    let capturedUrl = "";
+    server.use(
+      http.get(`${BASE_URL}/api/v1/jobs/`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json([mockJob]);
+      })
+    );
+    const { getJobs } = await apiImport();
+    await getJobs({ min_score_percentage: 60 });
+    expect(capturedUrl).toContain("min_score_percentage=60");
+    expect(capturedUrl).not.toContain("min_score=60");
   });
 
   it("appends search_config_id to query string", async () => {

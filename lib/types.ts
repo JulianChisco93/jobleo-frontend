@@ -61,7 +61,13 @@ export interface CV {
   updated_at: string;
 }
 
-export type AlertSensitivity = "broad" | "balanced" | "strict";
+/**
+ * Minimum affinity, in the same percentage points shown on every job card, that a
+ * match must reach before an alert is sent. The API accepts only these six steps.
+ */
+export const MIN_AFFINITY_STEPS = [30, 40, 50, 60, 70, 80] as const;
+
+export const MIN_AFFINITY_DEFAULT = 30;
 
 // ─── Regions ──────────────────────────────────────────────────────────────────
 
@@ -98,7 +104,7 @@ export interface SearchProfile {
   business_hours_end?: string;
   business_days_only: boolean;
   is_active: boolean;
-  alert_sensitivity: AlertSensitivity;
+  min_score_percentage: number;
   created_at: string;
   updated_at: string;
 }
@@ -165,7 +171,7 @@ export interface CreateSearchProfilePayload {
   business_hours_start: number; // int 0-23
   business_hours_end: number;   // int 0-23
   business_days_only: boolean;
-  alert_sensitivity: AlertSensitivity;
+  min_score_percentage: number; // uno de MIN_AFFINITY_STEPS; la API responde 422 si no
 }
 
 export interface CreateCVPayload {

@@ -9,7 +9,13 @@ import { TagInput } from "@/components/ui/TagInput";
 import { RegionSelector, hasLegacyLocations, useRegionsCatalog } from "@/components/ui/RegionSelector";
 import { Toggle } from "@/components/ui/Toggle";
 import { NocCombobox } from "@/components/ui/NocCombobox";
-import { hasPaidAccess, type SearchProfile, type PlanLimits } from "@/lib/types";
+import {
+  hasPaidAccess,
+  MIN_AFFINITY_STEPS,
+  MIN_AFFINITY_DEFAULT,
+  type SearchProfile,
+  type PlanLimits,
+} from "@/lib/types";
 
 function TipBanner({ title, body }: { title: string; body: string }) {
   const [open, setOpen] = useState(false);
@@ -39,11 +45,9 @@ function TipBanner({ title, body }: { title: string; body: string }) {
   );
 }
 
-const SENSITIVITY_OPTIONS = [
-  { value: "broad" as const, labelKey: "alertSensitivityBroad" },
-  { value: "balanced" as const, labelKey: "alertSensitivityBalanced" },
-  { value: "strict" as const, labelKey: "alertSensitivityStrict" },
-];
+const MIN_AFFINITY_MIN = MIN_AFFINITY_STEPS[0];
+const MIN_AFFINITY_MAX = MIN_AFFINITY_STEPS[MIN_AFFINITY_STEPS.length - 1];
+const MIN_AFFINITY_STEP = 10;
 
 const schema = z.object({
   name: z.string().min(1),
@@ -59,7 +63,11 @@ const schema = z.object({
   business_hours_start: z.string().optional(),
   business_hours_end: z.string().optional(),
   business_days_only: z.boolean(),
-  alert_sensitivity: z.enum(["broad", "balanced", "strict"]),
+  // The API only accepts these six steps and answers 422 for anything else. Kept
+  // as a plain number so it stays assignable from what the API returns.
+  min_score_percentage: z
+    .number()
+    .refine((v) => (MIN_AFFINITY_STEPS as readonly number[]).includes(v)),
 });
 
 export type ProfileFormData = z.infer<typeof schema>;
@@ -155,13 +163,13 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
       business_hours_start: toHourStr(defaultValues?.business_hours_start) || "09:00",
       business_hours_end: toHourStr(defaultValues?.business_hours_end) || "18:00",
       business_days_only: defaultValues?.business_days_only || false,
-      alert_sensitivity: defaultValues?.alert_sensitivity || "broad",
+      min_score_percentage: defaultValues?.min_score_percentage ?? MIN_AFFINITY_DEFAULT,
     },
   });
 
   const businessHoursOnly = watch("business_hours_only");
   const isActive = watch("is_active");
-  const alertSensitivity = watch("alert_sensitivity");
+  const minAffinity = watch("min_score_percentage");
 
   const jobTitles = watch("job_titles" as any) as string[] || [];
   const locations = watch("locations" as any) as string[] || [];
@@ -346,25 +354,34 @@ export function ProfileForm({ defaultValues, onSubmit, onDelete, isNew, limits }
             </select>
           </div>
 
-          {/* Alert Sensitivity */}
+          {/* Minimum affinity to be alerted about a match */}
           <div className="flex flex-col gap-2">
-            <label className={labelCls}>{t("alertSensitivityLabel")}</label>
-            <div className="flex rounded-xl overflow-hidden border border-outline-variant/30">
-              {SENSITIVITY_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setValue("alert_sensitivity", opt.value)}
-                  className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
-                    alertSensitivity === opt.value
-                      ? "bg-primary text-on-primary"
-                      : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
-                  }`}
-                >
-                  {t(opt.labelKey as any)}
-                </button>
+            <div className="flex items-baseline justify-between gap-3">
+              <label htmlFor="min-affinity" className={labelCls}>
+                {t("minAffinityLabel")}
+              </label>
+              <span className="text-lg font-display font-black text-primary tabular-nums leading-none">
+                {minAffinity}%
+              </span>
+            </div>
+            <input
+              id="min-affinity"
+              type="range"
+              min={MIN_AFFINITY_MIN}
+              max={MIN_AFFINITY_MAX}
+              step={MIN_AFFINITY_STEP}
+              aria-describedby="min-affinity-hint"
+              className="w-full accent-primary cursor-pointer"
+              {...register("min_score_percentage", { valueAsNumber: true })}
+            />
+            <div className="flex justify-between text-[10px] font-bold text-on-surface-variant tabular-nums">
+              {MIN_AFFINITY_STEPS.map((step) => (
+                <span key={step}>{step}</span>
               ))}
             </div>
+            <p id="min-affinity-hint" className="text-xs text-on-surface-variant leading-relaxed">
+              {t("minAffinityHint")}
+            </p>
           </div>
 
           {/* Active toggle — label ↔ toggle, sin pt-6 hack */}

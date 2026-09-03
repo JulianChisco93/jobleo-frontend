@@ -35,6 +35,7 @@ export const mockProfile = {
   business_hours_end: "18:00",
   business_days_only: false,
   is_active: true,
+  min_score_percentage: 30,
   created_at: "2024-01-01T00:00:00Z",
   updated_at: "2024-01-02T00:00:00Z",
 };

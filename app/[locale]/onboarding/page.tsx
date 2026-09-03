@@ -26,6 +26,7 @@ import {
 } from "@/lib/plans";
 import { savePendingCvFile, clearPendingCvFile } from "@/lib/pendingCv";
 import { HorizonLimits } from "@/components/billing/HorizonLimits";
+import { MIN_AFFINITY_DEFAULT } from "@/lib/types";
 import type { CreateSearchProfilePayload, PlanHorizon } from "@/lib/types";
 
 // ─── Shared state ────────────────────────────────────────────
@@ -592,7 +593,7 @@ function Step4({ initialData, onBack, onFinish, cvFile }: Step4Props) {
       business_hours_start: 9,
       business_hours_end: 18,
       business_days_only: false,
-      alert_sensitivity: "broad",
+      min_score_percentage: MIN_AFFINITY_DEFAULT,
     };
   }
 

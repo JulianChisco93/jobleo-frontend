@@ -390,10 +390,8 @@
     "aiTitleLimitFull": "Limit reached",
     "analyzeError": "Failed to analyze configuration. Please try again.",
     "analyzeClose": "Close",
-    "alertSensitivityLabel": "ALERT SENSITIVITY",
-    "alertSensitivityBroad": "Broad",
-    "alertSensitivityBalanced": "Balanced",
-    "alertSensitivityStrict": "Strict"
+    "minAffinityLabel": "MINIMUM AFFINITY",
+    "minAffinityHint": "You'll only be alerted about jobs with this affinity or higher. Your full history stays available under Job History."
   },
   "jobs": {
     "pageTitle": "Job History",
